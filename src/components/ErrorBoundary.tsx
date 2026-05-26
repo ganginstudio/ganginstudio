@@ -28,27 +28,8 @@ export default class ErrorBoundary extends React.Component<Props, State> {
 
   private handleRecovery = () => {
     try {
-      // Emergency recovery: Backup and clean potentially bad storage strings
-      const keys = ['gangin_projects', 'gangin_packages', 'gangin_faq', 'gangin_reviews', 'gangin_blog', 'gangin_settings', 'gangin_categories'];
-      keys.forEach(k => {
-        try {
-          const raw = localStorage.getItem(k);
-          if (raw) {
-            // Keep a recovery file inside memory just in case, but clear the bad entry
-            localStorage.setItem(`${k}_fallback_backup`, raw);
-          }
-        } catch (_) {}
-      });
-      
-      // Clear main entries to reload from solid default static data of GANGIN
-      localStorage.removeItem('gangin_projects');
-      localStorage.removeItem('gangin_categories');
-      localStorage.removeItem('gangin_packages');
-      localStorage.removeItem('gangin_faq');
-      localStorage.removeItem('gangin_reviews');
-      localStorage.removeItem('gangin_blog');
-      
-      // Perform soft reload to stable baseline
+      // Emergency recovery: Clear any legacy legacy browser states and do soft reload
+      localStorage.clear();
       window.location.reload();
     } catch (_) {
       window.location.href = window.location.pathname;

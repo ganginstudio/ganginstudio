@@ -17,23 +17,23 @@ export default function Contact() {
   
   const [showInquiryToast, setShowInquiryToast] = useState(false);
 
-  // File handler
-  const handleAdvFileUpload = (e: ChangeEvent<HTMLInputElement>) => {
+  // File handler connected directly to Supabase Storage
+  const handleAdvFileUpload = async (e: ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
-    Array.from(files).forEach((file: File) => {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        if (typeof reader.result === 'string') {
-          setUploads(prev => [
-            ...prev,
-            { name: file.name, dataUrl: reader.result }
-          ]);
-        }
-      };
-      reader.readAsDataURL(file);
-    });
+    for (const file of Array.from(files) as File[]) {
+      try {
+        const { uploadPortfolioImage } = await import('../lib/supabase');
+        const storageUrl = await uploadPortfolioImage(file);
+        setUploads(prev => [
+          ...prev,
+          { name: file.name, dataUrl: storageUrl }
+        ]);
+      } catch (err: any) {
+        alert(`파일 업로드 실패: ${err.message || err}`);
+      }
+    }
   };
 
   const removeAdvUpload = (idx: number) => {
@@ -69,12 +69,7 @@ export default function Contact() {
       })
     };
 
-    // Save logic
-    const allLeads = JSON.parse(localStorage.getItem('gangin_all_leads') || '[]');
-    localStorage.setItem('gangin_all_leads', JSON.stringify([advancedLead, ...allLeads]));
-
-    // Also inject into general estimates as a pending estimation for redundancy
-    const currentEsts = JSON.parse(localStorage.getItem('gangin_estimates') || '[]');
+    // Save lead submission directly to Supabase Database (No localStorage fallback)
     const secondaryEst = {
       id: advancedLead.id,
       clientName: name,
@@ -86,11 +81,17 @@ export default function Contact() {
       schedule: timeline,
       designPreference: desiredMood,
       details: `[종합 정밀 문의] ${inquiryDetail}`,
-      consultationType: 'Face-to-Face',
+      consultationType: 'Visit' as const,
       submittedAt: advancedLead.timestamp,
-      status: 'Pending'
+      status: 'Pending' as const
     };
-    localStorage.setItem('gangin_estimates', JSON.stringify([secondaryEst, ...currentEsts]));
+
+    import('../lib/leads').then(({ addLeadSubmission }) => {
+      addLeadSubmission({
+        lead: advancedLead,
+        estimate: secondaryEst
+      });
+    });
 
     // Clear
     setName('');

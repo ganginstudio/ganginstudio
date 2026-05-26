@@ -61,22 +61,23 @@ export default function Estimate({ prefillCategory, prefillSpace, clearPrefill, 
   // Base64 file loaders
   const fileInputRef = useRef<HTMLInputElement>(null);
   
-  const handleFileUpload = (e: ChangeEvent<HTMLInputElement>, uploadType: string) => {
+  // File handler connected directly to Supabase Storage
+  const handleFileUpload = async (e: ChangeEvent<HTMLInputElement>, uploadType: string) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
-    Array.from(files).forEach((file: File) => {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        if (typeof reader.result === 'string') {
-          setUploads(prev => [
-            ...prev,
-            { name: file.name, type: uploadType, dataUrl: reader.result as string }
-          ]);
-        }
-      };
-      reader.readAsDataURL(file);
-    });
+    for (const file of Array.from(files) as File[]) {
+      try {
+        const { uploadPortfolioImage } = await import('../lib/supabase');
+        const storageUrl = await uploadPortfolioImage(file);
+        setUploads(prev => [
+          ...prev,
+          { name: file.name, type: uploadType, dataUrl: storageUrl }
+        ]);
+      } catch (err: any) {
+        alert(`인테리어 시공 참고자료 업로드 실패: ${err.message || err}`);
+      }
+    }
   };
 
   const removeUpload = (index: number) => {
@@ -146,12 +147,14 @@ export default function Estimate({ prefillCategory, prefillSpace, clearPrefill, 
     };
   }, [prefillCategory, prefillSpace]);
 
-  // Load estimates log
+  // Load estimates log directly from Supabase Database (No localStorage fallback)
   useEffect(() => {
-    const data = localStorage.getItem('gangin_estimates');
-    if (data) {
-      setSavedEstimates(JSON.parse(data));
+    async function load() {
+      const { getEstimates } = await import('../lib/leads');
+      const data = await getEstimates();
+      setSavedEstimates(data);
     }
+    load();
   }, []);
 
   const handleFormSubmit = (e: FormEvent) => {
@@ -191,28 +194,30 @@ export default function Estimate({ prefillCategory, prefillSpace, clearPrefill, 
 
     const updated = [newEstimate, ...savedEstimates];
     setSavedEstimates(updated);
-    localStorage.setItem('gangin_estimates', JSON.stringify(updated));
 
-    // Optional lead system list update inside localstorage for central admin logging
-    const allLeads = JSON.parse(localStorage.getItem('gangin_all_leads') || '[]');
-    localStorage.setItem('gangin_all_leads', JSON.stringify([
-      {
-        id: newEstimate.id,
-        type: 'Detailed Estimate (정밀 공간 견적)',
-        name: clientName,
-        phone,
-        category: projectType,
-        region,
-        area: `${areaInPyeong}평 (${areaInSqm}㎡)`,
-        budget,
-        schedule: constructionSchedule,
-        details: `${details} (희망연락시간: ${preferredContactTime})`,
-        uploadsCount: uploads.length,
-        uploads: uploads.map(u => ({ name: u.name, type: u.type, dataUrl: u.dataUrl })),
-        timestamp: newEstimate.submittedAt
-      },
-      ...allLeads
-    ]));
+    // Save lead submission directly to Supabase Database
+    const newLead = {
+      id: newEstimate.id,
+      type: 'Detailed Estimate (정밀 공간 견적)',
+      name: clientName,
+      phone,
+      category: projectType,
+      region,
+      area: `${areaInPyeong}평 (${areaInSqm}㎡)`,
+      budget,
+      schedule: constructionSchedule,
+      details: `${details} (희망연락시간: ${preferredContactTime})`,
+      uploadsCount: uploads.length,
+      uploads: uploads.map(u => ({ name: u.name, type: u.type, dataUrl: u.dataUrl })),
+      timestamp: newEstimate.submittedAt
+    };
+
+    import('../lib/leads').then(({ addLeadSubmission }) => {
+      addLeadSubmission({
+        lead: newLead,
+        estimate: newEstimate
+      });
+    });
 
     // Clear state
     setClientName('');
@@ -226,13 +231,18 @@ export default function Estimate({ prefillCategory, prefillSpace, clearPrefill, 
     setTimeout(() => setShowToast(false), 5000);
   };
 
-  const deleteEstimate = (id: string) => {
+  const deleteEstimate = async (id: string) => {
     const updated = savedEstimates.filter(e => e.id !== id);
     setSavedEstimates(updated);
-    localStorage.setItem('gangin_estimates', JSON.stringify(updated));
-
-    const allLeads = JSON.parse(localStorage.getItem('gangin_all_leads') || '[]');
-    localStorage.setItem('gangin_all_leads', JSON.stringify(allLeads.filter((l: any) => l.id !== id)));
+    
+    try {
+      const { saveEstimates, getLeads, saveLeads } = await import('../lib/leads');
+      await saveEstimates(updated);
+      const allLeads = await getLeads();
+      await saveLeads(allLeads.filter((l: any) => l.id !== id));
+    } catch (err) {
+      console.error('[Supabase] Failed to delete estimate:', err);
+    }
   };
 
   return (

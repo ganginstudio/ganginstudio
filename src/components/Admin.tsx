@@ -10,6 +10,7 @@ import {
   ServicePackage,
   ServiceCategory
 } from '../types';
+import { uploadPortfolioImage } from '../lib/supabase';
 import {
   Lock,
   Plus,
@@ -45,6 +46,18 @@ interface AdminProps {
   onUpdateSettings: (updated: SiteSettings) => void;
   onUpdateCategories: (updated: ServiceCategory[]) => void;
 }
+
+const dataURLtoFile = (dataurl: string, filename: string): File => {
+  const arr = dataurl.split(',');
+  const mime = arr[0].match(/:(.*?);/)?.[1] || 'image/webp';
+  const bstr = atob(arr[1]);
+  let n = bstr.length;
+  const u8arr = new Uint8Array(n);
+  while (n--) {
+    u8arr[n] = bstr.charCodeAt(n);
+  }
+  return new File([u8arr], filename, { type: mime });
+};
 
 const processAndCompressImage = (file: File): Promise<string> => {
   return new Promise((resolve, reject) => {
@@ -121,6 +134,8 @@ const processAndCompressImage = (file: File): Promise<string> => {
   });
 };
 
+let globalDraftBackup: any = null;
+
 export default function Admin({
   projects,
   packages,
@@ -145,21 +160,68 @@ export default function Admin({
   const [currentTab, setCurrentTab] = useState<'settings' | 'portfolio' | 'packages' | 'categories' | 'faq' | 'reviews' | 'blog' | 'leads'>('settings');
 
   // Unified leads logging states
-  const [allLeads, setAllLeads] = useState<any[]>(() => {
-    try {
-      return JSON.parse(localStorage.getItem('gangin_all_leads') || '[]');
-    } catch (_) {
-      return [];
-    }
-  });
+  const [allLeads, setAllLeads] = useState<any[]>([]);
+  const [estimatesLog, setEstimatesLog] = useState<any[]>([]);
 
-  const [estimatesLog, setEstimatesLog] = useState<any[]>(() => {
-    try {
-      return JSON.parse(localStorage.getItem('gangin_estimates') || '[]');
-    } catch (_) {
-      return [];
+  // Load leads from Supabase Database on mount and tab shifts (No localStorage usage)
+  React.useEffect(() => {
+    async function loadLeads() {
+      try {
+        const { getLeads, getEstimates } = await import('../lib/leads');
+        const leadsData = await getLeads();
+        const estsData = await getEstimates();
+        setAllLeads(leadsData);
+        setEstimatesLog(estsData);
+      } catch (err) {
+        console.error('[Supabase] Failed to load leads in Admin dashboard:', err);
+      }
     }
-  });
+    loadLeads();
+  }, [isAuthenticated, currentTab]);
+
+  // Real-time subscription for Leads & Estimates inside Admin Dashboard
+  React.useEffect(() => {
+    if (!isAuthenticated || currentTab !== 'leads') return;
+    
+    let channel: any = null;
+    
+    async function subscribeLeads() {
+      const { supabase, isSupabaseConfigured } = await import('../lib/supabase');
+      if (!isSupabaseConfigured || !supabase) return;
+      
+      channel = supabase
+        .channel('gangin_admin_leads_updates')
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: 'gangin_cms' },
+          (payload: any) => {
+            const row = payload.new;
+            if (!row || !row.key) return;
+            const key = row.key;
+            const value = row.value;
+            
+            if (value === undefined || value === null) return;
+            
+            if (key === 'gangin_all_leads') {
+              setAllLeads(value);
+            } else if (key === 'gangin_estimates') {
+              setEstimatesLog(value);
+            }
+          }
+        )
+        .subscribe();
+    }
+    
+    subscribeLeads();
+    
+    return () => {
+      if (channel) {
+        import('../lib/supabase').then(({ supabase }) => {
+          if (supabase) supabase.removeChannel(channel);
+        });
+      }
+    };
+  }, [isAuthenticated, currentTab]);
 
   // Temp local edit states
   const [localSettings, setLocalSettings] = useState<SiteSettings>({ ...settings });
@@ -172,15 +234,15 @@ export default function Admin({
   const primaryFileRef = useRef<HTMLInputElement>(null);
   const galleryFileRef = useRef<HTMLInputElement>(null);
 
-  // Auto-backup session edits on key alters
+  // Auto-backup session edits in-memory on key alters
   React.useEffect(() => {
     if (editingProject) {
       try {
-        localStorage.setItem('gangin_project_draft_backup', JSON.stringify({
+        globalDraftBackup = {
           project: editingProject,
           isNew: isNewProject,
           original: originalProjectBackup
-        }));
+        };
       } catch (_) {}
     }
   }, [editingProject, isNewProject, originalProjectBackup]);
@@ -188,8 +250,7 @@ export default function Admin({
   // Evaluate draft completeness
   React.useEffect(() => {
     try {
-      const savedDraft = localStorage.getItem('gangin_project_draft_backup');
-      setHasDraft(!!savedDraft);
+      setHasDraft(!!globalDraftBackup);
     } catch (_) {
       setHasDraft(false);
     }
@@ -197,15 +258,12 @@ export default function Admin({
 
   const handleRestoreDraft = () => {
     try {
-      const savedDraft = localStorage.getItem('gangin_project_draft_backup');
-      if (savedDraft) {
-        const parsed = JSON.parse(savedDraft);
-        if (parsed && parsed.project) {
-          setEditingProject(parsed.project);
-          setIsNewProject(!!parsed.isNew);
-          setOriginalProjectBackup(parsed.original || null);
-          alert('작업하시던 임시 도안이 안전하게 워크스페이스로 복원되었습니다.');
-        }
+      const savedDraft = globalDraftBackup;
+      if (savedDraft && savedDraft.project) {
+        setEditingProject(savedDraft.project);
+        setIsNewProject(!!savedDraft.isNew);
+        setOriginalProjectBackup(savedDraft.original || null);
+        alert('작업하시던 임시 도안이 안전하게 워크스페이스로 복원되었습니다.');
       }
     } catch (_) {
       alert('임시 저장된 파일이 없거나 손상되었습니다.');
@@ -214,7 +272,7 @@ export default function Admin({
 
   const handleDismissDraft = () => {
     try {
-      localStorage.removeItem('gangin_project_draft_backup');
+      globalDraftBackup = null;
       setHasDraft(false);
     } catch (_) {}
   };
@@ -235,7 +293,7 @@ export default function Admin({
     alert('기본 디자인 환경 및 SEO 메타태그 설정이 완벽히 저장되었습니다.');
   };
 
-  // Robust Async File processing with validation & WebP conversion
+  // Robust Async File processing with validation & WebP conversion connected to Supabase Storage
   const handleFileChange = async (e: ChangeEvent<HTMLInputElement>, target: 'primary' | 'gallery') => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
@@ -244,25 +302,33 @@ export default function Admin({
       const file = files[0];
       try {
         const processedUrl = await processAndCompressImage(file);
+        // Convert back to File and upload to real Supabase Storage CMS
+        const compressedFile = dataURLtoFile(processedUrl, `primary_${Date.now()}.webp`);
+        const storageUrl = await uploadPortfolioImage(compressedFile);
+
         if (editingProject) {
           setEditingProject((prev) => {
             if (!prev) return null;
             return {
               ...prev,
-              image: processedUrl
+              image: storageUrl
             };
           });
         }
       } catch (err: any) {
-        alert(err.message || '이미지를 가공 변환하는 과정에서 안전 예외가 발생했습니다.');
+        alert(err.message || '이미지를 가공 변환 및 업로드하는 과정에서 에러가 발생했습니다.');
       }
     } else if (target === 'gallery') {
       const fileList = Array.from(files) as File[];
       for (const file of fileList) {
         try {
           const processedUrl = await processAndCompressImage(file);
+          // Convert back to File and upload to real Supabase Storage CMS
+          const compressedFile = dataURLtoFile(processedUrl, `gallery_${Date.now()}.webp`);
+          const storageUrl = await uploadPortfolioImage(compressedFile);
+
           const newItem = {
-            url: processedUrl,
+            url: storageUrl,
             caption: file.name.split('.')[0] || '공간 완료 부서',
             aspect: 'landscape' as const
           };
@@ -275,7 +341,7 @@ export default function Admin({
             };
           });
         } catch (err: any) {
-          alert(`[${file.name} 업로드 보류] - ${err.message || '가공 거부'}`);
+          alert(`[${file.name} 업로드 보류] - ${err.message || '가공 거부 및 업로드 실패'}`);
         }
       }
     }
@@ -352,14 +418,14 @@ export default function Admin({
       if (confirm('현재 기입하신 임시 작업안을 폐기하고 작성을 중단하여 목록 화면으로 되돌아가시겠습니까?')) {
         setEditingProject(null);
         setOriginalProjectBackup(null);
-        localStorage.removeItem('gangin_project_draft_backup');
+        globalDraftBackup = null;
         setHasDraft(false);
       }
     } else {
       if (confirm('현재까지 가공/기입된 모든 수정 사항을 복원 취소하고, 저장 전 원래 오리지널 아카이브 기록으로 안전 롤백 후 되돌아가시겠습니까?')) {
         setEditingProject(null);
         setOriginalProjectBackup(null);
-        localStorage.removeItem('gangin_project_draft_backup');
+        globalDraftBackup = null;
         setHasDraft(false);
       }
     }
@@ -410,7 +476,7 @@ export default function Admin({
     // Success - clean draft triggers
     setEditingProject(null);
     setOriginalProjectBackup(null);
-    localStorage.removeItem('gangin_project_draft_backup');
+    globalDraftBackup = null;
     setHasDraft(false);
     alert('포트폴리오 아카이브 기록이 성공적으로 안정 수리되어 동기화되었습니다.');
   };
@@ -752,20 +818,21 @@ export default function Admin({
                           type="file"
                           accept="image/*"
                           className="hidden"
-                          onChange={(e) => {
+                          onChange={async (e) => {
                             const files = e.target.files;
                             if (files && files.length > 0) {
                               const file = files[0];
-                              const reader = new FileReader();
-                              reader.onloadend = () => {
-                                if (typeof reader.result === 'string') {
-                                  setLocalSettings({
-                                    ...localSettings,
-                                    visualHeroImage: reader.result
-                                  });
-                                }
-                              };
-                              reader.readAsDataURL(file);
+                              try {
+                                const processedUrl = await processAndCompressImage(file);
+                                const compressedFile = dataURLtoFile(processedUrl, `hero_${Date.now()}.webp`);
+                                const storageUrl = await uploadPortfolioImage(compressedFile);
+                                setLocalSettings({
+                                  ...localSettings,
+                                  visualHeroImage: storageUrl
+                                });
+                              } catch (err: any) {
+                                alert(err.message || '비주얼 배경 이미지 업로드 중 오류가 발생했습니다.');
+                              }
                             }
                           }}
                         />
@@ -1644,14 +1711,19 @@ export default function Admin({
                 </p>
               </div>
               <button
-                onClick={() => {
+                onClick={async () => {
                   if (confirm('모든 접수 내역을 일괄 안전 폐기처리 하시겠습니까?')) {
                     setAllLeads([]);
                     setEstimatesLog([]);
-                    localStorage.removeItem('gangin_all_leads');
-                    localStorage.removeItem('gangin_estimates');
-                    localStorage.removeItem('gangin_consultations');
-                    alert('모든 접수 내역이 깨끗이 비워졌습니다.');
+                    try {
+                      const { saveLeads, saveEstimates, saveConsultations } = await import('../lib/leads');
+                      await saveLeads([]);
+                      await saveEstimates([]);
+                      await saveConsultations([]);
+                      alert('모든 접수 내역이 깨끗이 비워졌습니다.');
+                    } catch (err) {
+                      console.error('[Supabase] Failed to clear leads:', err);
+                    }
                   }
                 }}
                 className="px-4 py-2 border text-[9px] hover:bg-red-50 hover:text-red-600 transition-colors font-semibold"
@@ -1699,11 +1771,16 @@ export default function Admin({
 
                         <div className="pt-2 text-right">
                           <button
-                            onClick={() => {
+                            onClick={async () => {
                               if (confirm('이 접정 견적을 지우겠습니까?')) {
                                 const updated = estimatesLog.filter(e => e.id !== est.id);
                                 setEstimatesLog(updated);
-                                localStorage.setItem('gangin_estimates', JSON.stringify(updated));
+                                try {
+                                  const { saveEstimates } = await import('../lib/leads');
+                                  await saveEstimates(updated);
+                                } catch (err) {
+                                  console.error('[Supabase] Delete estimate failed:', err);
+                                }
                               }
                             }}
                             className="bg-red-50 hover:bg-red-100 text-red-600 px-3 py-1.5 text-[8px] uppercase font-bold tracking-wider rounded-none cursor-pointer"
@@ -1767,16 +1844,22 @@ export default function Admin({
 
                         <div className="pt-2 text-right">
                           <button
-                            onClick={() => {
+                            onClick={async () => {
                               if (confirm('이 접정 내역을 지우겠습니까?')) {
                                 const updatedLeads = allLeads.filter(l => l.id !== lead.id);
                                 setAllLeads(updatedLeads);
-                                localStorage.setItem('gangin_all_leads', JSON.stringify(updatedLeads));
                                 
                                 // Also sync other tables if necessary
                                 const updatedEsts = estimatesLog.filter(e => e.id !== lead.id);
                                 setEstimatesLog(updatedEsts);
-                                localStorage.setItem('gangin_estimates', JSON.stringify(updatedEsts));
+                                
+                                try {
+                                  const { saveLeads, saveEstimates } = await import('../lib/leads');
+                                  await saveLeads(updatedLeads);
+                                  await saveEstimates(updatedEsts);
+                                } catch (err) {
+                                  console.error('[Supabase] Delete leads failed:', err);
+                                }
                               }
                             }}
                             className="bg-red-50 hover:bg-red-100 text-red-600 px-3 py-1.5 text-[8px] uppercase font-bold tracking-wider rounded-none cursor-pointer"

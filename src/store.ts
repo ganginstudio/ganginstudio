@@ -611,34 +611,15 @@ export const DEFAULT_BLOG: BlogPost[] = [
   }
 ];
 
-// Safe parser to prevent crashes under bad JSON syntax or storage corruption
-function safeParseJSON<T>(key: string, fallback: T): T {
-  try {
-    const data = localStorage.getItem(key);
-    if (!data) return fallback;
-    const parsed = JSON.parse(data);
-    if (parsed === null || parsed === undefined) return fallback;
-    return parsed as T;
-  } catch (err) {
-    console.error(`Error parsing localStorage key "${key}":`, err);
-    // Silent fail recovery: Create fallback backup in case user wants to parse manually later
-    try {
-      const corrupted = localStorage.getItem(key);
-      if (corrupted) {
-        localStorage.setItem(`${key}_corrupted_backup_${Date.now()}`, corrupted);
-      }
-    } catch (_) {}
-    return fallback;
-  }
-}
+// GANGIN studio initializers and default state commit helpers
 
 export function getInitialState() {
-  const parsedProjects = safeParseJSON<Project[]>('gangin_projects', PORTFOLIO_PROJECTS);
-  const parsedPackages = safeParseJSON<ServicePackage[]>('gangin_packages', DEFAULT_PACKAGES);
-  const parsedFaq = safeParseJSON<FAQItem[]>('gangin_faq', DEFAULT_FAQ);
-  const parsedReviews = safeParseJSON<CustomerReview[]>('gangin_reviews', DEFAULT_REVIEWS);
-  const parsedBlog = safeParseJSON<BlogPost[]>('gangin_blog', DEFAULT_BLOG);
-  const parsedSettings = safeParseJSON<SiteSettings>('gangin_settings', null as any);
+  const parsedProjects = PORTFOLIO_PROJECTS;
+  const parsedPackages = DEFAULT_PACKAGES;
+  const parsedFaq = DEFAULT_FAQ;
+  const parsedReviews = DEFAULT_REVIEWS;
+  const parsedBlog = DEFAULT_BLOG;
+  const parsedSettings = null as any;
 
   // Validate, normalize, and de-duplicate projects to ensure 100% stable rendering
   const seenIds = new Set<string>();
@@ -739,14 +720,7 @@ export function saveState(state: {
   settings: SiteSettings;
 }) {
   try {
-    localStorage.setItem('gangin_projects', JSON.stringify(state.projects));
-    localStorage.setItem('gangin_packages', JSON.stringify(state.packages));
-    localStorage.setItem('gangin_faq', JSON.stringify(state.faq));
-    localStorage.setItem('gangin_reviews', JSON.stringify(state.reviews));
-    localStorage.setItem('gangin_blog', JSON.stringify(state.blog));
-    localStorage.setItem('gangin_settings', JSON.stringify(state.settings));
-
-    // Asynchronously update Supabase in the background if active
+    // Save state completely and exclusively at Supabase Database Level
     saveSupabaseState('gangin_projects', state.projects);
     saveSupabaseState('gangin_packages', state.packages);
     saveSupabaseState('gangin_faq', state.faq);
@@ -754,6 +728,6 @@ export function saveState(state: {
     saveSupabaseState('gangin_blog', state.blog);
     saveSupabaseState('gangin_settings', state.settings);
   } catch (err) {
-    console.error("Failed to commit application state to localStorage:", err);
+    console.error("Failed to commit application state to Supabase database:", err);
   }
 }

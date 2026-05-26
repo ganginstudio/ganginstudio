@@ -64,11 +64,8 @@ export default function App() {
   const [blog, setBlog] = useState<BlogPost[]>(storeInit.blog);
   const [settings, setSettings] = useState<SiteSettings>(storeInit.settings);
   
-  // Also persist/manage categories state
-  const [categories, setCategories] = useState<ServiceCategory[]>(() => {
-    const saved = localStorage.getItem('gangin_categories');
-    return saved ? JSON.parse(saved) : DEFAULT_CATEGORIES;
-  });
+  // Also persist/manage categories state (No localStorage fallback)
+  const [categories, setCategories] = useState<ServiceCategory[]>(DEFAULT_CATEGORIES);
 
   // Hydrate state from Supabase on mount if configured
   useEffect(() => {
@@ -95,7 +92,7 @@ export default function App() {
           setSettings(remoteSettings);
           setCategories(remoteCategories);
         } catch (e) {
-          console.error('[Supabase] Hydration failed, using defaults and localStorage:', e);
+          console.error('[Supabase] Hydration failed, using default states:', e);
         }
       }
       setIsHydrated(true);
@@ -103,7 +100,7 @@ export default function App() {
     loadSupabase();
   }, []);
 
-  // Dynamic automatic synchronization to localStorage/Supabase on state alteration
+  // Dynamic automatic synchronization exclusively to Supabase on state alteration
   useEffect(() => {
     if (!isHydrated) return;
     
@@ -115,7 +112,6 @@ export default function App() {
       blog,
       settings
     });
-    localStorage.setItem('gangin_categories', JSON.stringify(categories));
 
     // Asynchronously save categories to Supabase
     async function syncCategories() {
@@ -126,6 +122,64 @@ export default function App() {
     }
     syncCategories();
   }, [projects, packages, faq, reviews, blog, settings, categories, isHydrated]);
+
+  // Supabase Real-time Subscription for true live updates across tabs/clients
+  useEffect(() => {
+    let channel: any = null;
+    
+    async function subscribeRealtime() {
+      const { supabase, isSupabaseConfigured } = await import('./lib/supabase');
+      if (!isSupabaseConfigured || !supabase) return;
+      
+      channel = supabase
+        .channel('gangin_cms_live_updates')
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: 'gangin_cms' },
+          (payload: any) => {
+            const row = payload.new;
+            if (!row || !row.key) return;
+            const key = row.key;
+            const value = row.value;
+            
+            console.log(`[Supabase Live Update] "${key}" changed remotely.`, value);
+            
+            if (value === undefined || value === null) return;
+            
+            if (key === 'gangin_projects') {
+              setProjects(prev => JSON.stringify(prev) !== JSON.stringify(value) ? value : prev);
+            } else if (key === 'gangin_packages') {
+              setPackages(prev => JSON.stringify(prev) !== JSON.stringify(value) ? value : prev);
+            } else if (key === 'gangin_faq') {
+              setFaq(prev => JSON.stringify(prev) !== JSON.stringify(value) ? value : prev);
+            } else if (key === 'gangin_reviews') {
+              setReviews(prev => JSON.stringify(prev) !== JSON.stringify(value) ? value : prev);
+            } else if (key === 'gangin_blog') {
+              setBlog(prev => JSON.stringify(prev) !== JSON.stringify(value) ? value : prev);
+            } else if (key === 'gangin_settings') {
+              setSettings(prev => JSON.stringify(prev) !== JSON.stringify(value) ? value : prev);
+            } else if (key === 'gangin_categories') {
+              setCategories(prev => JSON.stringify(prev) !== JSON.stringify(value) ? value : prev);
+            }
+          }
+        )
+        .subscribe((status) => {
+          console.log('[Supabase Realtime Channel Status]:', status);
+        });
+    }
+    
+    if (isHydrated) {
+      subscribeRealtime();
+    }
+    
+    return () => {
+      if (channel) {
+        import('./lib/supabase').then(({ supabase }) => {
+          if (supabase) supabase.removeChannel(channel);
+        });
+      }
+    };
+  }, [isHydrated]);
 
   // States to pre-fill estimate inputs when user clicks an inquiry CTA in a specific project's detail
   const [prefillCategory, setPrefillCategory] = useState<string>('');

@@ -296,7 +296,7 @@ function HomeConversionCTAs({ setView }: { setView: (view: NavView) => void }) {
       schedule: '미정 (빠른 견적 신청)',
       designPreference: '따뜻하고 미니멀한 (Warm Minimal)',
       details: '[퀵 가이드 홈 견적 접수]',
-      consultationType: 'Call',
+      consultationType: 'Call' as const,
       submittedAt: new Date().toLocaleDateString('ko-KR', {
         year: 'numeric',
         month: 'long',
@@ -304,32 +304,32 @@ function HomeConversionCTAs({ setView }: { setView: (view: NavView) => void }) {
         hour: '2-digit',
         minute: '2-digit'
       }),
-      status: 'Pending'
+      status: 'Pending' as const
     };
 
-    // Store estimate
-    const currentEsts = JSON.parse(localStorage.getItem('gangin_estimates') || '[]');
-    localStorage.setItem('gangin_estimates', JSON.stringify([newEst, ...currentEsts]));
+    // Save lead submission directly to Supabase Database (No localStorage fallback)
+    const newLead = {
+      id: newEst.id,
+      type: 'Quick Estimate (우선 견적 신청)',
+      name: estName,
+      phone: estPhone,
+      category: estType,
+      region: '광수 전남 전역',
+      area: estArea ? `${estArea}평` : '협의 예정',
+      budget: estBudget,
+      schedule: '협의 예정',
+      details: '[홈페이지 하단 간편 견적 인서트]',
+      uploadsCount: 0,
+      uploads: [],
+      timestamp: newEst.submittedAt
+    };
 
-    const allLeads = JSON.parse(localStorage.getItem('gangin_all_leads') || '[]');
-    localStorage.setItem('gangin_all_leads', JSON.stringify([
-      {
-        id: newEst.id,
-        type: 'Quick Estimate (우선 견적 신청)',
-        name: estName,
-        phone: estPhone,
-        category: estType,
-        region: '광수 전남 전역',
-        area: estArea ? `${estArea}평` : '협의 예정',
-        budget: estBudget,
-        schedule: '협의 예정',
-        details: '[홈페이지 하단 간편 견적 인서트]',
-        uploadsCount: 0,
-        uploads: [],
-        timestamp: newEst.submittedAt
-      },
-      ...allLeads
-    ]));
+    import('../lib/leads').then(({ addLeadSubmission }) => {
+      addLeadSubmission({
+        lead: newLead,
+        estimate: newEst
+      });
+    });
 
     setEstName('');
     setEstPhone('');
@@ -367,12 +367,13 @@ function HomeConversionCTAs({ setView }: { setView: (view: NavView) => void }) {
       })
     };
 
-    const allLeads = JSON.parse(localStorage.getItem('gangin_all_leads') || '[]');
-    localStorage.setItem('gangin_all_leads', JSON.stringify([newConPort, ...allLeads]));
-
-    // Also save in a dedicated consultations key for redundancy
-    const currentCons = JSON.parse(localStorage.getItem('gangin_consultations') || '[]');
-    localStorage.setItem('gangin_consultations', JSON.stringify([newConPort, ...currentCons]));
+    // Save consultation submission directly to Supabase Database (No localStorage fallback)
+    import('../lib/leads').then(({ addLeadSubmission }) => {
+      addLeadSubmission({
+        lead: newConPort,
+        consultation: newConPort
+      });
+    });
 
     setConName('');
     setConPhone('');
