@@ -56,6 +56,7 @@ export default function App() {
 
   // Load Initialized Storage state
   const storeInit = getInitialState();
+  const [isHydrated, setIsHydrated] = useState(false);
   const [projects, setProjects] = useState<Project[]>(storeInit.projects);
   const [packages, setPackages] = useState<ServicePackage[]>(storeInit.packages);
   const [faq, setFaq] = useState<FAQItem[]>(storeInit.faq);
@@ -69,8 +70,43 @@ export default function App() {
     return saved ? JSON.parse(saved) : DEFAULT_CATEGORIES;
   });
 
-  // Dynamic automatic synchronization to localStorage on state alteration
+  // Hydrate state from Supabase on mount if configured
   useEffect(() => {
+    async function loadSupabase() {
+      const { fetchSupabaseState, isSupabaseConfigured } = await import('./lib/supabase');
+      if (isSupabaseConfigured) {
+        try {
+          console.log('[Supabase] Hydrating state from remote database...');
+          const remoteProjects = await fetchSupabaseState<Project[]>('gangin_projects', storeInit.projects);
+          const remotePackages = await fetchSupabaseState<ServicePackage[]>('gangin_packages', storeInit.packages);
+          const remoteFaq = await fetchSupabaseState<FAQItem[]>('gangin_faq', storeInit.faq);
+          const remoteReviews = await fetchSupabaseState<CustomerReview[]>('gangin_reviews', storeInit.reviews);
+          const remoteBlog = await fetchSupabaseState<BlogPost[]>('gangin_blog', storeInit.blog);
+          const remoteSettings = await fetchSupabaseState<SiteSettings>('gangin_settings', storeInit.settings);
+          
+          const defaultCategories = DEFAULT_CATEGORIES;
+          const remoteCategories = await fetchSupabaseState<ServiceCategory[]>('gangin_categories', defaultCategories);
+
+          setProjects(remoteProjects);
+          setPackages(remotePackages);
+          setFaq(remoteFaq);
+          setReviews(remoteReviews);
+          setBlog(remoteBlog);
+          setSettings(remoteSettings);
+          setCategories(remoteCategories);
+        } catch (e) {
+          console.error('[Supabase] Hydration failed, using defaults and localStorage:', e);
+        }
+      }
+      setIsHydrated(true);
+    }
+    loadSupabase();
+  }, []);
+
+  // Dynamic automatic synchronization to localStorage/Supabase on state alteration
+  useEffect(() => {
+    if (!isHydrated) return;
+    
     saveState({
       projects,
       packages,
@@ -80,7 +116,16 @@ export default function App() {
       settings
     });
     localStorage.setItem('gangin_categories', JSON.stringify(categories));
-  }, [projects, packages, faq, reviews, blog, settings, categories]);
+
+    // Asynchronously save categories to Supabase
+    async function syncCategories() {
+      const { saveSupabaseState, isSupabaseConfigured } = await import('./lib/supabase');
+      if (isSupabaseConfigured) {
+        saveSupabaseState('gangin_categories', categories);
+      }
+    }
+    syncCategories();
+  }, [projects, packages, faq, reviews, blog, settings, categories, isHydrated]);
 
   // States to pre-fill estimate inputs when user clicks an inquiry CTA in a specific project's detail
   const [prefillCategory, setPrefillCategory] = useState<string>('');
@@ -153,6 +198,7 @@ export default function App() {
         {currentView === 'pricing' && (
           <Pricing
             setView={setView}
+            packages={packages}
           />
         )}
 

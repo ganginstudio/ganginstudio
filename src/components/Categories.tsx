@@ -226,7 +226,7 @@ export default function Categories({
                 </div>
 
                 <div className="space-y-4">
-                  <span className="text-[10px] uppercase tracking-widest text-[#9333ea]/80 block font-normal">
+                  <span className="text-[10px] uppercase tracking-widest text-brand-dark/80 block font-normal">
                     공사 표준 스케줄 (Construction Timeline)
                   </span>
                   <p className="text-xs text-brand-muted font-light leading-relaxed">

@@ -1,12 +1,62 @@
+import { useState } from 'react';
 import { motion } from 'motion/react';
-import { NavView } from '../types';
+import { NavView, ServicePackage } from '../types';
 import { Check } from 'lucide-react';
 
 interface PricingProps {
   setView: (view: NavView) => void;
+  packages?: ServicePackage[];
 }
 
-export default function Pricing({ setView }: PricingProps) {
+export default function Pricing({ setView, packages }: PricingProps) {
+  // Main general packages filter
+  const generalPackages = (packages || []).filter(p =>
+    ['pack_basic', 'pack_standard', 'pack_premium'].includes(p.id)
+  );
+
+  // In case packages are not synced or empty, use static recovery defaults
+  const displayPackages = generalPackages.length >= 3 ? generalPackages : [
+    {
+      id: 'pack_basic',
+      name: 'BASIC',
+      startingPrice: '상담 후 안내',
+      duration: '실속있고 깔끔한 마감 요소와 실용적 평면 구성을 정립하는 기본 리모델링 스타트 패키지',
+      includedScope: [
+        '공간 구성 설계 레이아웃 2안 제안',
+        '주택/상업 기본 설계 수정 2회 제공',
+        '고해상도 공간 3D 그래픽 투시 오버플 프리뷰',
+        '정밀 시공 자재 표준 규격 수작 가이드 기초'
+      ]
+    },
+    {
+      id: 'pack_standard',
+      name: 'STANDARD',
+      startingPrice: '상담 후 안내',
+      duration: '한층 더 견고한 무설계선 마감 및 독사색과 배광 매치까지 완성하는 실전 설계 패키지',
+      includedScope: [
+        '공간 구성 최적 설계 레이아웃 4안 제안',
+        '실용 편의적 완벽 실사 무제한 수정 지원',
+        '마감 전용 고밀 천연 마크 수입 자재/컬러 매칭',
+        '빌트인 마이너스 숨김 구조 가구 맞춤 제작 설계'
+      ]
+    },
+    {
+      id: 'pack_premium',
+      name: 'PREMIUM',
+      startingPrice: '상담 후 안내',
+      duration: '장인 사색 플라스터, 조적 오버플 Wellness 욕탕 등 고전 하이엔드 예술 가치를 총망라한 통합 패키지',
+      includedScope: [
+        '공간 흐름 설계 정밀 레이아웃 6안 제안',
+        '프랙탈 수치 피드백 자유 수정 기한제한 무',
+        '하이엔드 마이크로시멘트 3종 시립 다각 공법',
+        '완제품 책임 보증 및 프리미엄 원케어 AS 케어 적용'
+      ]
+    }
+  ];
+
+  // Track the hovered card, default standard is active initially
+  const [hoveredCardId, setHoveredCardId] = useState<string>('pack_standard');
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 15 }}
@@ -28,182 +78,95 @@ export default function Pricing({ setView }: PricingProps) {
         </p>
       </div>
 
-      {/* Responsive Multi-Card Pricing Grid matching the image */}
-      <div id="pricing-packages-grid" className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch mb-24 max-w-[1150px] mx-auto">
-        
-        {/* Card 1: BASIC */}
-        <div
-          id="pricing-card-basic"
-          className="border border-brand-border bg-white rounded-none p-9 flex flex-col justify-between shadow-[0_4px_24px_rgba(0,0,0,0.02)] transition-all duration-300 hover:shadow-[0_12px_36px_rgba(0,0,0,0.05)] relative"
-        >
-          <div className="space-y-6">
-            <div className="space-y-2">
-              <h2 className="text-lg font-black text-[#111111] tracking-wider uppercase font-sans">BASIC</h2>
-              <p className="text-[11px] text-[#8C93A3] font-normal leading-relaxed tracking-tight min-h-[32px]">
-                실속있고 깔끔한 마감 요소와 실용적 평면 구성을 정립하는 기본 리모델링 스타트 패키지
-              </p>
-            </div>
-
-            {/* Price Text */}
-            <div className="py-4 border-y border-brand-border">
-              <span className="text-[22px] md:text-[28px] font-extrabold text-[#111111] tracking-tight block">
-                상담 후 안내
-              </span>
-            </div>
-
-            {/* Checklist */}
-            <div className="space-y-4 pt-1">
-              <ul className="space-y-4 text-[12px] text-[#374151] font-medium tracking-normal">
-                <li className="flex items-center gap-3">
-                  <Check size={14} className="text-brand-dark shrink-0" strokeWidth={3} />
-                  <span>공간 구성 설계 레이아웃 2안 제안</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <Check size={14} className="text-brand-dark shrink-0" strokeWidth={3} />
-                  <span>주택/상업 기본 설계 수정 2회 제공</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <Check size={14} className="text-brand-dark shrink-0" strokeWidth={3} />
-                  <span>고해상도 공간 3D 그래픽 투시 오버플 프리뷰</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <Check size={14} className="text-brand-dark shrink-0" strokeWidth={3} />
-                  <span>정밀 시공 자재 표준 규격 수작 가이드 기초</span>
-                </li>
-              </ul>
-            </div>
-          </div>
-
-          <div className="mt-10">
-            <button
-              onClick={() => {
-                setView('estimate');
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-              }}
-              className="w-full text-center py-4 text-xs font-bold text-[#4B5563] bg-[#F3F4F6] hover:bg-black hover:text-white transition-all duration-300 rounded-none cursor-pointer"
+      {/* Responsive Multi-Card Pricing Grid with hover responsiveness */}
+      <div 
+        id="pricing-packages-grid" 
+        className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch mb-24 max-w-[1150px] mx-auto"
+        onMouseLeave={() => setHoveredCardId('pack_standard')} /* Default back to standard when leaving container */
+      >
+        {displayPackages.map((pack) => {
+          const isActive = pack.id === hoveredCardId;
+          
+          return (
+            <div
+              key={pack.id}
+              id={`pricing-card-${pack.id}`}
+              onMouseEnter={() => setHoveredCardId(pack.id)}
+              className={`bg-white rounded-none p-9 flex flex-col justify-between transition-all duration-300 relative select-none cursor-pointer ${
+                isActive 
+                  ? 'border-2 border-brand-dark shadow-[0_12px_44px_rgba(0,0,0,0.08)] scale-[1.01] z-10' 
+                  : 'border border-brand-border shadow-[0_4px_24px_rgba(0,0,0,0.015)] opacity-95 hover:opacity-100 z-0'
+              }`}
             >
-              상담 예약하기
-            </button>
-          </div>
-        </div>
+              {/* Floating Choice Pill dynamically shown when active */}
+              {isActive && (
+                <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-[#111111] text-white text-[9px] font-black px-4 py-1.5 uppercase tracking-[0.16em] rounded-none shadow-[0_4px_12px_rgba(0,0,0,0.12)] select-none">
+                  {pack.id === 'pack_standard' ? 'BEST CHOICE' : pack.id === 'pack_premium' ? 'PREMIUM VALUE' : 'STANDARD VALUE'}
+                </div>
+              )}
 
-        {/* Card 2: STANDARD (Highlight BEST CHOICE Outline & Glow) */}
-        <div
-          id="pricing-card-standard"
-          className="border-2 border-brand-dark bg-white rounded-none p-9 flex flex-col justify-between shadow-[0_12px_44px_rgba(0,0,0,0.06)] transition-all duration-300 hover:shadow-[0_20px_50px_rgba(0,0,0,0.1)] relative"
-        >
-          {/* Best Choice Pill nested beautifully on the border */}
-          <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-[#111111] text-white text-[9px] font-black px-4 py-1.5 uppercase tracking-[0.16em] rounded-none shadow-[0_4px_12px_rgba(0,0,0,0.1)] select-none">
-            BEST CHOICE
-          </div>
+              <div className="space-y-6">
+                <div className="space-y-2">
+                  <h2 className="text-lg font-black text-[#111111] tracking-wider uppercase font-sans">
+                    {pack.name}
+                  </h2>
+                  <p className="text-[11px] text-[#8C93A3] font-normal leading-relaxed tracking-tight min-h-[48px]">
+                    {pack.duration}
+                  </p>
+                </div>
 
-          <div className="space-y-6">
-            <div className="space-y-2">
-              <h2 className="text-lg font-black text-[#111111] tracking-wider uppercase font-sans">STANDARD</h2>
-              <p className="text-[11px] text-[#8C93A3] font-normal leading-relaxed tracking-tight min-h-[32px]">
-                한층 더 견고한 무설계선 마감 및 독사색과 배광 매치까지 완성하는 실전 설계 패키지
-              </p>
+                {/* Price Text */}
+                <div className="py-4 border-y border-brand-border">
+                  <span className="text-[22px] md:text-[28px] font-extrabold text-[#111111] tracking-tight block">
+                    {pack.startingPrice}
+                  </span>
+                </div>
+
+                {/* Checklist (Included Options) */}
+                <div className="space-y-4 pt-1">
+                  <ul className="space-y-4 text-[12px] text-[#374151] font-medium tracking-normal">
+                    {pack.includedScope && pack.includedScope.length > 0 ? (
+                      pack.includedScope.map((option, idx) => (
+                        <li key={idx} className="flex items-center gap-3">
+                          <Check 
+                            size={14} 
+                            className={`shrink-0 transition-colors duration-200 ${
+                              isActive ? 'text-black' : 'text-brand-muted/70'
+                            }`} 
+                            strokeWidth={3} 
+                          />
+                          <span className="text-[12px] font-light text-[#374151] leading-tight">
+                            {option}
+                          </span>
+                        </li>
+                      ))
+                    ) : (
+                      <li className="text-[11px] text-brand-muted font-light">상담 시 전용 포트폴리오를 제안해 드립니다</li>
+                    )}
+                  </ul>
+                </div>
+              </div>
+
+              {/* Call to action button */}
+              <div className="mt-10">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setView('estimate');
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }}
+                  className={`w-full text-center py-4 text-xs font-bold uppercase tracking-widest transition-all duration-300 rounded-none cursor-pointer ${
+                    isActive 
+                      ? 'text-white bg-black hover:bg-black/85 shadow-[0_8px_20px_rgba(0,0,0,0.1)]' 
+                      : 'text-[#4B5563] bg-[#F3F4F6] hover:bg-black hover:text-white'
+                  }`}
+                >
+                  상담 예약하기
+                </button>
+              </div>
             </div>
-
-            {/* Price Text */}
-            <div className="py-4 border-y border-brand-border">
-              <span className="text-[22px] md:text-[28px] font-extrabold text-[#111111] tracking-tight block">
-                상담 후 안내
-              </span>
-            </div>
-
-            {/* Checklist */}
-            <div className="space-y-4 pt-1">
-              <ul className="space-y-4 text-[12px] text-[#374151] font-medium tracking-normal">
-                <li className="flex items-center gap-3">
-                  <Check size={14} className="text-brand-dark shrink-0" strokeWidth={3} />
-                  <span>공간 구성 최적 설계 레이아웃 4안 제안</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <Check size={14} className="text-brand-dark shrink-0" strokeWidth={3} />
-                  <span>실용 편의적 완벽 실사 무제한 수정 지원</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <Check size={14} className="text-brand-dark shrink-0" strokeWidth={3} />
-                  <span>마감 전용 고밀 천연 마크 수입 자재/컬러 매칭</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <Check size={14} className="text-brand-dark shrink-0" strokeWidth={3} />
-                  <span>빌트인 마이너스 숨김 구조 가구 맞춤 제작 설계</span>
-                </li>
-              </ul>
-            </div>
-          </div>
-
-          <div className="mt-10">
-            <button
-              onClick={() => {
-                setView('estimate');
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-              }}
-              className="w-full text-center py-4 text-xs font-bold text-white bg-black hover:bg-black/90 shadow-[0_8px_20px_rgba(0,0,0,0.1)] transition-all duration-300 rounded-none cursor-pointer"
-            >
-              상담 예약하기
-            </button>
-          </div>
-        </div>
-
-        {/* Card 3: PREMIUM */}
-        <div
-          id="pricing-card-premium"
-          className="border border-brand-border bg-white rounded-none p-9 flex flex-col justify-between shadow-[0_4px_24px_rgba(0,0,0,0.02)] transition-all duration-300 hover:shadow-[0_12px_36px_rgba(0,0,0,0.05)] relative"
-        >
-          <div className="space-y-6">
-            <div className="space-y-2">
-              <h2 className="text-lg font-black text-[#111111] tracking-wider uppercase font-sans">PREMIUM</h2>
-              <p className="text-[11px] text-[#8C93A3] font-normal leading-relaxed tracking-tight min-h-[32px]">
-                장인 사색 플라스터, 조적 오버플 Wellness 욕탕 등 고전 하이엔드 예술 가치를 총망라한 통합 패키지
-              </p>
-            </div>
-
-            {/* Price Text */}
-            <div className="py-4 border-y border-brand-border">
-              <span className="text-[22px] md:text-[28px] font-extrabold text-[#111111] tracking-tight block">
-                상담 후 안내
-              </span>
-            </div>
-
-            {/* Checklist */}
-            <div className="space-y-4 pt-1">
-              <ul className="space-y-4 text-[12px] text-[#374151] font-medium tracking-normal">
-                <li className="flex items-center gap-3">
-                  <Check size={14} className="text-brand-dark shrink-0" strokeWidth={3} />
-                  <span>공간 흐름 설계 정밀 레이아웃 6안 제안</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <Check size={14} className="text-brand-dark shrink-0" strokeWidth={3} />
-                  <span>프랙탈 수치 피드백 자유 수정 기한제한 무</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <Check size={14} className="text-brand-dark shrink-0" strokeWidth={3} />
-                  <span>하이엔드 마이크로시멘트 3종 시립 다각 공법</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <Check size={14} className="text-brand-dark shrink-0" strokeWidth={3} />
-                  <span>완제품 책임 보증 및 프리미엄 원케어 AS 케어 적용</span>
-                </li>
-              </ul>
-            </div>
-          </div>
-
-          <div className="mt-10">
-            <button
-              onClick={() => {
-                setView('estimate');
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-              }}
-              className="w-full text-center py-4 text-xs font-bold text-[#4B5563] bg-[#F3F4F6] hover:bg-black hover:text-white transition-all duration-300 rounded-none cursor-pointer"
-            >
-              상담 예약하기
-            </button>
-          </div>
-        </div>
-
+          );
+        })}
       </div>
 
       {/* Process list inspired by 1204DESIGN sequence transparency */}
@@ -259,4 +222,3 @@ export default function Pricing({ setView }: PricingProps) {
     </motion.div>
   );
 }
-

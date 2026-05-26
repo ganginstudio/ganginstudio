@@ -114,7 +114,7 @@ export default function Blog({ blogPosts, setView }: BlogProps) {
                       </div>
                       
                       <div className="space-y-2">
-                        <span className="text-[9px] uppercase tracking-[0.2em] text-[#9333ea] border border-[#d8b4fe] px-2 py-0.5 inline-block font-medium">
+                        <span className="text-[9px] uppercase tracking-[0.2em] text-brand-dark border border-brand-border px-2 py-0.5 inline-block font-light">
                           {CATEGORY_LABELS[post.category] || post.category}
                         </span>
                         
@@ -166,7 +166,7 @@ export default function Blog({ blogPosts, setView }: BlogProps) {
 
             {/* Post Metadata */}
             <div className="space-y-4">
-              <span className="text-[10px] uppercase tracking-widest text-[#9333ea] border border-[#d8b4fe] px-2 py-0.5 inline-block font-medium">
+              <span className="text-[10px] uppercase tracking-widest text-brand-dark border border-brand-border px-2 py-0.5 inline-block font-light">
                 {CATEGORY_LABELS[selectedPost.category] || selectedPost.category}
               </span>
               <h1 className="text-xl md:text-3xl font-light text-brand-dark leading-snug tracking-wide">

@@ -1,5 +1,6 @@
 import { Project, PricingPackage } from './types';
 import { PORTFOLIO_PROJECTS } from './data';
+import { saveSupabaseState } from './lib/supabase';
 
 export interface FAQItem {
   id: string;
@@ -744,6 +745,14 @@ export function saveState(state: {
     localStorage.setItem('gangin_reviews', JSON.stringify(state.reviews));
     localStorage.setItem('gangin_blog', JSON.stringify(state.blog));
     localStorage.setItem('gangin_settings', JSON.stringify(state.settings));
+
+    // Asynchronously update Supabase in the background if active
+    saveSupabaseState('gangin_projects', state.projects);
+    saveSupabaseState('gangin_packages', state.packages);
+    saveSupabaseState('gangin_faq', state.faq);
+    saveSupabaseState('gangin_reviews', state.reviews);
+    saveSupabaseState('gangin_blog', state.blog);
+    saveSupabaseState('gangin_settings', state.settings);
   } catch (err) {
     console.error("Failed to commit application state to localStorage:", err);
   }

@@ -792,7 +792,7 @@ export default function Admin({
 
               {/* SEO Core Block */}
               <div className="col-span-2 space-y-4 pt-4 border-t border-brand-border/40">
-                <span className="text-[10px] text-[#9333ea] uppercase font-bold tracking-widest block">SEO 포털 검색 엔진 최적화</span>
+                <span className="text-[10px] text-brand-dark uppercase font-bold tracking-widest block">SEO 포털 검색 엔진 최적화</span>
                 
                 <div className="space-y-1">
                   <label className="text-[10px] text-brand-muted font-medium">검색 노출 메타 제목 (Title Tag)</label>
@@ -1178,7 +1178,7 @@ export default function Admin({
                         <h4 className="text-xs font-semibold text-[#111111]">{cat.nameKr}</h4>
                         <span className="text-[9px] text-brand-muted uppercase font-mono">{cat.nameEn}</span>
                       </div>
-                      <span className="text-[9px] text-[#9333ea] border border-[#d8b4fe] px-2 py-0.5 font-medium">기획 편집</span>
+                      <span className="text-[9px] text-brand-dark border border-brand-dark/40 px-2 py-0.5 font-medium">기획 편집</span>
                     </div>
                   ))}
                 </div>
@@ -1264,9 +1264,9 @@ export default function Admin({
                     >
                       <div>
                         <h4 className="text-xs font-semibold text-brand-dark">{pack.name}</h4>
-                        <span className="text-[10px] text-[#9333ea] tracking-widest block font-mono mt-1 font-semibold">시작 요율: {pack.startingPrice}</span>
+                        <span className="text-[10px] text-brand-dark tracking-widest block font-mono mt-1 font-semibold">시작 요율: {pack.startingPrice}</span>
                       </div>
-                      <span className="text-[10px] text-brand-muted underline">요율 경정</span>
+                      <span className="text-[10px] text-brand-muted underline">패키지 설정</span>
                     </div>
                   ))}
                 </div>
@@ -1282,7 +1282,7 @@ export default function Admin({
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-1">
-                    <label className="text-[10px] text-brand-muted">패키지 노출 이름</label>
+                    <label className="text-[10px] text-brand-muted">패키지 노출 이름 (제목)</label>
                     <input
                       type="text"
                       value={editingPackage.name}
@@ -1292,32 +1292,49 @@ export default function Admin({
                   </div>
 
                   <div className="space-y-1">
-                    <label className="text-[10px] text-brand-muted">시작 단가 (Starting From 양식 존중)</label>
+                    <label className="text-[10px] text-brand-muted">시작 단가 (가격)</label>
                     <input
                       type="text"
                       value={editingPackage.startingPrice}
                       onChange={(e) => setEditingPackage({ ...editingPackage, startingPrice: e.target.value })}
-                      className="w-full text-xs font-light p-3 border border-brand-border/60 text-justify"
+                      className="w-full text-xs font-light p-3 border border-brand-border/60"
                     />
                   </div>
 
                   <div className="space-y-1 col-span-2">
-                    <label className="text-[10px] text-brand-muted">시공 표준 기간 소요</label>
-                    <input
-                      type="text"
+                    <label className="text-[10px] text-brand-muted">시공 상세 설명 (내용)</label>
+                    <textarea
                       value={editingPackage.duration}
                       onChange={(e) => setEditingPackage({ ...editingPackage, duration: e.target.value })}
-                      className="w-full text-xs font-light p-3 border border-brand-border/60"
+                      rows={2}
+                      className="w-full text-xs font-light p-3 border border-brand-border/60 resize-none font-sans"
                     />
+                  </div>
+
+                  <div className="space-y-1 col-span-2">
+                    <label className="text-[10px] text-brand-muted">체크리스트 옵션 목록 (한 줄에 하나의 항목 입력)</label>
+                    <textarea
+                      value={editingPackage.includedScope ? editingPackage.includedScope.join('\n') : ''}
+                      onChange={(e) => {
+                        const lines = e.target.value.split('\n');
+                        setEditingPackage({ ...editingPackage, includedScope: lines });
+                      }}
+                      rows={6}
+                      className="w-full text-xs font-mono p-3 border border-brand-border/60 leading-relaxed min-h-[140px]"
+                      placeholder="공간 구성 설계 레이아웃 2안 제안&#10;주택/상업 기본 설계 수정 2회 제공"
+                    />
+                    <p className="text-[9px] text-brand-muted font-light mt-1">
+                      엔터(줄바꿈)를 입력하면 각각 하나의 체크 박스 옵션 항목으로 분할되어 사이트 가격표에 반영됩니다.
+                    </p>
                   </div>
                 </div>
 
                 <div className="pt-6 border-t border-brand-border text-right">
                   <button
                     onClick={handleSavePackage}
-                    className="px-6 py-3 bg-brand-dark hover:bg-black text-white text-[10px] uppercase tracking-widest"
+                    className="px-6 py-3 bg-brand-dark hover:bg-black text-white text-[10px] uppercase tracking-widest cursor-pointer"
                   >
-                    단가 내역 정산 승인
+                    단가 내역 정산 승인 / 저장
                   </button>
                 </div>
               </div>
@@ -1339,7 +1356,7 @@ export default function Admin({
                       setEditingFAQ({ id: `faq_${Date.now()}`, category: 'Estimate', question: '', answer: '' });
                       setIsNewFAQ(true);
                     }}
-                    className="px-4 py-2 text-[10px] bg-[#9333ea] text-white uppercase cursor-pointer tracking-wider font-semibold"
+                    className="px-4 py-2 text-[10px] bg-brand-dark hover:bg-black text-white uppercase cursor-pointer tracking-wider font-medium"
                   >
                     신규 질문 등록
                   </button>
@@ -1548,7 +1565,7 @@ export default function Admin({
                   {blog.map((b) => (
                     <div key={b.id} className="p-4 border border-brand-border/40 bg-white flex justify-between items-center">
                       <div>
-                        <span className="text-[8px] border px-2 py-0.5 text-[#9333ea] border-[#d8b4fe] bg-purple-50">{b.category}</span>
+                        <span className="text-[8px] border px-2 py-0.5 text-brand-dark border-brand-border bg-brand-bg">{b.category}</span>
                         <h4 className="text-xs font-bold text-brand-dark mt-2">{b.title}</h4>
                       </div>
                       <div className="flex gap-2">
