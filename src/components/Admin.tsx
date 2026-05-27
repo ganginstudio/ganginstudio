@@ -9,7 +9,11 @@ import {
   SiteSettings,
   ServicePackage,
   ServiceCategory,
-  NavItemConfig
+  NavItemConfig,
+  HeroCmsConfig,
+  HomepageCmsConfig,
+  ContactCmsConfig,
+  PopupCmsConfig
 } from '../types';
 import { uploadPortfolioImage, isSupabaseOffline } from '../lib/supabase';
 import {
@@ -28,7 +32,9 @@ import {
   Layers,
   Check,
   RefreshCw,
-  ClipboardList
+  ClipboardList,
+  MapPin,
+  Sparkles
 } from 'lucide-react';
 
 interface AdminProps {
@@ -40,6 +46,10 @@ interface AdminProps {
   settings: SiteSettings;
   categories: ServiceCategory[];
   navItems?: NavItemConfig[];
+  heroCms: HeroCmsConfig;
+  homepageCms: HomepageCmsConfig;
+  contactCms: ContactCmsConfig;
+  popupCms: PopupCmsConfig;
   onUpdateProjects: (updated: Project[]) => void;
   onUpdatePackages: (updated: ServicePackage[]) => void;
   onUpdateFAQ: (updated: FAQItem[]) => void;
@@ -48,6 +58,10 @@ interface AdminProps {
   onUpdateSettings: (updated: SiteSettings) => void;
   onUpdateCategories: (updated: ServiceCategory[]) => void;
   onUpdateNavItems?: (updated: NavItemConfig[]) => void;
+  onUpdateHeroCms: (updated: HeroCmsConfig) => void;
+  onUpdateHomepageCms: (updated: HomepageCmsConfig) => void;
+  onUpdateContactCms: (updated: ContactCmsConfig) => void;
+  onUpdatePopupCms: (updated: PopupCmsConfig) => void;
 }
 
 const dataURLtoFile = (dataurl: string, filename: string): File => {
@@ -148,6 +162,10 @@ export default function Admin({
   settings,
   categories,
   navItems,
+  heroCms,
+  homepageCms,
+  contactCms,
+  popupCms,
   onUpdateProjects,
   onUpdatePackages,
   onUpdateFAQ,
@@ -155,14 +173,52 @@ export default function Admin({
   onUpdateBlog,
   onUpdateSettings,
   onUpdateCategories,
-  onUpdateNavItems
+  onUpdateNavItems,
+  onUpdateHeroCms,
+  onUpdateHomepageCms,
+  onUpdateContactCms,
+  onUpdatePopupCms
 }: AdminProps) {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [password, setPassword] = useState<string>('');
   const [errorMsg, setErrorMsg] = useState<string>('');
+
+  const handleHeroImageUpload = async (e: ChangeEvent<HTMLInputElement>, fieldName: 'image1' | 'image1Mobile' | 'image2' | 'image2Mobile' | 'image3' | 'image3Mobile') => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+    const file = files[0];
+    try {
+      const processedUrl = await processAndCompressImage(file);
+      const compressedFile = dataURLtoFile(processedUrl, `hero_${fieldName}_${Date.now()}.webp`);
+      const storageUrl = await uploadPortfolioImage(compressedFile);
+      if (storageUrl) {
+        onUpdateHeroCms({ ...heroCms, [fieldName]: storageUrl });
+        alert(`${fieldName} 이미지가 성공적으로 업로드 및 대체되었습니다.`);
+      }
+    } catch (err: any) {
+      alert(`이미지 업로드 중 오류가 발생했습니다: ${err.message || err}`);
+    }
+  };
+
+  const handleMapImageUpload = async (e: ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+    try {
+      const file = files[0];
+      const processedUrl = await processAndCompressImage(file);
+      const compressedFile = dataURLtoFile(processedUrl, `map_${Date.now()}.webp`);
+      const storageUrl = await uploadPortfolioImage(compressedFile);
+      if (storageUrl) {
+        onUpdateContactCms({ ...contactCms, mapImage: storageUrl });
+        alert(`지도가 성공적으로 업로드 되었습니다.`);
+      }
+    } catch (err: any) {
+      alert(`지도 업로드 중 오류가 발생했습니다: ${err.message || err}`);
+    }
+  };
   
   // Tabs management
-  const [currentTab, setCurrentTab] = useState<'settings' | 'portfolio' | 'packages' | 'categories' | 'faq' | 'reviews' | 'blog' | 'leads' | 'navigation'>('settings');
+  const [currentTab, setCurrentTab] = useState<'settings' | 'portfolio' | 'packages' | 'categories' | 'faq' | 'reviews' | 'blog' | 'leads' | 'navigation' | 'heroCms' | 'homepageCms' | 'contactCms' | 'popupCms'>('settings');
 
   // Unified leads logging states
   const [allLeads, setAllLeads] = useState<any[]>([]);
@@ -258,6 +314,7 @@ export default function Admin({
   const [isNewProject, setIsNewProject] = useState<boolean>(false);
   const [hasDraft, setHasDraft] = useState<boolean>(false);
   const primaryFileRef = useRef<HTMLInputElement>(null);
+  const mobilePrimaryFileRef = useRef<HTMLInputElement>(null);
   const galleryFileRef = useRef<HTMLInputElement>(null);
 
   // Auto-backup session edits in-memory on key alters
@@ -336,16 +393,16 @@ export default function Admin({
   };
 
   // Robust Async File processing with validation & WebP conversion connected to Supabase Storage
-  const handleFileChange = async (e: ChangeEvent<HTMLInputElement>, target: 'primary' | 'gallery') => {
+  const handleFileChange = async (e: ChangeEvent<HTMLInputElement>, target: 'primary' | 'primaryMobile' | 'gallery') => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
-    if (target === 'primary') {
+    if (target === 'primary' || target === 'primaryMobile') {
       const file = files[0];
       try {
         const processedUrl = await processAndCompressImage(file);
         // Convert back to File and upload to real Supabase Storage CMS
-        const compressedFile = dataURLtoFile(processedUrl, `primary_${Date.now()}.webp`);
+        const compressedFile = dataURLtoFile(processedUrl, `${target}_${Date.now()}.webp`);
         const storageUrl = await uploadPortfolioImage(compressedFile);
 
         if (editingProject) {
@@ -353,7 +410,7 @@ export default function Admin({
             if (!prev) return null;
             return {
               ...prev,
-              image: storageUrl
+              [target === 'primary' ? 'image' : 'imageMobile']: storageUrl
             };
           });
         }
@@ -758,6 +815,46 @@ export default function Admin({
             <ClipboardList size={13} />
             <span>상단 메뉴 관리</span>
           </button>
+
+          <button
+            onClick={() => { setCurrentTab('heroCms'); setEditingProject(null); }}
+            className={`flex items-center gap-2.5 py-3.5 px-4 text-start rounded-none transition-colors cursor-pointer ${
+              currentTab === 'heroCms' ? 'bg-brand-dark text-white font-medium' : 'hover:bg-brand-bg/60 text-brand-muted hover:text-brand-dark'
+            }`}
+          >
+            <Grid size={13} />
+            <span>비주얼 섹션 관리</span>
+          </button>
+
+          <button
+            onClick={() => { setCurrentTab('homepageCms'); setEditingProject(null); }}
+            className={`flex items-center gap-2.5 py-3.5 px-4 text-start rounded-none transition-colors cursor-pointer ${
+              currentTab === 'homepageCms' ? 'bg-brand-dark text-white font-medium' : 'hover:bg-brand-bg/60 text-brand-muted hover:text-brand-dark'
+            }`}
+          >
+            <Layers size={13} />
+            <span>홈페이지 레이블 관리</span>
+          </button>
+
+          <button
+            onClick={() => { setCurrentTab('contactCms'); setEditingProject(null); }}
+            className={`flex items-center gap-2.5 py-3.5 px-4 text-start rounded-none transition-colors cursor-pointer ${
+              currentTab === 'contactCms' ? 'bg-brand-dark text-white font-medium' : 'hover:bg-brand-bg/60 text-brand-muted hover:text-brand-dark'
+            }`}
+          >
+            <MapPin size={13} />
+            <span>상담문의 페이지 관리</span>
+          </button>
+
+          <button
+            onClick={() => { setCurrentTab('popupCms'); setEditingProject(null); }}
+            className={`flex items-center gap-2.5 py-3.5 px-4 text-start rounded-none transition-colors cursor-pointer ${
+              currentTab === 'popupCms' ? 'bg-brand-dark text-white font-medium' : 'hover:bg-brand-bg/60 text-brand-muted hover:text-brand-dark'
+            }`}
+          >
+            <Sparkles size={13} />
+            <span>팝업 위젯 관리</span>
+          </button>
         </nav>
       </aside>
 
@@ -1148,7 +1245,7 @@ export default function Admin({
 
                   {/* PC NATIVE IMAGE UPLOADER (Primary Image) */}
                   <div className="col-span-2 space-y-3 pt-4 border-t border-brand-border/40">
-                    <span className="text-[10px] text-brand-muted font-semibold uppercase block">대표 메인 썸네일 수작 파일 등록 (컬러)</span>
+                    <span className="text-[10px] text-brand-muted font-semibold uppercase block">대표 메인 썸네일 수작 파일 등록 (컬러 - 데스크탑용)</span>
                     <div className="flex items-center gap-6">
                       <div className="w-24 h-16 bg-brand-bg border border-brand-border overflow-hidden">
                         <img 
@@ -1175,10 +1272,48 @@ export default function Admin({
                           className="px-4 py-2.5 bg-brand-bg border border-brand-border/60 text-[10px] tracking-widest uppercase text-brand-dark cursor-pointer hover:bg-brand-border/30 flex items-center gap-2"
                         >
                           <Upload size={12} />
-                          내컴퓨터에서 메인 사진 파일 찾기
+                          내컴퓨터에서 데스크탑 전용 메인 사진 찾기
                         </button>
                         <p className="text-[9px] text-brand-muted font-light">
                           * 썸네일 파일은 흑백 보정을 걷어내고 자연 천연 원가 칼라로 노출됩니다.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* MOBILE OPTIMIZED THUMBNAIL UPLOADER */}
+                  <div className="col-span-2 space-y-3 pt-4 border-t border-brand-border/40">
+                    <span className="text-[10px] text-brand-muted font-semibold uppercase block">모바일 최적화 대표 썸네일 등록 (선택)</span>
+                    <div className="flex items-center gap-6">
+                      <div className="w-24 h-16 bg-brand-bg border border-brand-border overflow-hidden">
+                        <img 
+                          src={editingProject.imageMobile || editingProject.image || 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=1200'} 
+                          className="w-full h-full object-cover" 
+                          alt="" 
+                          loading="lazy"
+                          onError={(e) => {
+                            e.currentTarget.src = 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=1200';
+                          }}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          ref={mobilePrimaryFileRef}
+                          onChange={(e) => handleFileChange(e, 'primaryMobile')}
+                          className="hidden"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => mobilePrimaryFileRef.current?.click()}
+                          className="px-4 py-2.5 bg-brand-bg border border-brand-border/60 text-[10px] tracking-widest uppercase text-brand-dark cursor-pointer hover:bg-brand-border/30 flex items-center gap-2"
+                        >
+                          <Upload size={12} />
+                          내컴퓨터에서 모바일 전용 메인 사진 찾기
+                        </button>
+                        <p className="text-[9px] text-brand-muted font-light">
+                          * 입력값이 비어있을 경우, 데스크탑 전용 대표 썸네일 이미지를 기본 사용합니다.
                         </p>
                       </div>
                     </div>
@@ -1557,13 +1692,13 @@ export default function Admin({
             {!editingReview ? (
               <div className="space-y-6">
                 <div className="flex justify-between items-baseline border-b border-brand-border pb-4">
-                  <h3 className="text-sm font-semibold text-brand-dark uppercase tracking-widest">고객 상생 수기록소</h3>
+                  <h3 className="text-sm font-semibold text-brand-dark uppercase tracking-widest text-[#111111] font-sans">고객 후기 관리</h3>
                   <button
                     onClick={() => {
-                      setEditingReview({ id: `rev_${Date.now()}`, projectTitle: '', clientName: '익명 님', rating: 5, highlight: '', quote: '', story: '', date: '2026.05', category: '기타공간' });
+                      setEditingReview({ id: `rev_${Date.now()}`, projectTitle: '', clientName: '익명 님', rating: 5, highlight: '', quote: '', story: '', date: '2026.05', category: '기타공간', show: true, featured: false, displayOrder: reviews.length + 1 });
                       setIsNewReview(true);
                     }}
-                    className="px-4 py-2 text-[10px] bg-emerald-600 text-white font-semibold tracking-wider"
+                    className="px-4 py-2 text-[10px] bg-emerald-600 text-white font-semibold tracking-wider rounded-none cursor-pointer"
                   >
                     신규 후기 가설
                   </button>
@@ -1571,13 +1706,25 @@ export default function Admin({
 
                 <div className="space-y-4">
                   {reviews.map((r) => (
-                    <div key={r.id} className="p-4 border border-brand-border/40 bg-white flex justify-between items-center">
-                      <div>
-                        <h4 className="text-xs font-bold text-brand-dark">{r.clientName} | {r.projectTitle}</h4>
+                    <div key={r.id} className="p-4 border border-brand-border/40 bg-white flex justify-between items-center text-xs">
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <h4 className="font-bold text-brand-dark">{r.clientName} | {r.projectTitle}</h4>
+                          <span className="text-[8px] px-1.5 py-0.5 border text-brand-muted uppercase tracking-wider font-mono">
+                            {r.category || '기타'}
+                          </span>
+                          {r.featured && (
+                            <span className="text-[8px] bg-amber-50 text-amber-800 border border-amber-200 px-1 py-0.2 font-semibold">★ Featured</span>
+                          )}
+                          {r.show === false && (
+                            <span className="text-[8px] bg-red-50 text-red-800 border border-red-200 px-1 py-0.2 font-semibold">Hidden</span>
+                          )}
+                          <span className="text-[8px] bg-slate-50 text-slate-600 border border-slate-200 px-1 py-0.2 font-mono">Order: {r.displayOrder ?? 0}</span>
+                        </div>
                         <p className="text-[10px] text-brand-muted italic mt-1 font-light">"{r.highlight}"</p>
                       </div>
                       <div className="flex gap-2">
-                        <button onClick={() => { setEditingReview({ ...r }); setIsNewReview(false); }} className="px-3 py-1 border text-[9px]">수정</button>
+                        <button onClick={() => { setEditingReview({ ...r, show: r.show !== false, featured: !!r.featured, displayOrder: r.displayOrder ?? 1 }); setIsNewReview(false); }} className="px-3 py-1 border text-[9px]">수정</button>
                         <button onClick={() => handleDeleteReview(r.id)} className="px-3 py-1 bg-red-50 text-red-600 text-[9px]">삭제</button>
                       </div>
                     </div>
@@ -1586,18 +1733,29 @@ export default function Admin({
               </div>
             ) : (
               <div className="space-y-4">
-                <div className="space-y-1">
-                  <label className="text-[10px] text-brand-muted">대상 프로젝트 명판</label>
-                  <input
-                    type="text"
-                    value={editingReview.projectTitle}
-                    onChange={(e) => setEditingReview({ ...editingReview, projectTitle: e.target.value })}
-                    className="w-full text-xs font-light p-3 border border-brand-border/60"
-                  />
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <label className="text-[10px] text-brand-muted font-sans">대상 프로젝트 명판</label>
+                    <input
+                      type="text"
+                      value={editingReview.projectTitle}
+                      onChange={(e) => setEditingReview({ ...editingReview, projectTitle: e.target.value })}
+                      className="w-full text-xs font-light p-3 border border-brand-border/60"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[10px] text-brand-muted font-sans font-sans">프로젝트 분야 (Project Category)</label>
+                    <input
+                      type="text"
+                      value={editingReview.category}
+                      onChange={(e) => setEditingReview({ ...editingReview, category: e.target.value })}
+                      className="w-full text-xs font-light p-3 border border-brand-border/60"
+                    />
+                  </div>
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-[10px] text-brand-muted">작성 고객 실명구설 (예: 김** 님 (바리스타))</label>
+                  <label className="text-[10px] text-brand-muted font-sans">작성 고객 실명구설 (예: 김** 님 (바리스타))</label>
                   <input
                     type="text"
                     value={editingReview.clientName}
@@ -1608,7 +1766,7 @@ export default function Admin({
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1">
-                    <label className="text-[10px] text-brand-muted">평가 점수 (최대 5점)</label>
+                    <label className="text-[10px] text-brand-muted font-sans">평가 점수 (최대 5점)</label>
                     <input
                       type="number"
                       max={5}
@@ -1619,7 +1777,7 @@ export default function Admin({
                     />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-[10px] text-brand-muted">준공 완료일자</label>
+                    <label className="text-[10px] text-brand-muted font-sans">준공 완료일자 (예: 2025.04.12)</label>
                     <input
                       type="text"
                       value={editingReview.date}
@@ -1630,7 +1788,7 @@ export default function Admin({
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-[10px] text-brand-muted">한 줄 핵심 하이라이트</label>
+                  <label className="text-[10px] text-brand-muted font-sans">한 줄 핵심 하이라이트</label>
                   <input
                     type="text"
                     value={editingReview.highlight}
@@ -1640,7 +1798,7 @@ export default function Admin({
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-[10px] text-brand-muted">대표 헤드 쿼트 회화문</label>
+                  <label className="text-[10px] text-brand-muted font-sans">대표 헤드 쿼트 회화문 / 리뷰 텍스트 (Review Text)</label>
                   <input
                     type="text"
                     value={editingReview.quote}
@@ -1650,7 +1808,7 @@ export default function Admin({
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-[10px] text-brand-muted">사세적인 수공 에피소드 스토리 단락</label>
+                  <label className="text-[10px] text-brand-muted font-sans font-sans font-sans">세부 에피소드 스토리 단락 (Optional)</label>
                   <textarea
                     rows={4}
                     value={editingReview.story}
@@ -1659,9 +1817,43 @@ export default function Admin({
                   />
                 </div>
 
+                {/* Additional controls: Featured, Show/Hide, Display order */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center pt-2 p-4 bg-gray-50/50 border border-brand-border/30">
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="checkbox"
+                      id="rev-feat"
+                      checked={!!editingReview.featured}
+                      onChange={(e) => setEditingReview({ ...editingReview, featured: e.target.checked })}
+                      className="w-4 h-4 cursor-pointer text-brand-dark"
+                    />
+                    <label htmlFor="rev-feat" className="text-[10px] text-brand-dark font-sans select-none cursor-pointer">참조 추천 (Featured Toggle)</label>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="checkbox"
+                      id="rev-show"
+                      checked={editingReview.show !== false}
+                      onChange={(e) => setEditingReview({ ...editingReview, show: e.target.checked })}
+                      className="w-4 h-4 cursor-pointer text-brand-dark"
+                    />
+                    <label htmlFor="rev-show" className="text-[10px] text-brand-dark font-sans select-none cursor-pointer">공개함 노출 (Show / Hide)</label>
+                  </div>
+                  <div className="space-y-1">
+                    <label htmlFor="rev-order" className="text-[10px] text-brand-muted font-sans block">전시 정렬 순서 (Display Order)</label>
+                    <input
+                      type="number"
+                      id="rev-order"
+                      value={editingReview.displayOrder ?? 0}
+                      onChange={(e) => setEditingReview({ ...editingReview, displayOrder: Number(e.target.value) })}
+                      className="w-full text-xs font-light p-1.5 border border-brand-border bg-white"
+                    />
+                  </div>
+                </div>
+
                 <div className="pt-4 text-right space-x-2">
-                  <button onClick={() => setEditingReview(null)} className="px-4 py-2 border text-[9px]">취소</button>
-                  <button onClick={handleSaveReview} className="px-6 py-2 bg-brand-dark text-white text-[9px]">체결</button>
+                  <button onClick={() => setEditingReview(null)} className="px-4 py-2 border text-[9px] cursor-pointer">취소</button>
+                  <button onClick={handleSaveReview} className="px-6 py-2 bg-brand-dark text-white text-[9px] cursor-pointer">체결</button>
                 </div>
               </div>
             )}
@@ -2069,6 +2261,1347 @@ export default function Admin({
                 >
                   <Save size={13} />
                   <span>메뉴 설정 일괄 보존하기</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* TAB 10: HERO / VISUAL SECTION CMS */}
+        {currentTab === 'heroCms' && (
+          <div className="space-y-8">
+            <div className="border-b border-brand-border pb-4">
+              <h3 className="text-sm font-semibold text-brand-dark uppercase tracking-widest">비주얼 섹션 관리</h3>
+              <p className="text-[10px] text-brand-muted font-light mt-1">
+                홈페이지 최상단 비주얼 슬라이더의 백그라운드 사진(3개), 자동 전환 텀, 노출 배치 순위 및 헤드라인 단어쌍을 관리합니다.
+              </p>
+            </div>
+
+            <div className="space-y-6">
+              {/* Image upload rows */}
+              <div className="bg-brand-bg/10 border border-brand-border p-5 space-y-4">
+                <span className="text-[10px] uppercase font-semibold text-brand-dark tracking-widest block">● 슬라이드 이미지 슬롯 설정 (최대 3장)</span>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {/* Slot 1 */}
+                  <div className="space-y-3 p-4 bg-white border border-brand-border/40">
+                    <span className="text-[10px] text-brand-muted block font-mono">SLOT 01</span>
+                    <div className="w-full aspect-[4/3] bg-brand-bg overflow-hidden border border-brand-border/40 relative">
+                      <img src={heroCms.image1} alt="Slot 1 Preview" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                    </div>
+                    <div className="space-y-2">
+                      <div>
+                        <span className="text-[9px] text-brand-muted block font-light mb-1">데스크탑 전용 이미지</span>
+                        <input
+                          type="text"
+                          value={heroCms.image1 || ''}
+                          onChange={(e) => onUpdateHeroCms({ ...heroCms, image1: e.target.value })}
+                          className="w-full text-xs font-light p-2 bg-brand-bg border border-brand-border/60 focus:outline-none mb-1 font-mono"
+                          placeholder="이미지 URL 직접 입력"
+                        />
+                        <label className="block w-full text-center py-2 bg-brand-dark text-white text-[9px] uppercase tracking-wider hover:bg-black transition-colors cursor-pointer font-medium">
+                          스토리지 업로드
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => handleHeroImageUpload(e, 'image1')}
+                            className="hidden"
+                          />
+                        </label>
+                      </div>
+
+                      <div className="pt-2 border-t border-brand-border/20">
+                        <span className="text-[9px] text-brand-muted block font-light mb-1">모바일 최적 이미지 (선택)</span>
+                        <input
+                          type="text"
+                          value={heroCms.image1Mobile || ''}
+                          onChange={(e) => onUpdateHeroCms({ ...heroCms, image1Mobile: e.target.value })}
+                          className="w-full text-xs font-light p-2 bg-brand-bg border border-brand-border/60 focus:outline-none mb-1 font-mono"
+                          placeholder="모바일 이미지 URL 직접 입력"
+                        />
+                        <label className="block w-full text-center py-1.5 bg-neutral-600 text-white text-[8px] uppercase tracking-wider hover:bg-neutral-800 transition-colors cursor-pointer font-normal">
+                          모바일 최적화 업로드
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => handleHeroImageUpload(e, 'image1Mobile')}
+                            className="hidden"
+                          />
+                        </label>
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between pt-1">
+                      <span className="text-[10.5px] text-brand-dark font-light">이 슬라이드 노출</span>
+                      <input
+                        type="checkbox"
+                        checked={heroCms.show1 !== false}
+                        onChange={(e) => onUpdateHeroCms({ ...heroCms, show1: e.target.checked })}
+                        className="w-4 h-4 text-brand-dark text-center"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Slot 2 */}
+                  <div className="space-y-3 p-4 bg-white border border-brand-border/40">
+                    <span className="text-[10px] text-brand-muted block font-mono">SLOT 02</span>
+                    <div className="w-full aspect-[4/3] bg-brand-bg overflow-hidden border border-brand-border/40 relative">
+                      <img src={heroCms.image2} alt="Slot 2 Preview" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                    </div>
+                    <div className="space-y-2">
+                      <div>
+                        <span className="text-[9px] text-brand-muted block font-light mb-1">데스크탑 전용 이미지</span>
+                        <input
+                          type="text"
+                          value={heroCms.image2 || ''}
+                          onChange={(e) => onUpdateHeroCms({ ...heroCms, image2: e.target.value })}
+                          className="w-full text-xs font-light p-2 bg-brand-bg border border-brand-border/60 focus:outline-none mb-1 font-mono"
+                          placeholder="이미지 URL 직접 입력"
+                        />
+                        <label className="block w-full text-center py-2 bg-brand-dark text-white text-[9px] uppercase tracking-wider hover:bg-black transition-colors cursor-pointer font-medium">
+                          스토리지 업로드
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => handleHeroImageUpload(e, 'image2')}
+                            className="hidden"
+                          />
+                        </label>
+                      </div>
+
+                      <div className="pt-2 border-t border-brand-border/20">
+                        <span className="text-[9px] text-brand-muted block font-light mb-1">모바일 최적 이미지 (선택)</span>
+                        <input
+                          type="text"
+                          value={heroCms.image2Mobile || ''}
+                          onChange={(e) => onUpdateHeroCms({ ...heroCms, image2Mobile: e.target.value })}
+                          className="w-full text-xs font-light p-2 bg-brand-bg border border-brand-border/60 focus:outline-none mb-1 font-mono"
+                          placeholder="모바일 이미지 URL 직접 입력"
+                        />
+                        <label className="block w-full text-center py-1.5 bg-neutral-600 text-white text-[8px] uppercase tracking-wider hover:bg-neutral-800 transition-colors cursor-pointer font-normal">
+                          모바일 최적화 업로드
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => handleHeroImageUpload(e, 'image2Mobile')}
+                            className="hidden"
+                          />
+                        </label>
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between pt-1">
+                      <span className="text-[10.5px] text-brand-dark font-light">이 슬라이드 노출</span>
+                      <input
+                        type="checkbox"
+                        checked={heroCms.show2 !== false}
+                        onChange={(e) => onUpdateHeroCms({ ...heroCms, show2: e.target.checked })}
+                        className="w-4 h-4 text-brand-dark"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Slot 3 */}
+                  <div className="space-y-3 p-4 bg-white border border-brand-border/40">
+                    <span className="text-[10px] text-brand-muted block font-mono">SLOT 03</span>
+                    <div className="w-full aspect-[4/3] bg-brand-bg overflow-hidden border border-brand-border/40 relative">
+                      <img src={heroCms.image3} alt="Slot 3 Preview" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                    </div>
+                    <div className="space-y-2">
+                      <div>
+                        <span className="text-[9px] text-brand-muted block font-light mb-1">데스크탑 전용 이미지</span>
+                        <input
+                          type="text"
+                          value={heroCms.image3 || ''}
+                          onChange={(e) => onUpdateHeroCms({ ...heroCms, image3: e.target.value })}
+                          className="w-full text-xs font-light p-2 bg-brand-bg border border-brand-border/60 focus:outline-none mb-1 font-mono"
+                          placeholder="이미지 URL 직접 입력"
+                        />
+                        <label className="block w-full text-center py-2 bg-brand-dark text-white text-[9px] uppercase tracking-wider hover:bg-black transition-colors cursor-pointer font-medium">
+                          스토리지 업로드
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => handleHeroImageUpload(e, 'image3')}
+                            className="hidden"
+                          />
+                        </label>
+                      </div>
+
+                      <div className="pt-2 border-t border-brand-border/20">
+                        <span className="text-[9px] text-brand-muted block font-light mb-1">모바일 최적 이미지 (선택)</span>
+                        <input
+                          type="text"
+                          value={heroCms.image3Mobile || ''}
+                          onChange={(e) => onUpdateHeroCms({ ...heroCms, image3Mobile: e.target.value })}
+                          className="w-full text-xs font-light p-2 bg-brand-bg border border-brand-border/60 focus:outline-none mb-1 font-mono"
+                          placeholder="모바일 이미지 URL 직접 입력"
+                        />
+                        <label className="block w-full text-center py-1.5 bg-neutral-600 text-white text-[8px] uppercase tracking-wider hover:bg-neutral-800 transition-colors cursor-pointer font-normal">
+                          모바일 최적화 업로드
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => handleHeroImageUpload(e, 'image3Mobile')}
+                            className="hidden"
+                          />
+                        </label>
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between pt-1">
+                      <span className="text-[10.5px] text-brand-dark font-light">이 슬라이드 노출</span>
+                      <input
+                        type="checkbox"
+                        checked={heroCms.show3 !== false}
+                        onChange={(e) => onUpdateHeroCms({ ...heroCms, show3: e.target.checked })}
+                        className="w-4 h-4 text-brand-dark"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Slider Settings */}
+              <div className="bg-white border border-brand-border/60 p-5 space-y-4">
+                <span className="text-[10px] uppercase font-semibold text-brand-dark tracking-widest block">● 슬라이더 속성 작동법</span>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <label className="text-[10px] text-brand-muted">슬라이드 표기 순위 패턴 (Order - 콤마 분리 예: 1,2,3)</label>
+                    <input
+                      type="text"
+                      value={heroCms.order || '1,2,3'}
+                      onChange={(e) => onUpdateHeroCms({ ...heroCms, order: e.target.value })}
+                      className="w-full text-xs font-light p-2.5 bg-white border border-brand-border/60 focus:outline-none"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[10px] text-brand-muted">슬라이드 전환 간격 (ms - 4000 권장)</label>
+                    <input
+                      type="number"
+                      value={heroCms.interval || 4000}
+                      onChange={(e) => onUpdateHeroCms({ ...heroCms, interval: parseInt(e.target.value, 10) || 4000 })}
+                      className="w-full text-xs font-light p-2.5 bg-white border border-brand-border/60 focus:outline-none"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Text / Labels settings */}
+              <div className="bg-white border border-brand-border/60 p-5 space-y-4">
+                <span className="text-[10px] uppercase font-semibold text-brand-dark tracking-widest block">● 비주얼 슬로건 및 라벨 문구수정</span>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <label className="text-[10px] text-brand-muted">헤드라인 1번째 라인 (Headline Line 1)</label>
+                    <input
+                      type="text"
+                      value={heroCms.headlineLine1 || ''}
+                      onChange={(e) => onUpdateHeroCms({ ...heroCms, headlineLine1: e.target.value })}
+                      className="w-full text-xs font-light p-2.5 bg-white border border-brand-border/60 focus:outline-none"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[10px] text-brand-muted">헤드라인 2번째 라인 (Headline Line 2)</label>
+                    <input
+                      type="text"
+                      value={heroCms.headlineLine2 || ''}
+                      onChange={(e) => onUpdateHeroCms({ ...heroCms, headlineLine2: e.target.value })}
+                      className="w-full text-xs font-light p-2.5 bg-white border border-brand-border/60 focus:outline-none"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="space-y-1">
+                    <label className="text-[10px] text-brand-muted">필수 분류 라벨 1</label>
+                    <input
+                      type="text"
+                      value={heroCms.label1 || ''}
+                      onChange={(e) => onUpdateHeroCms({ ...heroCms, label1: e.target.value })}
+                      className="w-full text-xs font-light p-2.5 bg-white border border-brand-border/60 focus:outline-none"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[10px] text-brand-muted">필수 분류 라벨 2</label>
+                    <input
+                      type="text"
+                      value={heroCms.label2 || ''}
+                      onChange={(e) => onUpdateHeroCms({ ...heroCms, label2: e.target.value })}
+                      className="w-full text-xs font-light p-2.5 bg-white border border-brand-border/60 focus:outline-none"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[10px] text-brand-muted">필수 분류 라벨 3</label>
+                    <input
+                      type="text"
+                      value={heroCms.label3 || ''}
+                      onChange={(e) => onUpdateHeroCms({ ...heroCms, label3: e.target.value })}
+                      className="w-full text-xs font-light p-2.5 bg-white border border-brand-border/60 focus:outline-none"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                  <div className="p-4 bg-brand-bg/10 border border-brand-border/40 space-y-3">
+                    <span className="text-[9.5px] uppercase font-bold text-brand-dark block">버튼 1설정 (Main CTA)</span>
+                    <div className="space-y-1.5">
+                      <label className="text-[9px] text-brand-muted block">버튼 텍스트</label>
+                      <input
+                        type="text"
+                        value={heroCms.button1Text || ''}
+                        onChange={(e) => onUpdateHeroCms({ ...heroCms, button1Text: e.target.value })}
+                        className="w-full text-xs font-light p-2 bg-white border border-brand-border/60 focus:outline-none"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-[9px] text-brand-muted block">액션/이동 링크 뷰 주소 (portfolio 등)</label>
+                      <input
+                        type="text"
+                        value={heroCms.button1Url || ''}
+                        onChange={(e) => onUpdateHeroCms({ ...heroCms, button1Url: e.target.value })}
+                        className="w-full text-xs font-light p-2 bg-white border border-brand-border/60 focus:outline-none font-mono"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="p-4 bg-brand-bg/10 border border-brand-border/40 space-y-3">
+                    <span className="text-[9.5px] uppercase font-bold text-brand-dark block">버튼 2설정 (Sub CTA)</span>
+                    <div className="space-y-1.5">
+                      <label className="text-[9px] text-brand-muted block">버튼 텍스트</label>
+                      <input
+                        type="text"
+                        value={heroCms.button2Text || ''}
+                        onChange={(e) => onUpdateHeroCms({ ...heroCms, button2Text: e.target.value })}
+                        className="w-full text-xs font-light p-2 bg-white border border-brand-border/60 focus:outline-none"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-[9px] text-brand-muted block">액션/이동 링크 뷰 주소 (estimate 등)</label>
+                      <input
+                        type="text"
+                        value={heroCms.button2Url || ''}
+                        onChange={(e) => onUpdateHeroCms({ ...heroCms, button2Url: e.target.value })}
+                        className="w-full text-xs font-light p-2 bg-white border border-brand-border/60 focus:outline-none font-mono"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Manual save block */}
+              <div className="flex justify-end pt-4">
+                <button
+                  type="button"
+                  onClick={async () => {
+                    console.log('[SAVE START] gangin_hero_cms');
+                    try {
+                      const { saveSupabaseState, isSupabaseConfigured } = await import('../lib/supabase');
+                      if (isSupabaseConfigured) {
+                        const success = await saveSupabaseState('gangin_hero_cms', heroCms);
+                        if (success) {
+                          alert('슬라이더 및 비주얼 섹션의 모든 지면 세부사항이 완벽하게 백업되었습니다!');
+                        } else {
+                          alert('데이터베이스 동기화 중 이상이 감지되었습니다.');
+                        }
+                      } else {
+                        alert('연결 오프라인상태로 임시 메모리에만 가저장되었습니다.');
+                      }
+                    } catch (e: any) {
+                      alert(`저장 중 예외가 발생했습니다: ${e.message || e}`);
+                    }
+                  }}
+                  className="bg-brand-dark hover:bg-neutral-800 text-white font-semibold text-xs py-3.5 px-8 flex items-center gap-2 transition-colors cursor-pointer"
+                >
+                  <Save size={13} />
+                  <span>비주얼 셋업 일괄 보존하기</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* TAB 11: HOMEPAGE / MAIN CONTENT CMS */}
+        {currentTab === 'homepageCms' && (
+          <div className="space-y-8">
+            <div className="border-b border-brand-border pb-4">
+              <h3 className="text-sm font-semibold text-brand-dark uppercase tracking-widest">홈페이지 지면 상세 제어</h3>
+              <p className="text-[10px] text-brand-muted font-light mt-1">
+                브랜드 철학(Philosophy), 선정작 멘트(Curation), 신뢰 핵심 공식(Integrity) 및 퀵 간편상담 유입 채널의 라벨과 영문 장식을 일괄 보존합니다.
+              </p>
+            </div>
+
+            <div className="space-y-6">
+              {/* Block 1: Philosophy Section */}
+              <div className="bg-white border border-brand-border/60 p-5 space-y-4">
+                <span className="text-[10px] uppercase font-semibold text-brand-dark tracking-widest block">● SECTION 01: 브랜드 철학 지면 (Philosophy)</span>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="space-y-1">
+                    <label className="text-[10px] text-brand-muted">순번 오버레이 (Num)</label>
+                    <input
+                      type="text"
+                      value={homepageCms.philosophyNum || ''}
+                      onChange={(e) => onUpdateHomepageCms({ ...homepageCms, philosophyNum: e.target.value })}
+                      className="w-full text-xs font-light p-2.5 bg-white border border-brand-border/60 focus:outline-none"
+                    />
+                  </div>
+                  <div className="space-y-1 col-span-2">
+                    <label className="text-[10px] text-brand-muted">소제목 라벨명 (Label)</label>
+                    <input
+                      type="text"
+                      value={homepageCms.philosophyLabel || ''}
+                      onChange={(e) => onUpdateHomepageCms({ ...homepageCms, philosophyLabel: e.target.value })}
+                      className="w-full text-xs font-light p-2.5 bg-white border border-brand-border/60 focus:outline-none"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-[10px] text-brand-muted">대표 영역 타이틀 (Title)</label>
+                  <input
+                    type="text"
+                    value={homepageCms.philosophyTitle || ''}
+                    onChange={(e) => onUpdateHomepageCms({ ...homepageCms, philosophyTitle: e.target.value })}
+                    className="w-full text-xs font-light p-2.5 bg-white border border-brand-border/60 focus:outline-none"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-[10px] text-brand-muted">목표 메시지 헤드라인 (Headline)</label>
+                  <textarea
+                    rows={2}
+                    value={homepageCms.philosophyHeadline || ''}
+                    onChange={(e) => onUpdateHomepageCms({ ...homepageCms, philosophyHeadline: e.target.value })}
+                    className="w-full text-xs font-light p-2.5 bg-white border border-brand-border/60 focus:outline-none"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <label className="text-[10px] text-brand-muted">서술 텍스트 1번째 문단 (Para 1)</label>
+                    <textarea
+                      rows={3}
+                      value={homepageCms.philosophyPara1 || ''}
+                      onChange={(e) => onUpdateHomepageCms({ ...homepageCms, philosophyPara1: e.target.value })}
+                      className="w-full text-xs font-light p-2.5 bg-white border border-brand-border/60 focus:outline-none"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[10px] text-brand-muted">서술 텍스트 2번째 문단 (Para 2)</label>
+                    <textarea
+                      rows={3}
+                      value={homepageCms.philosophyPara2 || ''}
+                      onChange={(e) => onUpdateHomepageCms({ ...homepageCms, philosophyPara2: e.target.value })}
+                      className="w-full text-xs font-light p-2.5 bg-white border border-brand-border/60 focus:outline-none"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Block 2: Featured Spaces Header Section */}
+              <div className="bg-white border border-brand-border/60 p-5 space-y-4">
+                <span className="text-[10px] uppercase font-semibold text-brand-dark tracking-widest block">● SECTION 02: 선정작 포트폴리오 헤더 (Featured Spaces)</span>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="space-y-1">
+                    <label className="text-[10px] text-brand-muted">순번 오버레이 (Num)</label>
+                    <input
+                      type="text"
+                      value={homepageCms.featuredNum || ''}
+                      onChange={(e) => onUpdateHomepageCms({ ...homepageCms, featuredNum: e.target.value })}
+                      className="w-full text-xs font-light p-2.5 bg-white border border-brand-border/60 focus:outline-none"
+                    />
+                  </div>
+                  <div className="space-y-1 col-span-2">
+                    <label className="text-[10px] text-brand-muted">소제목 라벨명 (Label)</label>
+                    <input
+                      type="text"
+                      value={homepageCms.featuredLabel || ''}
+                      onChange={(e) => onUpdateHomepageCms({ ...homepageCms, featuredLabel: e.target.value })}
+                      className="w-full text-xs font-light p-2.5 bg-white border border-brand-border/60 focus:outline-none"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <label className="text-[10px] text-brand-muted">선정작 주 타이틀 (Title)</label>
+                    <input
+                      type="text"
+                      value={homepageCms.featuredTitle || ''}
+                      onChange={(e) => onUpdateHomepageCms({ ...homepageCms, featuredTitle: e.target.value })}
+                      className="w-full text-xs font-light p-2.5 bg-white border border-brand-border/60 focus:outline-none"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[10px] text-brand-muted">동반 우측버튼 텍스트 (Button Text)</label>
+                    <input
+                      type="text"
+                      value={homepageCms.featuredBtnText || ''}
+                      onChange={(e) => onUpdateHomepageCms({ ...homepageCms, featuredBtnText: e.target.value })}
+                      className="w-full text-xs font-light p-2.5 bg-white border border-brand-border/60 focus:outline-none"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Block 3: Integrity Section and Core columns */}
+              <div className="bg-white border border-brand-border/60 p-5 space-y-4">
+                <span className="text-[10px] uppercase font-semibold text-brand-dark tracking-widest block">● SECTION 03: 투명성 공식 기술 (Integrity & Columns)</span>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="space-y-1">
+                    <label className="text-[10px] text-brand-muted">순번 오버레이 (Num)</label>
+                    <input
+                      type="text"
+                      value={homepageCms.integrityNum || ''}
+                      onChange={(e) => onUpdateHomepageCms({ ...homepageCms, integrityNum: e.target.value })}
+                      className="w-full text-xs font-light p-2.5 bg-white border border-brand-border/60 focus:outline-none"
+                    />
+                  </div>
+                  <div className="space-y-1 col-span-2">
+                    <label className="text-[10px] text-brand-muted">원가 라벨 문안 (Label)</label>
+                    <input
+                      type="text"
+                      value={homepageCms.integrityLabel || ''}
+                      onChange={(e) => onUpdateHomepageCms({ ...homepageCms, integrityLabel: e.target.value })}
+                      className="w-full text-xs font-light p-2.5 bg-white border border-brand-border/60 focus:outline-none"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-[10px] text-brand-muted">메인 핵심 타이틀 (Title)</label>
+                  <input
+                    type="text"
+                    value={homepageCms.integrityTitle || ''}
+                    onChange={(e) => onUpdateHomepageCms({ ...homepageCms, integrityTitle: e.target.value })}
+                    className="w-full text-xs font-light p-2.5 bg-white border border-brand-border/60 focus:outline-none"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-[10px] text-brand-muted">요약형 단락 소개 (Description)</label>
+                  <textarea
+                    rows={2}
+                    value={homepageCms.integrityDesc || ''}
+                    onChange={(e) => onUpdateHomepageCms({ ...homepageCms, integrityDesc: e.target.value })}
+                    className="w-full text-xs font-light p-2.5 bg-white border border-brand-border/60 focus:outline-none"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 border-t border-brand-border/40 pt-4">
+                  {/* Column 1 */}
+                  <div className="p-3 bg-brand-bg/10 border border-brand-border/40 space-y-2">
+                    <span className="text-[9.5px] uppercase font-bold text-brand-dark block">열설정 01 (자재 관리)</span>
+                    <input
+                      type="text"
+                      value={homepageCms.col1Num || '01'}
+                      onChange={(e) => onUpdateHomepageCms({ ...homepageCms, col1Num: e.target.value })}
+                      className="w-full text-[11px] font-light p-1.5 border border-brand-border/60 focus:outline-none"
+                      placeholder="Num"
+                    />
+                    <input
+                      type="text"
+                      value={homepageCms.col1Title || ''}
+                      onChange={(e) => onUpdateHomepageCms({ ...homepageCms, col1Title: e.target.value })}
+                      className="w-full text-[11px] font-light p-1.5 border border-brand-border/60 focus:outline-none"
+                      placeholder="Title"
+                    />
+                    <textarea
+                      rows={3}
+                      value={homepageCms.col1Desc || ''}
+                      onChange={(e) => onUpdateHomepageCms({ ...homepageCms, col1Desc: e.target.value })}
+                      className="w-full text-[10.5px] font-light p-1.5 border border-brand-border/60 focus:outline-none"
+                      placeholder="Desc"
+                    />
+                  </div>
+
+                  {/* Column 2 */}
+                  <div className="p-3 bg-brand-bg/10 border border-brand-border/40 space-y-2">
+                    <span className="text-[9.5px] uppercase font-bold text-brand-dark block">열설정 02 (직영 체제)</span>
+                    <input
+                      type="text"
+                      value={homepageCms.col2Num || '02'}
+                      onChange={(e) => onUpdateHomepageCms({ ...homepageCms, col2Num: e.target.value })}
+                      className="w-full text-[11px] font-light p-1.5 border border-brand-border/60 focus:outline-none"
+                      placeholder="Num"
+                    />
+                    <input
+                      type="text"
+                      value={homepageCms.col2Title || ''}
+                      onChange={(e) => onUpdateHomepageCms({ ...homepageCms, col2Title: e.target.value })}
+                      className="w-full text-[11px] font-light p-1.5 border border-brand-border/60 focus:outline-none"
+                      placeholder="Title"
+                    />
+                    <textarea
+                      rows={3}
+                      value={homepageCms.col2Desc || ''}
+                      onChange={(e) => onUpdateHomepageCms({ ...homepageCms, col2Desc: e.target.value })}
+                      className="w-full text-[10.5px] font-light p-1.5 border border-brand-border/60 focus:outline-none"
+                      placeholder="Desc"
+                    />
+                  </div>
+
+                  {/* Column 3 */}
+                  <div className="p-3 bg-brand-bg/10 border border-brand-border/40 space-y-2">
+                    <span className="text-[9.5px] uppercase font-bold text-brand-dark block">열설정 03 (3개년 보수)</span>
+                    <input
+                      type="text"
+                      value={homepageCms.col3Num || '03'}
+                      onChange={(e) => onUpdateHomepageCms({ ...homepageCms, col3Num: e.target.value })}
+                      className="w-full text-[11px] font-light p-1.5 border border-brand-border/60 focus:outline-none"
+                      placeholder="Num"
+                    />
+                    <input
+                      type="text"
+                      value={homepageCms.col3Title || ''}
+                      onChange={(e) => onUpdateHomepageCms({ ...homepageCms, col3Title: e.target.value })}
+                      className="w-full text-[11px] font-light p-1.5 border border-brand-border/60 focus:outline-none"
+                      placeholder="Title"
+                    />
+                    <textarea
+                      rows={3}
+                      value={homepageCms.col3Desc || ''}
+                      onChange={(e) => onUpdateHomepageCms({ ...homepageCms, col3Desc: e.target.value })}
+                      className="w-full text-[10.5px] font-light p-1.5 border border-brand-border/60 focus:outline-none"
+                      placeholder="Desc"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Block 4: Conversion Portals & Form Labels */}
+              <div className="bg-white border border-brand-border/60 p-5 space-y-4">
+                <span className="text-[10px] uppercase font-semibold text-brand-dark tracking-widest block">● SECTION 04: 상담 접수 유도창 정보 (Conversion Portals)</span>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="space-y-1">
+                    <label className="text-[10px] text-brand-muted">순번 오버레이 (Num)</label>
+                    <input
+                      type="text"
+                      value={homepageCms.conversionNum || ''}
+                      onChange={(e) => onUpdateHomepageCms({ ...homepageCms, conversionNum: e.target.value })}
+                      className="w-full text-xs font-light p-2.5 bg-white border border-brand-border/60 focus:outline-none"
+                    />
+                  </div>
+                  <div className="space-y-1 col-span-2">
+                    <label className="text-[10px] text-brand-muted">대표 대문자 부제목 (Label)</label>
+                    <input
+                      type="text"
+                      value={homepageCms.conversionLabel || ''}
+                      onChange={(e) => onUpdateHomepageCms({ ...homepageCms, conversionLabel: e.target.value })}
+                      className="w-full text-xs font-light p-2.5 bg-white border border-brand-border/60 focus:outline-none"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-[10px] text-brand-muted">핵심 전환 타이틀 (Title)</label>
+                  <input
+                    type="text"
+                    value={homepageCms.conversionTitle || ''}
+                    onChange={(e) => onUpdateHomepageCms({ ...homepageCms, conversionTitle: e.target.value })}
+                    className="w-full text-xs font-light p-2.5 bg-white border border-brand-border/60 focus:outline-none"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-[10px] text-brand-muted">우측 본문 서술문자 (Description)</label>
+                  <textarea
+                    rows={2}
+                    value={homepageCms.conversionDesc || ''}
+                    onChange={(e) => onUpdateHomepageCms({ ...homepageCms, conversionDesc: e.target.value })}
+                    className="w-full text-xs font-light p-2.5 bg-white border border-brand-border/60 focus:outline-none"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-brand-border/40 pt-4">
+                  {/* Portal 01 Form */}
+                  <div className="p-4 bg-brand-bg/10 border border-brand-border/40 space-y-3.5">
+                    <span className="text-[9.5px] uppercase font-bold text-brand-dark block">유입채널 01: 예상 가인스펙 견적 (Portal 1)</span>
+                    <div className="space-y-1">
+                      <label className="text-[9px] text-brand-muted block">간편 창구 타이틀</label>
+                      <input
+                        type="text"
+                        value={homepageCms.portal1Title || ''}
+                        onChange={(e) => onUpdateHomepageCms({ ...homepageCms, portal1Title: e.target.value })}
+                        className="w-full text-xs font-light p-2 bg-white border border-brand-border/60 focus:outline-none"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[9px] text-brand-muted block">가이드 구문</label>
+                      <textarea
+                        rows={2.5}
+                        value={homepageCms.portal1Desc || ''}
+                        onChange={(e) => onUpdateHomepageCms({ ...homepageCms, portal1Desc: e.target.value })}
+                        className="w-full text-xs font-light p-2 bg-white border border-brand-border/60 focus:outline-none"
+                      />
+                    </div>
+                    {/* Form 1 Labels mapping */}
+                    <div className="p-3 bg-white border border-brand-border/40 rounded-none space-y-2">
+                      <span className="text-[8.5px] font-bold text-brand-muted uppercase block">인풋 레이블 텍스트</span>
+                      <div className="grid grid-cols-2 gap-2">
+                        <input
+                          type="text"
+                          value={homepageCms.form1NameLabel || ''}
+                          onChange={(e) => onUpdateHomepageCms({ ...homepageCms, form1NameLabel: e.target.value })}
+                          className="text-[10.5px] font-light p-1.5 border border-brand-border/60 focus:outline-none"
+                          placeholder="성함 레이블"
+                        />
+                        <input
+                          type="text"
+                          value={homepageCms.form1PhoneLabel || ''}
+                          onChange={(e) => onUpdateHomepageCms({ ...homepageCms, form1PhoneLabel: e.target.value })}
+                          className="text-[10.5px] font-light p-1.5 border border-brand-border/60 focus:outline-none"
+                          placeholder="번호 레이블"
+                        />
+                        <input
+                          type="text"
+                          value={homepageCms.form1TypeLabel || ''}
+                          onChange={(e) => onUpdateHomepageCms({ ...homepageCms, form1TypeLabel: e.target.value })}
+                          className="text-[10.5px] font-light p-1.5 border border-brand-border/60 focus:outline-none"
+                          placeholder="분야 레이블"
+                        />
+                        <input
+                          type="text"
+                          value={homepageCms.form1AreaLabel || ''}
+                          onChange={(e) => onUpdateHomepageCms({ ...homepageCms, form1AreaLabel: e.target.value })}
+                          className="text-[10.5px] font-light p-1.5 border border-brand-border/60 focus:outline-none"
+                          placeholder="평형 레이블"
+                        />
+                      </div>
+                      <input
+                        type="text"
+                        value={homepageCms.form1BudgetLabel || ''}
+                        onChange={(e) => onUpdateHomepageCms({ ...homepageCms, form1BudgetLabel: e.target.value })}
+                        className="w-full text-[10.5px] font-light p-1.5 border border-brand-border/60 focus:outline-none"
+                        placeholder="예산 레이블"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Portal 02 Form */}
+                  <div className="p-4 bg-brand-bg/10 border border-brand-border/40 space-y-3.5">
+                    <span className="text-[9.5px] uppercase font-bold text-brand-dark block">유입채널 02: 1분 직통 신청 (Portal 2)</span>
+                    <div className="space-y-1">
+                      <label className="text-[9px] text-brand-muted block">간편 유선 긴급상담 타이틀</label>
+                      <input
+                        type="text"
+                        value={homepageCms.portal2Title || ''}
+                        onChange={(e) => onUpdateHomepageCms({ ...homepageCms, portal2Title: e.target.value })}
+                        className="w-full text-xs font-light p-2 bg-white border border-brand-border/60 focus:outline-none"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[9px] text-brand-muted block">가이드 구문</label>
+                      <textarea
+                        rows={2.5}
+                        value={homepageCms.portal2Desc || ''}
+                        onChange={(e) => onUpdateHomepageCms({ ...homepageCms, portal2Desc: e.target.value })}
+                        className="w-full text-xs font-light p-2 bg-white border border-brand-border/60 focus:outline-none"
+                      />
+                    </div>
+                    {/* Form 2 Labels mapping */}
+                    <div className="p-3 bg-white border border-brand-border/40 rounded-none space-y-2">
+                      <span className="text-[8.5px] font-bold text-brand-muted uppercase block">인풋 레이블 텍스트</span>
+                      <div className="grid grid-cols-2 gap-2">
+                        <input
+                          type="text"
+                          value={homepageCms.form2NameLabel || ''}
+                          onChange={(e) => onUpdateHomepageCms({ ...homepageCms, form2NameLabel: e.target.value })}
+                          className="text-[10.5px] font-light p-1.5 border border-brand-border/60 focus:outline-none"
+                          placeholder="성함 레이블"
+                        />
+                        <input
+                          type="text"
+                          value={homepageCms.form2PhoneLabel || ''}
+                          onChange={(e) => onUpdateHomepageCms({ ...homepageCms, form2PhoneLabel: e.target.value })}
+                          className="text-[10.5px] font-light p-1.5 border border-brand-border/60 focus:outline-none"
+                          placeholder="전화 레이블"
+                        />
+                        <input
+                          type="text"
+                          value={homepageCms.form2TypeLabel || ''}
+                          onChange={(e) => onUpdateHomepageCms({ ...homepageCms, form2TypeLabel: e.target.value })}
+                          className="text-[10.5px] font-light p-1.5 border border-brand-border/60 focus:outline-none"
+                          placeholder="카테고리 레이블"
+                        />
+                        <input
+                          type="text"
+                          value={homepageCms.form2TimeLabel || ''}
+                          onChange={(e) => onUpdateHomepageCms({ ...homepageCms, form2TimeLabel: e.target.value })}
+                          className="text-[10.5px] font-light p-1.5 border border-brand-border/60 focus:outline-none"
+                          placeholder="희망시간 레이블"
+                        />
+                      </div>
+                      <input
+                        type="text"
+                        value={homepageCms.form2DescLabel || ''}
+                        onChange={(e) => onUpdateHomepageCms({ ...homepageCms, form2DescLabel: e.target.value })}
+                        className="w-full text-[10.5px] font-light p-1.5 border border-brand-border/60 focus:outline-none"
+                        placeholder="문의내용 레이블"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Manual save block */}
+              <div className="flex justify-end pt-4">
+                <button
+                  type="button"
+                  onClick={async () => {
+                    console.log('[SAVE START] gangin_homepage_cms');
+                    try {
+                      const { saveSupabaseState, isSupabaseConfigured } = await import('../lib/supabase');
+                      if (isSupabaseConfigured) {
+                        const success = await saveSupabaseState('gangin_homepage_cms', homepageCms);
+                        if (success) {
+                          alert('홈페이지 전체 텍스트 레이블 구성정보가 Supabase에 영구 보관되었습니다!');
+                        } else {
+                          alert('데이터베이스 동기화 중 에러가 발생했습니다.');
+                        }
+                      } else {
+                        alert('연결 오프라인상태로 임시 메모리에만 유지됩니다.');
+                      }
+                    } catch (e: any) {
+                      alert(`저장 중 예외가 발생했습니다: ${e.message || e}`);
+                    }
+                  }}
+                  className="bg-brand-dark hover:bg-neutral-800 text-white font-semibold text-xs py-3.5 px-8 flex items-center gap-2 transition-colors cursor-pointer"
+                >
+                  <Save size={13} />
+                  <span>지면 텍스트 일괄 보존하기</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {currentTab === 'contactCms' && (
+          <div className="space-y-8 animate-fadeIn">
+            <div className="border-b border-brand-border pb-4">
+              <h3 className="text-sm font-semibold text-brand-dark uppercase tracking-widest">상담문의 페이지 관리</h3>
+              <p className="text-[10px] text-brand-muted font-light mt-1">
+                오시는 길 및 기획 문의(Contact) 페이지 상의 전 관할 섹션 레이블과 내용, 지도의 임베드/이미지 및 카카오상담 빠른 버튼을 정밀 편집합니다.
+              </p>
+            </div>
+
+            <div className="space-y-10">
+              {/* SECTION 1: TOP PANEL */}
+              <div className="p-5 border border-brand-border/60 bg-neutral-50/50">
+                <span className="text-[9px] font-mono tracking-widest uppercase text-brand-muted block mb-4">01. TOP HEADER SECTION (상단 영역)</span>
+                <div className="space-y-4">
+                  <div>
+                    <label className="text-[10px] uppercase font-semibold text-brand-dark block mb-1">상단 설명 레이블</label>
+                    <input
+                      type="text"
+                      value={contactCms.topLabel || ''}
+                      onChange={(e) => onUpdateContactCms({ ...contactCms, topLabel: e.target.value })}
+                      className="w-full text-xs font-light p-2.5 bg-white border border-brand-border/60 focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] uppercase font-semibold text-brand-dark block mb-1">상단 메인 타이틀</label>
+                    <input
+                      type="text"
+                      value={contactCms.topTitle || ''}
+                      onChange={(e) => onUpdateContactCms({ ...contactCms, topTitle: e.target.value })}
+                      className="w-full text-xs font-light p-2.5 bg-white border border-brand-border/60 focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] uppercase font-semibold text-brand-dark block mb-1">상단 설명문 내용</label>
+                    <textarea
+                      value={contactCms.topDesc || ''}
+                      onChange={(e) => onUpdateContactCms({ ...contactCms, topDesc: e.target.value })}
+                      rows={3}
+                      className="w-full text-xs font-light p-2.5 bg-white border border-brand-border/60 focus:outline-none resize-none"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* SECTION 2: STUDIO ADDRESS */}
+              <div className="p-5 border border-brand-border/60 bg-neutral-50/50">
+                <span className="text-[9px] font-mono tracking-widest uppercase text-brand-muted block mb-4">02. STUDIO ADDRESS SECTION (사옥 정보)</span>
+                <div className="space-y-4">
+                  <div>
+                    <label className="text-[10px] uppercase font-semibold text-brand-dark block mb-1">주소 섹션 타이틀</label>
+                    <input
+                      type="text"
+                      value={contactCms.addressSectionTitle || ''}
+                      onChange={(e) => onUpdateContactCms({ ...contactCms, addressSectionTitle: e.target.value })}
+                      className="w-full text-xs font-light p-2.5 bg-white border border-brand-border/60 focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] uppercase font-semibold text-brand-dark block mb-1">사옥 메인 도로명주소</label>
+                    <input
+                      type="text"
+                      value={contactCms.addressMain || ''}
+                      onChange={(e) => onUpdateContactCms({ ...contactCms, addressMain: e.target.value })}
+                      className="w-full text-xs font-light p-2.5 bg-white border border-brand-border/60 focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] uppercase font-semibold text-brand-dark block mb-1">지번 주소 (상세 및 인근 랜드마크)</label>
+                    <input
+                      type="text"
+                      value={contactCms.addressSub || ''}
+                      onChange={(e) => onUpdateContactCms({ ...contactCms, addressSub: e.target.value })}
+                      className="w-full text-xs font-light p-2.5 bg-white border border-brand-border/60 focus:outline-none"
+                    />
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-[10px] uppercase font-semibold text-brand-dark block mb-1">지도 이동 링크 텍스트</label>
+                      <input
+                        type="text"
+                        value={contactCms.addressMapLinkText || ''}
+                        onChange={(e) => onUpdateContactCms({ ...contactCms, addressMapLinkText: e.target.value })}
+                        className="w-full text-xs font-light p-2.5 bg-white border border-brand-border/60 focus:outline-none"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[10px] uppercase font-semibold text-brand-dark block mb-1">지도 이동용 외부 링크 URL</label>
+                      <input
+                        type="text"
+                        value={contactCms.addressMapLinkUrl || ''}
+                        onChange={(e) => onUpdateContactCms({ ...contactCms, addressMapLinkUrl: e.target.value })}
+                        className="w-full text-xs font-light p-2.5 bg-white border border-brand-border/60 focus:outline-none"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* SECTION 3: CALL & CHANNEL */}
+              <div className="p-5 border border-brand-border/60 bg-neutral-50/50">
+                <span className="text-[9px] font-mono tracking-widest uppercase text-brand-muted block mb-4">03. CALL & CHANNEL SECTION (상담 및 채널)</span>
+                <div className="space-y-4">
+                  <div>
+                    <label className="text-[10px] uppercase font-semibold text-brand-dark block mb-1">상담/연락 섹션 타이틀</label>
+                    <input
+                      type="text"
+                      value={contactCms.channelSectionTitle || ''}
+                      onChange={(e) => onUpdateContactCms({ ...contactCms, channelSectionTitle: e.target.value })}
+                      className="w-full text-xs font-light p-2.5 bg-white border border-brand-border/60 focus:outline-none"
+                    />
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-[10px] uppercase font-semibold text-brand-dark block mb-1">대표 유선전화번호</label>
+                      <input
+                        type="text"
+                        value={contactCms.channelMainPhone || ''}
+                        onChange={(e) => onUpdateContactCms({ ...contactCms, channelMainPhone: e.target.value })}
+                        className="w-full text-xs font-light p-2.5 bg-white border border-brand-border/60 focus:outline-none"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[10px] uppercase font-semibold text-brand-dark block mb-1">상담 직통 모바일전화</label>
+                      <input
+                        type="text"
+                        value={contactCms.channelMobilePhone || ''}
+                        onChange={(e) => onUpdateContactCms({ ...contactCms, channelMobilePhone: e.target.value })}
+                        className="w-full text-xs font-light p-2.5 bg-white border border-brand-border/60 focus:outline-none"
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-[10px] uppercase font-semibold text-brand-dark block mb-1">공식 대표 이메일</label>
+                      <input
+                        type="text"
+                        value={contactCms.channelEmail || ''}
+                        onChange={(e) => onUpdateContactCms({ ...contactCms, channelEmail: e.target.value })}
+                        className="w-full text-xs font-light p-2.5 bg-white border border-brand-border/60 focus:outline-none"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[10px] uppercase font-semibold text-brand-dark block mb-1">카카오톡 채널 표기명</label>
+                      <input
+                        type="text"
+                        value={contactCms.channelKakaoText || ''}
+                        onChange={(e) => onUpdateContactCms({ ...contactCms, channelKakaoText: e.target.value })}
+                        className="w-full text-xs font-light p-2.5 bg-white border border-brand-border/60 focus:outline-none"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-[10px] uppercase font-semibold text-brand-dark block mb-1">카카오톡 채널 바로가기 URL</label>
+                    <input
+                      type="text"
+                      value={contactCms.channelKakaoUrl || ''}
+                      onChange={(e) => onUpdateContactCms({ ...contactCms, channelKakaoUrl: e.target.value })}
+                      className="w-full text-xs font-light p-2.5 bg-white border border-brand-border/60 focus:outline-none"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* SECTION 4: WORK HOUR SCHEDULE */}
+              <div className="p-5 border border-brand-border/60 bg-neutral-50/50">
+                <span className="text-[9px] font-mono tracking-widest uppercase text-brand-muted block mb-4">04. WORK HOUR SCHEDULE SECTION (업무 시간)</span>
+                <div className="space-y-4">
+                  <div>
+                    <label className="text-[10px] uppercase font-semibold text-brand-dark block mb-1">업무시간 섹션 타이틀</label>
+                    <input
+                      type="text"
+                      value={contactCms.workSectionTitle || ''}
+                      onChange={(e) => onUpdateContactCms({ ...contactCms, workSectionTitle: e.target.value })}
+                      className="w-full text-xs font-light p-2.5 bg-white border border-brand-border/60 focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] uppercase font-semibold text-brand-dark block mb-1">평일 업무 운영 시간</label>
+                    <input
+                      type="text"
+                      value={contactCms.workWeekday || ''}
+                      onChange={(e) => onUpdateContactCms({ ...contactCms, workWeekday: e.target.value })}
+                      className="w-full text-xs font-light p-2.5 bg-white border border-brand-border/60 focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] uppercase font-semibold text-brand-dark block mb-1">주말 및 공휴일 가이드</label>
+                    <input
+                      type="text"
+                      value={contactCms.workWeekend || ''}
+                      onChange={(e) => onUpdateContactCms({ ...contactCms, workWeekend: e.target.value })}
+                      className="w-full text-xs font-light p-2.5 bg-white border border-brand-border/60 focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] uppercase font-semibold text-brand-dark block mb-1">긴급 안내 주의문항</label>
+                    <textarea
+                      value={contactCms.workHolidayNotice || ''}
+                      onChange={(e) => onUpdateContactCms({ ...contactCms, workHolidayNotice: e.target.value })}
+                      rows={2}
+                      className="w-full text-xs font-light p-2.5 bg-white border border-brand-border/60 focus:outline-none resize-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] uppercase font-semibold text-brand-dark block mb-1">기타 참고 일정 (선택사항)</label>
+                    <input
+                      type="text"
+                      value={contactCms.workAdditionalNote || ''}
+                      onChange={(e) => onUpdateContactCms({ ...contactCms, workAdditionalNote: e.target.value })}
+                      className="w-full text-xs font-light p-2.5 bg-white border border-brand-border/60 focus:outline-none"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* SECTION 5: MAP GRAPHICS INTEGRATION */}
+              <div className="p-5 border border-brand-border/60 bg-neutral-50/50">
+                <span className="text-[9px] font-mono tracking-widest uppercase text-brand-muted block mb-4">05. MAP GRAPHICS INTEGRATION (오시는 길 지도 설정)</span>
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-[10px] uppercase font-semibold text-brand-dark block mb-1">지도 마커 라벨</label>
+                      <input
+                        type="text"
+                        value={contactCms.mapMarkerTitle || ''}
+                        onChange={(e) => onUpdateContactCms({ ...contactCms, mapMarkerTitle: e.target.value })}
+                        className="w-full text-xs font-light p-2.5 bg-white border border-brand-border/60 focus:outline-none"
+                        placeholder="GANG IN STUDIO HQ"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[10px] uppercase font-semibold text-brand-dark block mb-1">지도 마커 설명 / 서브라벨</label>
+                      <input
+                        type="text"
+                        value={contactCms.mapMarkerDesc || ''}
+                        onChange={(e) => onUpdateContactCms({ ...contactCms, mapMarkerDesc: e.target.value })}
+                        className="w-full text-xs font-light p-2.5 bg-white border border-brand-border/60 focus:outline-none"
+                        placeholder="남구 양림동 24-12 사옥 1F"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="border border-dashed border-brand-border/80 p-4 bg-white space-y-3">
+                    <span className="text-[9.5px] uppercase font-semibold text-brand-dark block">지도 화면 직접 구성 (실제 지도 혹은 조감도 대체용)</span>
+                    <p className="text-[9px] text-brand-muted/80 leading-relaxed font-light">
+                      실버 조감도 일러스트레이터 지도를 완전히 무시하고 네이버 지도 / 카카오 맵 공유용 <strong>HTML Embed 코드</strong>를 붙여넣거나, 제작한 <strong>지도 이미지</strong>를 업로드해 실시간 매핑할 수 있습니다.
+                    </p>
+                    
+                    <div className="space-y-3">
+                      <div>
+                        <label className="text-[9px] uppercase font-semibold text-brand-dark block mb-1">1단계: 지도 &lt;iframe&gt; Embed 소스코드 직접 기입</label>
+                        <textarea
+                          value={contactCms.mapEmbed || ''}
+                          onChange={(e) => onUpdateContactCms({ ...contactCms, mapEmbed: e.target.value })}
+                          rows={2}
+                          className="w-full text-[10px] font-mono p-2 bg-neutral-50 border border-brand-border/60 focus:outline-none resize-none"
+                          placeholder="<iframe src='...' ...></iframe> 형태의 코드를 기입할 시 우측 지도를 우선 덮어 씌워 전면 출력합니다."
+                        />
+                      </div>
+                      
+                      <div>
+                        <label className="text-[9px] uppercase font-semibold text-brand-dark block mb-1">2단계 또는: 지도 배경 이미지 업로드 (Embed 코드가 없을 시 작동)</label>
+                        <div className="mt-1.5 flex items-center gap-3">
+                          <input
+                            type="file"
+                            id="admin-map-img-upload"
+                            accept="image/*"
+                            onChange={handleMapImageUpload}
+                            className="hidden"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => document.getElementById('admin-map-img-upload')?.click()}
+                            className="bg-neutral-100 hover:bg-neutral-200 text-brand-dark px-3.5 py-2 text-[10px] uppercase font-mono tracking-wider flex items-center gap-1.5 transition-colors cursor-pointer"
+                          >
+                            <Upload size={11} />
+                            <span>지도 전용 이미지 올리기</span>
+                          </button>
+                          {contactCms.mapImage && (
+                            <div className="flex items-center gap-2">
+                              <span className="text-[9px] text-emerald-700 bg-emerald-50 px-2.5 py-1 flex items-center gap-1 border border-emerald-200">
+                                <Check size={10} />
+                                <span>이미지 연동 중</span>
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() => onUpdateContactCms({ ...contactCms, mapImage: '' })}
+                                className="text-[9.5px] text-red-600 hover:underline"
+                              >
+                                삭제하기
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-[10px] uppercase font-semibold text-brand-dark block mb-1">네이버 지도 연계 주소 (Naver Map Link)</label>
+                      <input
+                        type="text"
+                        value={contactCms.naverMapLink || ''}
+                        onChange={(e) => onUpdateContactCms({ ...contactCms, naverMapLink: e.target.value })}
+                        className="w-full text-xs font-light p-2.5 bg-white border border-brand-border/60 focus:outline-none"
+                        placeholder="https://map.naver.com/..."
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[10px] uppercase font-semibold text-brand-dark block mb-1">카카오 지도 연계 주소 (Kakao Map Link)</label>
+                      <input
+                        type="text"
+                        value={contactCms.kakaoMapLink || ''}
+                        onChange={(e) => onUpdateContactCms({ ...contactCms, kakaoMapLink: e.target.value })}
+                        className="w-full text-xs font-light p-2.5 bg-white border border-brand-border/60 focus:outline-none"
+                        placeholder="https://map.kakao.com/..."
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* SECTION 6: CONTACT BUTTONS & ACTIONS */}
+              <div className="p-5 border border-brand-border/60 bg-neutral-50/50">
+                <span className="text-[9px] font-mono tracking-widest uppercase text-brand-muted block mb-4">06. CTA ACTION BUTTON (간편 상담 바로가기 버튼 설정)</span>
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2.5 py-1">
+                    <input
+                      type="checkbox"
+                      id="cms-contact-btn-show"
+                      checked={!!contactCms.buttonShow}
+                      onChange={(e) => onUpdateContactCms({ ...contactCms, buttonShow: e.target.checked })}
+                      className="w-3.5 h-3.5 accent-brand-dark cursor-pointer"
+                    />
+                    <label htmlFor="cms-contact-btn-show" className="text-[10px] uppercase font-bold text-brand-dark cursor-pointer selection:bg-none">
+                      상담페이지 내 공식 채널 연계 빠른 액션 버튼 표시하기 (Show Button)
+                    </label>
+                  </div>
+                  {contactCms.buttonShow && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="text-[10px] uppercase font-semibold text-brand-dark block mb-1">액션 버튼 텍스트</label>
+                        <input
+                          type="text"
+                          value={contactCms.buttonText || ''}
+                          onChange={(e) => onUpdateContactCms({ ...contactCms, buttonText: e.target.value })}
+                          className="w-full text-xs font-light p-2.5 bg-white border border-brand-border/60 focus:outline-none"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-[10px] uppercase font-semibold text-brand-dark block mb-1">액션 바로가기 링크 URL</label>
+                        <input
+                          type="text"
+                          value={contactCms.buttonUrl || ''}
+                          onChange={(e) => onUpdateContactCms({ ...contactCms, buttonUrl: e.target.value })}
+                          className="w-full text-xs font-light p-2.5 bg-white border border-brand-border/60 focus:outline-none"
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Manual save block */}
+              <div className="flex justify-end pt-4">
+                <button
+                  type="button"
+                  onClick={async () => {
+                    console.log('[CONTACT PAGE SAVE START]');
+                    try {
+                      const { saveSupabaseState, isSupabaseConfigured } = await import('../lib/supabase');
+                      if (isSupabaseConfigured) {
+                        const success = await saveSupabaseState('gangin_contact_cms', contactCms);
+                        if (success) {
+                          console.log('[CONTACT PAGE SAVE SUCCESS]');
+                          alert('상담문의(Contact) 페이지 구성 정보가 Supabase에 영구 보관되었습니다!');
+                        } else {
+                          console.log('[CONTACT PAGE SAVE FAILED]');
+                          alert('데이터베이스 동기화 중 에러가 발생했습니다.');
+                        }
+                      } else {
+                        alert('연결 오프라인상태로 임시 메모리에만 유지됩니다.');
+                      }
+                    } catch (e: any) {
+                      console.log('[CONTACT PAGE SAVE FAILED]');
+                      alert(`저장 중 예외가 발생했습니다: ${e.message || e}`);
+                    }
+                  }}
+                  className="bg-brand-dark hover:bg-neutral-800 text-white font-semibold text-xs py-3.5 px-8 flex items-center gap-2 transition-colors cursor-pointer"
+                >
+                  <Save size={13} />
+                  <span>상담문의 페이지 설정 영구 보존하기</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {currentTab === 'popupCms' && (
+          <div className="space-y-8 animate-fade-in">
+            <div className="border-b border-brand-border pb-4">
+              <h3 className="text-sm font-semibold text-brand-dark uppercase tracking-widest">실시간 스페셜 오퍼 팝업 위젯 관리</h3>
+              <p className="text-[10px] text-brand-muted font-light mt-1">
+                사용자가 사이트에 첫 방문 시 또는 PC에서 화면을 이탈하려 할 때 화면 중앙에 부드럽게 표출되는 스페셜 견적 오퍼 모달의 내용을 실시간 제어합니다.
+              </p>
+            </div>
+
+            <div className="space-y-6">
+              <div className="p-5 border border-brand-border/60 bg-brand-bg space-y-4">
+                <span className="text-[10px] uppercase font-bold tracking-widest text-[#111111] block mb-2">활성화 여부 설정</span>
+                <div className="flex items-center gap-2.5">
+                  <input
+                    type="checkbox"
+                    id="cms-popup-active"
+                    checked={!!popupCms.showPopup}
+                    onChange={(e) => onUpdatePopupCms({ ...popupCms, showPopup: e.target.checked })}
+                    className="w-3.5 h-3.5 accent-brand-dark cursor-pointer"
+                  />
+                  <label htmlFor="cms-popup-active" className="text-[10px] uppercase font-bold text-brand-dark cursor-pointer selection:bg-none">
+                    첫 방문 팝업 위젯 시스템 가동하기 (Enable Popup)
+                  </label>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-[10px] uppercase font-semibold text-brand-dark block mb-1">상단 레이블 (Badge Text)</label>
+                  <input
+                    type="text"
+                    value={popupCms.topLabel || ''}
+                    onChange={(e) => onUpdatePopupCms({ ...popupCms, topLabel: e.target.value })}
+                    className="w-full text-xs font-light p-2.5 bg-white border border-brand-border/60 focus:outline-none focus:border-brand-dark"
+                  />
+                </div>
+                <div>
+                  <label className="text-[10px] uppercase font-semibold text-brand-dark block mb-1">표출 대기 지연 시간 (초)</label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    min="0"
+                    value={popupCms.delayTime ?? 1}
+                    onChange={(e) => onUpdatePopupCms({ ...popupCms, delayTime: parseFloat(e.target.value) || 0 })}
+                    className="w-full text-xs font-light p-2.5 bg-white border border-brand-border/60 focus:outline-none focus:border-brand-dark"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="text-[10px] uppercase font-semibold text-brand-dark block mb-1">팝업 헤드라인 타이틀 (Popup Title)</label>
+                <textarea
+                  rows={2}
+                  value={popupCms.title || ''}
+                  onChange={(e) => onUpdatePopupCms({ ...popupCms, title: e.target.value })}
+                  className="w-full text-xs font-light p-2.5 bg-white border border-brand-border/60 focus:outline-none focus:border-brand-dark leading-relaxed"
+                />
+              </div>
+
+              <div>
+                <label className="text-[10px] uppercase font-semibold text-brand-dark block mb-1">팝업 상세 설명 (Description Narrative)</label>
+                <textarea
+                  rows={4}
+                  value={popupCms.description || ''}
+                  onChange={(e) => onUpdatePopupCms({ ...popupCms, description: e.target.value })}
+                  className="w-full text-xs font-light p-2.5 bg-white border border-brand-border/60 focus:outline-none focus:border-brand-dark leading-relaxed"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label className="text-[10px] uppercase font-semibold text-brand-dark block mb-1">실행버튼(CTA) 텍스트</label>
+                  <input
+                    type="text"
+                    value={popupCms.ctaText || ''}
+                    onChange={(e) => onUpdatePopupCms({ ...popupCms, ctaText: e.target.value })}
+                    className="w-full text-xs font-light p-2.5 bg-white border border-brand-border/60 focus:outline-none focus:border-brand-dark"
+                  />
+                </div>
+                <div>
+                  <label className="text-[10px] uppercase font-semibold text-brand-dark block mb-1">실행버튼(CTA) 이동 주소/뷰ID</label>
+                  <input
+                    type="text"
+                    value={popupCms.ctaUrl || ''}
+                    onChange={(e) => onUpdatePopupCms({ ...popupCms, ctaUrl: e.target.value })}
+                    className="w-full text-xs font-light p-2.5 bg-white border border-brand-border/60 focus:outline-none focus:border-brand-dark"
+                    placeholder="예: estimate 또는 https://..."
+                  />
+                </div>
+                <div>
+                  <label className="text-[10px] uppercase font-semibold text-brand-dark block mb-1">닫기/Dismiss 대체글자</label>
+                  <input
+                    type="text"
+                    value={popupCms.dismissText || ''}
+                    onChange={(e) => onUpdatePopupCms({ ...popupCms, dismissText: e.target.value })}
+                    className="w-full text-xs font-light p-2.5 bg-white border border-brand-border/60 focus:outline-none focus:border-brand-dark"
+                  />
+                </div>
+              </div>
+
+              {/* Manual save block */}
+              <div className="flex justify-end pt-4">
+                <button
+                  type="button"
+                  onClick={async () => {
+                    try {
+                      const { saveSupabaseState, isSupabaseConfigured } = await import('../lib/supabase');
+                      if (isSupabaseConfigured) {
+                        const success = await saveSupabaseState('gangin_popup_cms', popupCms);
+                        if (success) {
+                          alert('팝업 위젯 정보가 Supabase 데이터베이스에 완벽하게 영구보존 되었습니다!');
+                        } else {
+                          alert('데이터베이스 동기화 중 에러가 발생했습니다.');
+                        }
+                      } else {
+                        alert('연결 오프라인상태로 임시 메모리에만 유지됩니다.');
+                      }
+                    } catch (e: any) {
+                      alert(`저장 중 예외가 발생했습니다: ${e.message || e}`);
+                    }
+                  }}
+                  className="bg-brand-dark hover:bg-neutral-800 text-white font-semibold text-xs py-3.5 px-8 flex items-center gap-2 transition-colors cursor-pointer"
+                >
+                  <Save size={13} />
+                  <span>팝업 위젯 구성 설정 영구 보존하기</span>
                 </button>
               </div>
             </div>

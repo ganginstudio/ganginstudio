@@ -143,11 +143,11 @@ export default function Categories({
               </div>
             </div>
             
-            <div className="lg:col-span-7 bg-brand-bg relative aspect-[16/10] overflow-hidden border border-brand-border/60 shadow-xs">
+            <div className="lg:col-span-7 bg-[#fafaf9] relative w-full h-auto aspect-square md:aspect-[16/10] overflow-hidden border border-brand-border/60 shadow-xs">
               <img
                 src={activeCategory.heroImage}
                 alt={activeCategory.nameKr}
-                className="w-full h-full object-cover grayscale-0 transition-all duration-700"
+                className="w-full h-auto md:h-full object-contain md:object-cover grayscale-0 transition-all duration-700"
                 referrerPolicy="no-referrer"
               />
             </div>
@@ -281,12 +281,12 @@ export default function Categories({
                     onClick={() => handleProjectClick(p.id)}
                     className="group cursor-pointer space-y-3"
                   >
-                    <div className="aspect-[4/3] w-full overflow-hidden bg-brand-border relative">
+                    <div className="w-full h-auto aspect-square md:aspect-[4/3] overflow-hidden bg-[#fafaf9] relative border border-brand-border/40">
                       <img
-                        src={p.image || 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=1200'}
+                        src={p.imageMobile || p.image || 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=1200'}
                         alt={p.title || "Bathroom Interior Project"}
                         loading="lazy"
-                        className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-102"
+                        className="w-full h-auto md:h-full object-contain md:object-cover transition-transform duration-700 ease-out group-hover:scale-102"
                         referrerPolicy="no-referrer"
                         onError={(e) => {
                           e.currentTarget.src = 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=1200';

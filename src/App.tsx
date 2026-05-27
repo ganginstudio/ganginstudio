@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { NavView, Project, NavItemConfig } from './types';
+import { NavView, Project, NavItemConfig, HeroCmsConfig, HomepageCmsConfig, ContactCmsConfig, PopupCmsConfig } from './types';
 import {
   getInitialState,
   saveState,
@@ -37,13 +37,37 @@ export default function App() {
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
   const [showExitModal, setShowExitModal] = useState(false);
 
+  // Load Initialized Storage state
+  const storeInit = getInitialState();
+  const [isHydrated, setIsHydrated] = useState(false);
+
+  const DEFAULT_POPUP_CMS: PopupCmsConfig = {
+    showPopup: true,
+    topLabel: "SPECIAL LEAD OFFER",
+    title: "잠시만요, 귀하의 기획 공간 예상견적을 3분 만에 무료로 확인해 보시겠습니까?",
+    description: "강인스튜디오는 계약 전 도면과 상세 원가 명세서를 투명하게 검수해 이중 지출 요소를 배제하고 있습니다. 성함과 평수만으로 즉시 시방 분석안을 배정받으십시오.",
+    ctaText: "3분 예상견적 바로 받기 →",
+    ctaUrl: "estimate",
+    dismissText: "아니요, 다음에 하겠습니다",
+    delayTime: 1
+  };
+
+  const [popupCms, setPopupCms] = useState<PopupCmsConfig>(DEFAULT_POPUP_CMS);
+
+  // Popup init and mobile check logs
+  useEffect(() => {
+    console.log('[POPUP INIT]');
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth < 1024;
+    console.log('[POPUP MOBILE CHECK]', isMobile ? 'Mobile/Tablet detected' : 'Desktop detected');
+  }, []);
+
   // Exit intent hook listener
   useEffect(() => {
     const handleMouseLeave = (e: MouseEvent) => {
       // Trigger when mouse cursor moves past the top viewport edge (clientY < 15)
       if (e.clientY < 15) {
         const alreadyDismissed = sessionStorage.getItem('gangin_exit_intent_dismissed');
-        if (!alreadyDismissed) {
+        if (!alreadyDismissed && popupCms.showPopup) {
           setShowExitModal(true);
         }
       }
@@ -52,11 +76,30 @@ export default function App() {
     return () => {
       document.removeEventListener('mouseleave', handleMouseLeave);
     };
-  }, []);
+  }, [popupCms.showPopup]);
 
-  // Load Initialized Storage state
-  const storeInit = getInitialState();
-  const [isHydrated, setIsHydrated] = useState(false);
+  // Automated trigger after page load
+  useEffect(() => {
+    if (!isHydrated) return;
+    const alreadyDismissed = sessionStorage.getItem('gangin_exit_intent_dismissed');
+    if (!alreadyDismissed && popupCms.showPopup) {
+      const ms = (popupCms.delayTime ?? 1) * 1000;
+      const timer = setTimeout(() => {
+        const stillNotDismissed = sessionStorage.getItem('gangin_exit_intent_dismissed');
+        if (!stillNotDismissed) {
+          setShowExitModal(true);
+        }
+      }, ms);
+      return () => clearTimeout(timer);
+    }
+  }, [isHydrated, popupCms.showPopup, popupCms.delayTime]);
+
+  // Track show log
+  useEffect(() => {
+    if (showExitModal) {
+      console.log('[POPUP SHOW]');
+    }
+  }, [showExitModal]);
   const [projects, setProjects] = useState<Project[]>(storeInit.projects);
   const [packages, setPackages] = useState<ServicePackage[]>(storeInit.packages);
   const [faq, setFaq] = useState<FAQItem[]>(storeInit.faq);
@@ -66,6 +109,112 @@ export default function App() {
   
   // Also persist/manage categories state (No localStorage fallback)
   const [categories, setCategories] = useState<ServiceCategory[]>(DEFAULT_CATEGORIES);
+
+  const DEFAULT_HERO_CMS: HeroCmsConfig = {
+    image1: "/src/assets/images/gangin_hero_1779412179856.png",
+    image2: "https://images.unsplash.com/photo-1618219908412-a29a1bb7b86e?q=80&w=1200",
+    image3: "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?q=80&w=1200",
+    show1: true,
+    show2: true,
+    show3: true,
+    order: "1,2,3",
+    interval: 4000,
+    headlineLine1: "공간을 디자인하고",
+    headlineLine2: "시공까지 책임집니다.",
+    label1: "Interior Design",
+    label2: "Construction",
+    label3: "After Service",
+    button1Text: "포트폴리오",
+    button1Url: "portfolio",
+    button2Text: "견적문의",
+    button2Url: "estimate"
+  };
+
+  const DEFAULT_HOMEPAGE_CMS: HomepageCmsConfig = {
+    philosophyNum: "01",
+    philosophyLabel: "GANG IN STUDIO",
+    philosophyTitle: "Brand Philosophy",
+    philosophyHeadline: "우리는 쓸모없는 화려한 장식과 소음을 지우고 오직 본질적인 선과 기하학적 비례에 집중합니다.",
+    philosophyPara1: "나무, 석재, 콘크리트, 금속. 자연에서 길러낸 가공되지 않은 자재에 빛의 춤을 더해 거주자가 매일 진정한 마음의 응집력과 고요함을 발견하도록 설계합니다.",
+    philosophyPara2: "강인스튜디오는 디자인 단계에서 기획한 1mm의 미세한 공차와 음영 디테일을 현장 시공 소장들이 한치의 오차 없이 그대로 구축해 나갑니다. 그것이 우리 인테리어의 품위이자 책임감입니다.",
+
+    featuredNum: "02",
+    featuredLabel: "Editorial Curation",
+    featuredTitle: "Featured Spaces (선정작)",
+    featuredBtnText: "전체 포트폴리오 보기",
+    featuredBtnUrl: "portfolio",
+
+    integrityNum: "03",
+    integrityLabel: "Integrity & Precision",
+    integrityTitle: "투명성 회계제도와 직직영 책임 시공의 약속",
+    integrityDesc: "광주 인테리어 업체 중 유일하게 투명한 상세 명세 자재 원가 내역서를 계약 전 100% 가감 없이 공유하며, 중간 마진 명세 일체의 요소를 정출하는 정제된 1204DESIGN 비즈니스 투명성 공식을 엄수합니다.",
+    
+    col1Num: "01",
+    col1Title: "자재 등급 정찰제",
+    col1Desc: "계약하는 세밀 자재 하나까지 단위 수량과 도소매 단가를 투명하게 공개해 가라 자재나 임의 변경 행위가 애초에 불가능하도록 회계 감독선을 수립합니다.",
+    col2Num: "02",
+    col2Title: "직영 소장제",
+    col2Desc: "외주 대마에 전적으로 시공을 위탁하는 타 업체들과 달리 본사의 15년 차 경력 정규 면허 기술진이 도면과 동일한 자재의 접합률을 실시간 전담 감독합니다.",
+    col3Num: "03",
+    col3Title: "3개년 웰니스 점검",
+    col3Desc: "하자 이행 증권 상의 기간을 뛰어넘어, 사후 3개년간 자사 소속 시공 사후 수련팀이 6달 간격으로 실내 습도 밸런스와 오크 가구 뒤틀림 복원을 무료로 리포팅합니다.",
+
+    conversionNum: "04",
+    conversionLabel: "HIGH CONVERSION PORTALS",
+    conversionTitle: "공학적 투명성과 시적 여백의 기획 채널",
+    conversionDesc: "공학적 투명성과 시적 여백의 기획 채널",
+
+    portal1Title: "우리집 예상견적 받아보기",
+    portal1Desc: "평수와 원가 기준을 빠르게 연산하여 가도면 상담을 예약하는 간섭 없는 인스턴트 견적 채널입니다. 더 면밀한 정보는 언제든 견적문의 탭의 7단계 도구를 실행하십시오.",
+    portal2Title: "간편 유선 긴급상담 받아보기",
+    portal2Desc: "복잡한 서류 절차가 아닌, 단순 시공 가부 여부 및 사옥 예약 방법론 등을 바리스타 처럼 빠르고 격조 있게 물어보는 1분 직통 신청 창구입니다.",
+
+    form1NameLabel: "고객 성함",
+    form1PhoneLabel: "대표 번호",
+    form1TypeLabel: "공간 분야",
+    form1AreaLabel: "분양 면적 (평형)",
+    form1BudgetLabel: "보유 예산 규모",
+    form2NameLabel: "대표 성함",
+    form2PhoneLabel: "전화 번호",
+    form2TypeLabel: "문의 카테고리",
+    form2TimeLabel: "통화 희망 시간대",
+    form2DescLabel: "간단 문의 사항"
+  };
+
+  const DEFAULT_CONTACT_CMS: ContactCmsConfig = {
+    topLabel: "Establish Connection — 커뮤니케이션 오피스 연결",
+    topTitle: "오시는 길 & 기획 문의",
+    topDesc: "강인스튜디오 사옥은 광주 남구 양림동 역사문화거리에 위치해 있습니다. 설계 미팅 및 자재 큐레이션 체험은 사전 예약제로 진행되오니 출발 전 온라인 정밀 양식 또는 유선 채널로 문의 주십시오.",
+    addressSectionTitle: "● STUDIO ADdRESS",
+    addressMain: "광주광역시 남구 양림동 24-12 강인스튜디오 빌딩 1F",
+    addressSub: "지번: 남구 양림동 24-12 (기독병원 근처 복합거리)",
+    addressMapLinkText: "Naver Map으로 경로 확인",
+    addressMapLinkUrl: "https://map.naver.com",
+    channelSectionTitle: "● CALL & CHANNEL",
+    channelMainPhone: "062.515.1204",
+    channelMobilePhone: "010.5515.1204",
+    channelEmail: "contact@ganginstudio.com",
+    channelKakaoText: "@강인스튜디오",
+    channelKakaoUrl: "https://pf.kakao.com/_xganginstudio",
+    workSectionTitle: "● WORK HOUR SCheDULE",
+    workWeekday: "평일: 10:00 - 18:00 (전면 예약제)",
+    workWeekend: "주말/공휴일: 사전 약정 미팅 수렴 건 운영",
+    workHolidayNotice: "* 현장 기술 감리 중 전화 수신이 다소 늦어질 수 있어, 부재중일 경우 직통 번호로 카카오톡을 남기시면 감사하겠습니다.",
+    workAdditionalNote: "",
+    mapImage: "",
+    mapEmbed: "",
+    mapMarkerTitle: "GANG IN STUDIO HQ",
+    mapMarkerDesc: "남구 양림동 24-12 사옥 1F",
+    naverMapLink: "https://map.naver.com",
+    kakaoMapLink: "https://map.kakao.com",
+    buttonText: "카카오톡 공식 채널 빠른 상담",
+    buttonUrl: "https://pf.kakao.com/_xganginstudio",
+    buttonShow: true
+  };
+
+  const [heroCms, setHeroCms] = useState<HeroCmsConfig>(DEFAULT_HERO_CMS);
+  const [homepageCms, setHomepageCms] = useState<HomepageCmsConfig>(DEFAULT_HOMEPAGE_CMS);
+  const [contactCms, setContactCms] = useState<ContactCmsConfig>(DEFAULT_CONTACT_CMS);
 
   const DEFAULT_NAV_ITEMS: NavItemConfig[] = [
     { id: 'nav_home', label: 'Home', view: 'home', labelKr: '홈', order: 1, show: true },
@@ -90,6 +239,10 @@ export default function App() {
     settings?: string;
     categories?: string;
     navItems?: string;
+    heroCms?: string;
+    homepageCms?: string;
+    contactCms?: string;
+    popupCms?: string;
   }>({});
 
   // Hydrate state from Supabase on mount if configured
@@ -103,6 +256,7 @@ export default function App() {
           const remotePackages = await fetchSupabaseState<ServicePackage[]>('gangin_packages', storeInit.packages);
           const remoteFaq = await fetchSupabaseState<FAQItem[]>('gangin_faq', storeInit.faq);
           const remoteReviews = await fetchSupabaseState<CustomerReview[]>('gangin_reviews', storeInit.reviews);
+          console.log('[FEATURED REVIEW FETCH SUCCESS]');
           const remoteBlog = await fetchSupabaseState<BlogPost[]>('gangin_blog', storeInit.blog);
           const remoteSettings = await fetchSupabaseState<SiteSettings>('gangin_settings', storeInit.settings);
           
@@ -110,6 +264,18 @@ export default function App() {
           const remoteCategories = await fetchSupabaseState<ServiceCategory[]>('gangin_categories', defaultCategories);
 
           const remoteNavItems = await fetchSupabaseState<NavItemConfig[]>('gangin_nav_items', DEFAULT_NAV_ITEMS);
+
+          const remoteHeroCms = await fetchSupabaseState<HeroCmsConfig>('gangin_hero_cms', DEFAULT_HERO_CMS);
+          console.log('[HERO CONTENT FETCH SUCCESS]');
+
+          const remoteHomepageCms = await fetchSupabaseState<HomepageCmsConfig>('gangin_homepage_cms', DEFAULT_HOMEPAGE_CMS);
+          console.log('[HOMEPAGE SECTION FETCH SUCCESS]');
+
+          const remoteContactCms = await fetchSupabaseState<ContactCmsConfig>('gangin_contact_cms', DEFAULT_CONTACT_CMS);
+          console.log('[CONTACT PAGE FETCH SUCCESS]');
+
+          const remotePopupCms = await fetchSupabaseState<PopupCmsConfig>('gangin_popup_cms', DEFAULT_POPUP_CMS);
+          console.log('[POPUP CONTENT FETCH SUCCESS]');
 
           // Seed state cache to bypass redundant initial mount writebacks
           lastSavedState.current = {
@@ -120,7 +286,11 @@ export default function App() {
             blog: JSON.stringify(remoteBlog),
             settings: JSON.stringify(remoteSettings),
             categories: JSON.stringify(remoteCategories),
-            navItems: JSON.stringify(remoteNavItems)
+            navItems: JSON.stringify(remoteNavItems),
+            heroCms: JSON.stringify(remoteHeroCms),
+            homepageCms: JSON.stringify(remoteHomepageCms),
+            contactCms: JSON.stringify(remoteContactCms),
+            popupCms: JSON.stringify(remotePopupCms)
           };
 
           setProjects(remoteProjects);
@@ -131,6 +301,10 @@ export default function App() {
           setSettings(remoteSettings);
           setCategories(remoteCategories);
           setNavItems(remoteNavItems);
+          setHeroCms(remoteHeroCms);
+          setHomepageCms(remoteHomepageCms);
+          setContactCms(remoteContactCms);
+          setPopupCms(remotePopupCms);
         } catch (e) {
           console.error('[Supabase] Hydration failed, using default states:', e);
         }
@@ -169,7 +343,14 @@ export default function App() {
       const revStr = JSON.stringify(reviews);
       if (revStr !== lastSavedState.current.reviews) {
         lastSavedState.current.reviews = revStr;
-        await saveSupabaseState('gangin_reviews', reviews);
+        console.log('[FEATURED REVIEW SAVE START]');
+        try {
+          await saveSupabaseState('gangin_reviews', reviews);
+          console.log('[FEATURED REVIEW SAVE SUCCESS]');
+        } catch (err) {
+          console.error(err);
+          console.log('[FEATURED REVIEW SAVE FAILED]');
+        }
       }
 
       const blogStr = JSON.stringify(blog);
@@ -195,10 +376,45 @@ export default function App() {
         lastSavedState.current.navItems = navStr;
         await saveSupabaseState('gangin_nav_items', navItems);
       }
+
+      const hcStr = JSON.stringify(heroCms);
+      if (hcStr !== lastSavedState.current.heroCms) {
+        lastSavedState.current.heroCms = hcStr;
+        await saveSupabaseState('gangin_hero_cms', heroCms);
+      }
+
+      const hmcStr = JSON.stringify(homepageCms);
+      if (hmcStr !== lastSavedState.current.homepageCms) {
+        lastSavedState.current.homepageCms = hmcStr;
+        await saveSupabaseState('gangin_homepage_cms', homepageCms);
+      }
+
+      const ccStr = JSON.stringify(contactCms);
+      if (ccStr !== lastSavedState.current.contactCms) {
+        lastSavedState.current.contactCms = ccStr;
+        console.log('[CONTACT PAGE SAVE START]');
+        try {
+          await saveSupabaseState('gangin_contact_cms', contactCms);
+          console.log('[CONTACT PAGE SAVE SUCCESS]');
+        } catch (err) {
+          console.error(err);
+          console.log('[CONTACT PAGE SAVE FAILED]');
+        }
+      }
+
+      const popStr = JSON.stringify(popupCms);
+      if (popStr !== lastSavedState.current.popupCms) {
+        lastSavedState.current.popupCms = popStr;
+        try {
+          await saveSupabaseState('gangin_popup_cms', popupCms);
+        } catch (err) {
+          console.error('Failed to sync popup CMS state:', err);
+        }
+      }
     }
 
     syncState();
-  }, [projects, packages, faq, reviews, blog, settings, categories, navItems, isHydrated]);
+  }, [projects, packages, faq, reviews, blog, settings, categories, navItems, heroCms, homepageCms, contactCms, popupCms, isHydrated]);
 
   // Supabase Real-time Subscription for true live updates across tabs/clients
   useEffect(() => {
@@ -248,6 +464,18 @@ export default function App() {
             } else if (key === 'gangin_nav_items') {
               lastSavedState.current.navItems = stringified;
               setNavItems(prev => JSON.stringify(prev) !== stringified ? value : prev);
+            } else if (key === 'gangin_hero_cms') {
+              lastSavedState.current.heroCms = stringified;
+              setHeroCms(prev => JSON.stringify(prev) !== stringified ? value : prev);
+            } else if (key === 'gangin_homepage_cms') {
+              lastSavedState.current.homepageCms = stringified;
+              setHomepageCms(prev => JSON.stringify(prev) !== stringified ? value : prev);
+            } else if (key === 'gangin_contact_cms') {
+              lastSavedState.current.contactCms = stringified;
+              setContactCms(prev => JSON.stringify(prev) !== stringified ? value : prev);
+            } else if (key === 'gangin_popup_cms') {
+              lastSavedState.current.popupCms = stringified;
+              setPopupCms(prev => JSON.stringify(prev) !== stringified ? value : prev);
             }
           }
         )
@@ -324,9 +552,12 @@ export default function App() {
         {currentView === 'home' && (
           <Home
             projects={projects}
+            reviews={reviews}
             setView={setView}
             setSelectedProjectId={setSelectedProjectId}
             settings={settings}
+            heroCms={heroCms}
+            homepageCms={homepageCms}
           />
         )}
 
@@ -363,7 +594,7 @@ export default function App() {
         )}
 
         {currentView === 'contact' && (
-          <Contact />
+          <Contact contactCms={contactCms} />
         )}
 
         {/* 1204DESIGN-Inspired New Core Views */}
@@ -411,6 +642,10 @@ export default function App() {
             settings={settings}
             categories={categories}
             navItems={navItems}
+            heroCms={heroCms}
+            homepageCms={homepageCms}
+            contactCms={contactCms}
+            popupCms={popupCms}
             onUpdateProjects={setProjects}
             onUpdatePackages={setPackages}
             onUpdateFAQ={setFaq}
@@ -419,6 +654,10 @@ export default function App() {
             onUpdateSettings={setSettings}
             onUpdateCategories={setCategories}
             onUpdateNavItems={setNavItems}
+            onUpdateHeroCms={setHeroCms}
+            onUpdateHomepageCms={setHomepageCms}
+            onUpdateContactCms={setContactCms}
+            onUpdatePopupCms={setPopupCms}
           />
         )}
       </main>
@@ -538,60 +777,68 @@ export default function App() {
       {/* C. Minimalist Exit Intent Modal in elegant LEIBAL Aesthetic */}
       <AnimatePresence>
         {showExitModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-black/60 backdrop-blur-xs">
+          <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4 sm:p-6 bg-black/70 backdrop-blur-xs">
             <motion.div
               initial={{ opacity: 0, scale: 0.98, y: 15 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.98, y: 15 }}
-              className="bg-[#FFFFFF] border border-[#111111] max-w-md w-full p-8 text-left space-y-6 relative"
+              className="bg-[#FFFFFF] border border-[#111111] w-[92%] sm:w-full max-w-md p-6 sm:p-8 text-left space-y-5 sm:space-y-6 relative max-h-[92vh] overflow-y-auto shadow-2xl"
             >
               {/* Close pin */}
               <button
                 type="button"
                 onClick={() => {
+                  console.log('[POPUP DISMISS]');
                   sessionStorage.setItem('gangin_exit_intent_dismissed', 'true');
                   setShowExitModal(false);
                 }}
-                className="absolute top-6 right-6 text-brand-muted hover:text-[#111111] transition-colors cursor-pointer"
+                className="absolute top-4 right-4 sm:top-6 sm:right-6 text-brand-muted hover:text-[#111111] transition-colors cursor-pointer p-2.5"
+                aria-label="Close"
               >
-                <X size={15} />
+                <X size={16} />
               </button>
 
-              <div className="space-y-3">
+              <div className="space-y-3.5 pr-4">
                 <span className="text-[8px] uppercase tracking-[0.3em] text-[#e11d48] font-bold block flex items-center gap-1.5 animate-pulse">
                   <Sparkles size={10} />
-                  <span>SPECIAL LEAD OFFER</span>
+                  <span>{popupCms.topLabel || "SPECIAL LEAD OFFER"}</span>
                 </span>
-                <h3 className="text-sm font-normal text-brand-dark tracking-widest leading-relaxed">
-                  잠시만요, 귀하의 기획 공간 예상견적을 <br/>3분 만에 무료로 확인해 보시겠습니까?
+                <h3 className="text-sm font-normal text-brand-dark tracking-widest leading-relaxed whitespace-pre-line text-balance">
+                  {popupCms.title}
                 </h3>
-                <p className="text-[11px] font-light text-brand-muted leading-relaxed tracking-wide">
-                  강인스튜디오는 계약 전 도면과 상세 원가 명세서를 투명하게 검수해 이중 지출 요소를 배제하고 있습니다. 성함과 평수만으로 즉시 시방 분석안을 배정받으십시오.
+                <p className="text-[11.5px] font-light text-brand-muted leading-relaxed tracking-wide whitespace-pre-line">
+                  {popupCms.description}
                 </p>
               </div>
 
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-col gap-2.5 pt-1">
                 <button
                   type="button"
                   onClick={() => {
+                    console.log('[POPUP DISMISS]');
                     sessionStorage.setItem('gangin_exit_intent_dismissed', 'true');
                     setShowExitModal(false);
-                    setView('estimate');
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                    if (popupCms.ctaUrl && (popupCms.ctaUrl.startsWith('http://') || popupCms.ctaUrl.startsWith('https://'))) {
+                      window.open(popupCms.ctaUrl, '_blank', 'noreferrer');
+                    } else {
+                      setView((popupCms.ctaUrl || 'estimate') as any);
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }
                   }}
-                  className="w-full py-3.5 bg-[#111111] hover:bg-black text-white text-[10px] tracking-[0.2em] font-bold uppercase transition-colors text-center cursor-pointer"
+                  className="w-full py-3.5 bg-[#111111] hover:bg-black text-white text-[10px] tracking-[0.2em] font-bold uppercase transition-colors text-center cursor-pointer active:scale-[0.99]"
                 >
-                  3분 예상견적 바로 받기 →
+                  {popupCms.ctaText}
                 </button>
                 <button
                   type="button"
                   onClick={() => {
+                    console.log('[POPUP DISMISS]');
                     sessionStorage.setItem('gangin_exit_intent_dismissed', 'true');
                     setShowExitModal(false);
                   }}
-                  className="w-full py-2.5 bg-transparent hover:bg-brand-bg/40 text-brand-muted hover:text-brand-dark text-[9px] tracking-widest uppercase transition-all text-center cursor-pointer font-light"
+                  className="w-full py-2.5 bg-transparent hover:bg-brand-bg/40 text-brand-muted hover:text-brand-dark text-[9px] tracking-widest uppercase transition-all text-center cursor-pointer font-light active:bg-brand-bg/80"
                 >
-                  아니요, 다음에 하겠습니다
+                  {popupCms.dismissText}
                 </button>
               </div>
             </motion.div>

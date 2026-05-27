@@ -19,6 +19,9 @@ export interface CustomerReview {
   story: string;
   date: string;
   category: string;
+  show?: boolean;
+  featured?: boolean;
+  displayOrder?: number;
 }
 
 export interface BlogPost {
@@ -519,7 +522,10 @@ export const DEFAULT_REVIEWS: CustomerReview[] = [
     quote: '"장식과 몰딩이 가득했던 기존 집에서는 소음이 늘 마음에 얹혔는데, 강인을 만나 집이 하나의 침묵 미술관 같이 비워졌습니다. 매일 아침 자연 햇살이 마이크로시멘트 바닥에 흘려드는 그림자를 보며 진정한 정적과 영혼의 휴식을 충전합니다."',
     story: '체리색 구조의 전형적인 아파트였던 곳을 마이너스 몰딩과 벽면 전체의 밀크 화이트 히든 레이아웃으로 개축했습니다. 3D 시뮬레이션으로 가구 틈새 비례까지 미리 정합해 두어, 단 1mm의 마감선에도 눈에 걸리는 파열음 없이 물 흐르듯 가치 있는 주거 형태를 소유하게 되셨습니다.',
     date: '2025.04.12',
-    category: '주거공간'
+    category: '주거공간',
+    show: true,
+    featured: true,
+    displayOrder: 1
   },
   {
     id: 'rev_02',
@@ -530,7 +536,10 @@ export const DEFAULT_REVIEWS: CustomerReview[] = [
     quote: '"인테리어를 해 준다며 화려한 알록달록 자재만 전시하는 타 업체들과 달리, 강인은 에스프레소 추출 음영에 맞춰 6미터 현무암 스택을 고스란히 깎아 올렸습니다. 바에 머무는 손님들이 다 하나같이 공간의 묵직한 힘에 감탄합니다."',
     story: '광주 동명동 카페 골목에서 극치 깊은 비하인드 뷰를 이글어냈습니다. 검은 화강과 거친 티크 우드 질감을 비대칭 매치하고 바쁜 영업 시간 중 구성원이 전혀 부딪히지 않는 급배수 중앙 수렴 공도선을 배치하여, 오픈 이래 사색적 미학으로 일관된 매장 대기 행렬을 수호하는 데 기여했습니다.',
     date: '2025.05.02',
-    category: '카페/디저트숍'
+    category: '카페/디저트숍',
+    show: true,
+    featured: true,
+    displayOrder: 2
   },
   {
     id: 'rev_03',
@@ -541,7 +550,10 @@ export const DEFAULT_REVIEWS: CustomerReview[] = [
     quote: '"타일 미장 속 조적 욕탕에 물이 새서 아랫집에 피해를 줄까 봐 밤잠 설쳤는데, 강인 소장들이 96시간 동안 수위를 한 장 한 장 가로지르며 정밀 담수 현판 테스트를 이행하는 보고를 받고 소름이 돋았습니다. 웰니스 욕실은 역시 기술이 먼저입니다."',
     story: '네로 마르키나 무광 스톤 마감이 들어간 욕탕 축조 사업에서 방수의 절대 완벽을 증명했습니다. 보온에 탁월하도록 침실 바지 열선을 매립 차단해 사계절 내내 스파 온풍실 같은 건조 수밀함을 선사하는 고결 웰니스 명작을 빚었습니다.',
     date: '2025.03.18',
-    category: '욕실 디자인'
+    category: '욕실 디자인',
+    show: true,
+    featured: true,
+    displayOrder: 3
   }
 ];
 
@@ -705,7 +717,12 @@ export function getInitialState() {
       return list;
     })() : DEFAULT_PACKAGES,
     faq: Array.isArray(parsedFaq) ? parsedFaq : DEFAULT_FAQ,
-    reviews: Array.isArray(parsedReviews) ? parsedReviews : DEFAULT_REVIEWS,
+    reviews: (Array.isArray(parsedReviews) ? parsedReviews : DEFAULT_REVIEWS).map((r, i) => ({
+      ...r,
+      show: r.show !== undefined ? r.show : true,
+      featured: r.featured !== undefined ? r.featured : true,
+      displayOrder: r.displayOrder !== undefined ? r.displayOrder : (i + 1)
+    })),
     blog: Array.isArray(parsedBlog) ? parsedBlog : DEFAULT_BLOG,
     settings: finalSettings
   };

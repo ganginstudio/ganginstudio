@@ -15,6 +15,7 @@ export interface BeforeAfterPair {
 
 export interface GalleryItem {
   url: string;
+  urlMobile?: string;
   caption: string;
   aspect?: 'portrait' | 'landscape' | 'square';
 }
@@ -30,6 +31,7 @@ export interface Project {
   area: string; // e.g. "135㎡ / 41평"
   client: string;
   image: string; // primary image path
+  imageMobile?: string; // primary mobile image path (optional)
   concept: string; // Design philosophy story
   materials: string[];
   timeline: string;
@@ -72,6 +74,127 @@ export interface NavItemConfig {
   labelKr: string;
   order: number;
   show: boolean;
+}
+
+export interface HeroCmsConfig {
+  image1: string;
+  image1Mobile?: string;
+  image2: string;
+  image2Mobile?: string;
+  image3: string;
+  image3Mobile?: string;
+  show1: boolean;
+  show2: boolean;
+  show3: boolean;
+  order: string;
+  interval: number;
+  headlineLine1: string;
+  headlineLine2: string;
+  label1: string;
+  label2: string;
+  label3: string;
+  button1Text: string;
+  button1Url: string;
+  button2Text: string;
+  button2Url: string;
+}
+
+export interface HomepageCmsConfig {
+  philosophyNum: string;
+  philosophyLabel: string;
+  philosophyTitle: string;
+  philosophyHeadline: string;
+  philosophyPara1: string;
+  philosophyPara2: string;
+
+  featuredNum: string;
+  featuredLabel: string;
+  featuredTitle: string;
+  featuredBtnText: string;
+  featuredBtnUrl: string;
+
+  integrityNum: string;
+  integrityLabel: string;
+  integrityTitle: string;
+  integrityDesc: string;
+  
+  col1Num: string;
+  col1Title: string;
+  col1Desc: string;
+  col2Num: string;
+  col2Title: string;
+  col2Desc: string;
+  col3Num: string;
+  col3Title: string;
+  col3Desc: string;
+
+  conversionNum: string;
+  conversionLabel: string;
+  conversionTitle: string;
+  conversionDesc: string;
+
+  portal1Title: string;
+  portal1Desc: string;
+  portal2Title: string;
+  portal2Desc: string;
+
+  form1NameLabel: string;
+  form1PhoneLabel: string;
+  form1TypeLabel: string;
+  form1AreaLabel: string;
+  form1BudgetLabel: string;
+  form2NameLabel: string;
+  form2PhoneLabel: string;
+  form2TypeLabel: string;
+  form2TimeLabel: string;
+  form2DescLabel: string;
+}
+
+export interface ContactCmsConfig {
+  topLabel: string;
+  topTitle: string;
+  topDesc: string;
+
+  addressSectionTitle: string;
+  addressMain: string;
+  addressSub: string;
+  addressMapLinkText: string;
+  addressMapLinkUrl: string;
+
+  channelSectionTitle: string;
+  channelMainPhone: string;
+  channelMobilePhone: string;
+  channelEmail: string;
+  channelKakaoText: string;
+  channelKakaoUrl: string;
+
+  workSectionTitle: string;
+  workWeekday: string;
+  workWeekend: string;
+  workHolidayNotice: string;
+  workAdditionalNote: string;
+
+  mapImage: string;
+  mapEmbed: string;
+  mapMarkerTitle: string;
+  mapMarkerDesc: string;
+  naverMapLink: string;
+  kakaoMapLink: string;
+
+  buttonText: string;
+  buttonUrl: string;
+  buttonShow: boolean;
+}
+
+export interface PopupCmsConfig {
+  showPopup: boolean;
+  topLabel: string;
+  title: string;
+  description: string;
+  ctaText: string;
+  ctaUrl: string;
+  dismissText: string;
+  delayTime: number; // in seconds
 }
 
 import { FAQItem, CustomerReview, BlogPost, SiteSettings, ServicePackage, ServiceCategory } from './store';

@@ -51,12 +51,12 @@ export default function ProjectDetail({ project, onBack, setView, setEstimatePre
       <div className="max-w-[1400px] mx-auto px-6 md:px-12 mt-12">
         {/* 1. LARGE WIDESCREEN HERO */}
         <section className="mb-24">
-          <div className="w-full h-[60vh] md:h-[75vh] overflow-hidden bg-brand-border">
+          <div className="w-full h-auto aspect-square md:h-[75vh] md:aspect-auto overflow-hidden bg-[#fafaf9] border border-brand-border/40">
             <img
-              src={project.image || 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=1200'}
+              src={project.imageMobile || project.image || 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=1200'}
               alt={project.title || "Bathroom Interior Project"}
               loading="lazy"
-              className="w-full h-full object-cover animate-fade-in"
+              className="w-full h-auto md:h-full object-contain md:object-cover animate-fade-in"
               referrerPolicy="no-referrer"
               onError={(e) => {
                 e.currentTarget.src = 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=1200';
@@ -230,12 +230,12 @@ export default function ProjectDetail({ project, onBack, setView, setEstimatePre
             <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
               {(project.gallery || []).map((img, index) => (
                 <div key={index} className="space-y-3">
-                   <div className="w-full aspect-[4/3] overflow-hidden bg-brand-border">
+                   <div className="w-full h-auto aspect-square md:aspect-[4/3] overflow-hidden bg-[#fafaf9] border border-brand-border/40">
                     <img 
-                      src={img.url || 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=1200'} 
+                      src={img.urlMobile || img.url || 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=1200'} 
                       alt={img.caption || "Bathroom Interior Project"} 
                       loading="lazy"
-                      className="w-full h-full object-cover"
+                      className="w-full h-auto md:h-full object-contain md:object-cover"
                       referrerPolicy="no-referrer"
                       onError={(e) => {
                         e.currentTarget.src = 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=1200';

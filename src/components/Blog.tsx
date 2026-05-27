@@ -104,11 +104,11 @@ export default function Blog({ blogPosts, setView }: BlogProps) {
                   >
                     <div className="space-y-4">
                       {/* Image Frame - Natural Color */}
-                      <div className="w-full aspect-[16/10] overflow-hidden bg-brand-bg relative">
+                      <div className="w-full h-auto aspect-video md:aspect-[16/10] overflow-hidden bg-[#fafaf9] relative border border-brand-border/40">
                         <img
                           src={post.image}
                           alt={post.title}
-                          className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-102"
+                          className="w-full h-auto md:h-full object-contain md:object-cover transition-transform duration-700 ease-out group-hover:scale-102"
                           referrerPolicy="no-referrer"
                         />
                       </div>
@@ -183,11 +183,11 @@ export default function Blog({ blogPosts, setView }: BlogProps) {
             </div>
 
             {/* Natural Rich Image banner */}
-            <div className="aspect-[16/9] w-full overflow-hidden bg-brand-bg relative border border-brand-border/60">
+            <div className="w-full h-auto aspect-video md:aspect-[16/9] overflow-hidden bg-[#fafaf9] relative border border-brand-border/60">
               <img
                 src={selectedPost.image}
                 alt={selectedPost.title}
-                className="w-full h-full object-cover"
+                className="w-full h-auto md:h-full object-contain md:object-cover"
                 referrerPolicy="no-referrer"
               />
             </div>

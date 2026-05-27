@@ -1,18 +1,27 @@
-import { useState, FormEvent } from 'react';
-import { motion } from 'motion/react';
-import { Project, NavView, SiteSettings } from '../types';
+import { useState, useEffect, FormEvent } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
+import { Project, NavView, HeroCmsConfig, HomepageCmsConfig, CustomerReview } from '../types';
 import { ArrowRight, MoveDown, Sparkles, Send, Check } from 'lucide-react';
 
 interface HomeProps {
   projects: Project[];
+  reviews: CustomerReview[];
   setView: (view: NavView) => void;
   setSelectedProjectId: (id: string | null) => void;
-  settings: SiteSettings;
+  settings: any;
+  heroCms: HeroCmsConfig;
+  homepageCms: HomepageCmsConfig;
 }
 
-export default function Home({ projects, setView, setSelectedProjectId, settings }: HomeProps) {
+export default function Home({ projects, reviews, setView, setSelectedProjectId, settings, heroCms, homepageCms }: HomeProps) {
   // Pull 3 featured projects for the homepage grid
   const featuredProjects = projects.filter(p => p.featured).slice(0, 3);
+
+  // Pull maximum 3 sorted featured customer reviews
+  const featuredReviews = (reviews || [])
+    .filter(r => r.featured && r.show)
+    .sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0))
+    .slice(0, 3);
 
   const handleProjectClick = (id: string) => {
     setSelectedProjectId(id);
@@ -20,21 +29,139 @@ export default function Home({ projects, setView, setSelectedProjectId, settings
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  // Safe Fallback initialization for Hero Slider
+  const hCms = heroCms || {
+    image1: "/src/assets/images/gangin_hero_1779412179856.png",
+    image2: "https://images.unsplash.com/photo-1618219908412-a29a1bb7b86e?q=80&w=1200",
+    image3: "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?q=80&w=1200",
+    show1: true,
+    show2: true,
+    show3: true,
+    order: "1,2,3",
+    interval: 4000,
+    headlineLine1: "공간을 디자인하고",
+    headlineLine2: "시공까지 책임집니다.",
+    label1: "Interior Design",
+    label2: "Construction",
+    label3: "After Service",
+    button1Text: "포트폴리오",
+    button1Url: "portfolio",
+    button2Text: "견적문의",
+    button2Url: "estimate"
+  };
+
+  const hpCms = homepageCms || {
+    philosophyNum: "01",
+    philosophyLabel: "GANG IN STUDIO",
+    philosophyTitle: "Brand Philosophy",
+    philosophyHeadline: "우리는 쓸모없는 화려한 장식과 소음을 지우고 오직 본질적인 선과 기하학적 비례에 집중합니다.",
+    philosophyPara1: "나무, 석재, 콘크리트, 금속. 자연에서 길러낸 가공되지 않은 자재에 빛의 춤을 더해 거주자가 매일 진정한 마음의 응집력과 고요함을 발견하도록 설계합니다.",
+    philosophyPara2: "강인스튜디오는 디자인 단계에서 기획한 1mm의 미세한 공차와 음영 디테일을 현장 시공 소장들이 한치의 오차 없이 그대로 구축해 나갑니다. 그것이 우리 인테리어의 품위이자 책임감입니다.",
+
+    featuredNum: "02",
+    featuredLabel: "Editorial Curation",
+    featuredTitle: "Featured Spaces (선정작)",
+    featuredBtnText: "전체 포트폴리오 보기",
+    featuredBtnUrl: "portfolio",
+
+    integrityNum: "03",
+    integrityLabel: "Integrity & Precision",
+    integrityTitle: "투명성 회계제도와 직직영 책임 시공의 약속",
+    integrityDesc: "광주 인테리어 업체 중 유일하게 투명한 상세 명세 자재 원가 내역서를 계약 전 100% 가감 없이 공유하며, 중간 마진 명세 일체의 요소를 정출하는 정제된 1204DESIGN 비즈니스 투명성 공식을 엄수합니다.",
+    
+    col1Num: "01",
+    col1Title: "자재 등급 정찰제",
+    col1Desc: "계약하는 세밀 자재 하나까지 단위 수량과 도소매 단가를 투명하게 공개해 가라 자재나 임의 변경 행위가 애초에 불가능하도록 회계 감독선을 수립합니다.",
+    col2Num: "02",
+    col2Title: "직영 소장제",
+    col2Desc: "외주 대마에 전적으로 시공을 위탁하는 타 업체들과 달리 본사의 15년 차 경력 정규 면허 기술진이 도면과 동일한 자재의 접합률을 실시간 전담 감독합니다.",
+    col3Num: "03",
+    col3Title: "3개년 웰니스 점검",
+    col3Desc: "하자 이행 증권 상의 기간을 뛰어넘어, 사후 3개년간 자사 소속 시공 사후 수련팀이 6달 간격으로 실내 습도 밸런스와 오크 가구 뒤틀림 복원을 무료로 리포팅합니다.",
+
+    conversionNum: "04",
+    conversionLabel: "HIGH CONVERSION PORTALS",
+    conversionTitle: "공학적 투명성과 시적 여백의 기획 채널",
+    conversionDesc: "광주 인테리어 업체 중 유일하게 투명한 상세 명세 자재 원가 내역서를 계약 전 100% 가감 없이 공유하며...",
+
+    portal1Title: "우리집 예상견적 받아보기",
+    portal1Desc: "평수와 원가 기준을 빠르게 연산하여 가도면 상담을 예약하는 간섭 없는 인스턴트 견적 채널입니다. 더 면밀한 정보는 언제든 견적문의 탭의 7단계 도구를 실행하십시오.",
+    portal2Title: "간편 유선 긴급상담 받아보기",
+    portal2Desc: "복잡한 서류 절차가 아닌, 단순 시공 가부 여부 및 사옥 예약 방법론 등을 바리스타 처럼 빠르고 격조 있게 물어보는 1분 직통 신청 창구입니다.",
+
+    form1NameLabel: "고객 성함",
+    form1PhoneLabel: "대표 번호",
+    form1TypeLabel: "공간 분야",
+    form1AreaLabel: "분양 면적 (평형)",
+    form1BudgetLabel: "보유 예산 규모",
+    form2NameLabel: "대표 성함",
+    form2PhoneLabel: "전화 번호",
+    form2TypeLabel: "문의 카테고리",
+    form2TimeLabel: "통화 희망 시간대",
+    form2DescLabel: "간단 문의 사항"
+  };
+
+  const [isMobile, setIsMobile] = useState<boolean>(false);
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // Compile Active Hero Slide Images list in specified Custom Order
+  const slideTemplates = [
+    { id: '1', url: (isMobile && hCms.image1Mobile) ? hCms.image1Mobile : (hCms.image1 || "/src/assets/images/gangin_hero_1779412179856.png"), show: hCms.show1 !== false },
+    { id: '2', url: (isMobile && hCms.image2Mobile) ? hCms.image2Mobile : (hCms.image2 || "https://images.unsplash.com/photo-1618219908412-a29a1bb7b86e?q=80&w=1200"), show: hCms.show2 !== false },
+    { id: '3', url: (isMobile && hCms.image3Mobile) ? hCms.image3Mobile : (hCms.image3 || "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?q=80&w=1200"), show: hCms.show3 !== false },
+  ];
+
+  const orderPattern = (hCms.order || "1,2,3")
+    .split(',')
+    .map(val => val.trim())
+    .filter(val => val === '1' || val === '2' || val === '3');
+
+  const orderedSlides = orderPattern
+    .map(id => slideTemplates.find(s => s.id === id))
+    .filter((s): s is { id: string; url: string; show: boolean } => !!s && s.show);
+
+  // Fallback if zero items shown
+  const finalSlides = orderedSlides.length > 0 ? orderedSlides : [slideTemplates[0]];
+
+  const [slideIdx, setSlideIdx] = useState(0);
+
+  // Automatic transition clock
+  useEffect(() => {
+    if (finalSlides.length <= 1) return;
+    const intervalTime = hCms.interval || 4000;
+    const intervalId = setInterval(() => {
+      setSlideIdx(prev => (prev + 1) % finalSlides.length);
+    }, intervalTime);
+    return () => clearInterval(intervalId);
+  }, [finalSlides.length, hCms.interval]);
+
   return (
     <div id="home-view-container" className="pt-24 min-h-screen">
-      {/* 1. HERO SECTION */}
-      <section id="hero-section" className="relative h-[85vh] md:h-[90vh] bg-brand-bg flex items-center px-6 md:px-12 mb-32 overflow-hidden">
-        {/* Background Image - Muted and extremely precise */}
-        <div className="absolute inset-0 z-0">
-          <img
-            src={settings?.visualHeroImage || "/src/assets/images/gangin_hero_1779412179856.png"}
-            alt="GANG IN STUDIO Principal Space"
-            className="w-full h-full object-cover grayscale-10 brightness-[0.93] contrast-[1.02]"
-            referrerPolicy="no-referrer"
-          />
-          {/* Subtle light overlay to match LEIBAL palette values */}
-          <div className="absolute inset-0 bg-[#F7F6F2]/10 mix-blend-multiply" />
-          <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-[#F7F6F2] to-transparent" />
+      {/* 1. HERO SECTION WITH IMAGE SLIDER */}
+      <section id="hero-section" className="relative h-[85vh] md:h-[90vh] bg-neutral-950 flex items-center px-6 md:px-12 mb-32 overflow-hidden">
+        {/* Slider Background wrapper - Pure fade transitions */}
+        <div className="absolute inset-0 z-0 bg-neutral-950">
+          <AnimatePresence mode="wait">
+            <motion.img
+              key={finalSlides[slideIdx]?.id || 'fallback'}
+              src={finalSlides[slideIdx]?.url}
+              alt="GANG IN STUDIO Principal Space Slide"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 1.0, ease: 'easeInOut' }}
+              className="absolute inset-0 w-full h-full object-contain md:object-cover bg-neutral-950 grayscale-10 brightness-[0.93] contrast-[1.02]"
+              referrerPolicy="no-referrer"
+            />
+          </AnimatePresence>
+          <div className="absolute inset-y-0 left-0 w-full h-full bg-[#111111]/10 bg-gradient-to-t from-[#ffffff] via-transparent to-transparent z-10" />
         </div>
 
         {/* Text Area */}
@@ -47,44 +174,70 @@ export default function Home({ projects, setView, setSelectedProjectId, settings
           >
             {/* Super thin architectural heading */}
             <h1 className="text-2xl sm:text-3xl md:text-5xl font-extralight tracking-widest leading-[1.6] mb-8 font-sans">
-              공간을 <span className="font-light">디자인하고</span> <br />
-              시공까지 <span className="font-light">책임집니다.</span>
+              {hCms.headlineLine1 || "공간을 디자인하고"} <br />
+              <span className="font-light">{hCms.headlineLine2 || "시공까지 책임집니다."}</span>
             </h1>
 
             {/* Sub-capabilities */}
             <div className="flex flex-wrap gap-x-8 gap-y-3 text-[11px] tracking-[0.25em] uppercase text-brand-muted/90 mb-12 font-light">
-              <span className="flex items-center gap-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-brand-dark/40" /> Interior Design
-              </span>
-              <span className="flex items-center gap-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-brand-dark/40" /> Construction
-              </span>
-              <span className="flex items-center gap-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-brand-dark/40" /> After Service
-              </span>
+              {hCms.label1 && (
+                <span className="flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-brand-dark/40" /> {hCms.label1}
+                </span>
+              )}
+              {hCms.label2 && (
+                <span className="flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-brand-dark/40" /> {hCms.label2}
+                </span>
+              )}
+              {hCms.label3 && (
+                <span className="flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-brand-dark/40" /> {hCms.label3}
+                </span>
+              )}
             </div>
 
-            {/* CTAs following LEIBAL aesthetics: thin borders, muted response, premium styling */}
+            {/* CTAs following LEIBAL aesthetics */}
             <div className="flex items-center gap-x-6">
-              <button
-                id="hero-cta-portfolio"
-                onClick={() => setView('portfolio')}
-                className="group relative px-7 py-3 text-[11px] uppercase tracking-[0.2em] bg-brand-dark text-white hover:bg-brand-dark/90 transition-all duration-300 rounded-none cursor-pointer focus:outline-none flex items-center gap-2"
-              >
-                <span>포트폴리오</span>
-                <ArrowRight size={12} className="transform group-hover:translate-x-1 transition-transform" />
-              </button>
+              {hCms.button1Text && (
+                <button
+                  id="hero-cta-portfolio"
+                  onClick={() => setView((hCms.button1Url || 'portfolio') as any)}
+                  className="group relative px-7 py-3 text-[11px] uppercase tracking-[0.2em] bg-brand-dark text-white hover:bg-brand-dark/90 transition-all duration-300 rounded-none cursor-pointer focus:outline-none flex items-center gap-2"
+                >
+                  <span>{hCms.button1Text}</span>
+                  <ArrowRight size={12} className="transform group-hover:translate-x-1 transition-transform" />
+                </button>
+              )}
               
-              <button
-                id="hero-cta-estimate"
-                onClick={() => setView('estimate')}
-                className="group px-7 py-3 text-[11px] uppercase tracking-[0.2em] border border-brand-dark/30 text-brand-dark hover:border-brand-dark hover:bg-brand-dark hover:text-white transition-all duration-500 rounded-none cursor-pointer focus:outline-none"
-              >
-                견적문의
-              </button>
+              {hCms.button2Text && (
+                <button
+                  id="hero-cta-estimate"
+                  onClick={() => setView((hCms.button2Url || 'estimate') as any)}
+                  className="group px-7 py-3 text-[11px] uppercase tracking-[0.2em] border border-brand-dark/30 text-brand-dark hover:border-brand-dark hover:bg-brand-dark hover:text-white transition-all duration-500 rounded-none cursor-pointer focus:outline-none"
+                >
+                  {hCms.button2Text}
+                </button>
+              )}
             </div>
           </motion.div>
         </div>
+
+        {/* Manual Dot Navigation overrides */}
+        {finalSlides.length > 1 && (
+          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2.5">
+            {finalSlides.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => setSlideIdx(i)}
+                className={`w-1.5 h-1.5 rounded-full transition-all duration-300 focus:outline-none cursor-pointer ${
+                  slideIdx === i ? 'bg-brand-dark scale-125' : 'bg-brand-dark/30 hover:bg-brand-dark/60'
+                }`}
+                aria-label={`Go to slide ${i + 1}`}
+              />
+            ))}
+          </div>
+        )}
 
         {/* Scroll down indicator to maintain editorial feel */}
         <div className="absolute right-12 bottom-12 hidden md:flex items-center gap-4 text-[10px] tracking-[0.3em] uppercase text-brand-muted/75 vertical-text">
@@ -95,33 +248,73 @@ export default function Home({ projects, setView, setSelectedProjectId, settings
 
       {/* 2. PHILOSOPHY HIGHLIGHT */}
       <section id="introduction-philosophy" className="max-w-[1400px] mx-auto px-6 md:px-12 mb-36">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-24 items-baseline">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-24 items-baseline mb-16">
           {/* Tag */}
           <div className="lg:col-span-3">
             <span className="text-[10px] uppercase tracking-[0.3em] text-brand-muted/70 block">
-              01 — Brand Philosophy
+              {hpCms.philosophyNum} — {hpCms.philosophyLabel}
             </span>
             <h2 className="text-xs uppercase tracking-[0.2em] text-[#111111] mt-2 font-normal">
-              GANG IN STUDIO
+              {hpCms.philosophyTitle}
             </h2>
           </div>
 
           {/* Narrative */}
           <div className="lg:col-span-5 space-y-6">
             <h3 className="text-xl md:text-2xl font-light tracking-[0.1em] text-brand-dark font-sans leading-relaxed">
-              우리는 쓸모없는 화려한 장식과 소음을 지우고 오직 본질적인 선과 기하학적 비례에 집중합니다.
+              {hpCms.philosophyHeadline}
             </h3>
           </div>
 
           <div className="lg:col-span-4 text-xs font-light tracking-wide text-brand-muted leading-relaxed space-y-4">
             <p>
-              나무, 석재, 콘크리트, 금속. 자연에서 길러낸 가공되지 않은 자재에 빛의 춤을 더해 거주자가 매일 진정한 마음의 응집력과 고요함을 발견하도록 설계합니다.
+              {hpCms.philosophyPara1}
             </p>
             <p>
-              강인스튜디오는 디자인 단계에서 기획한 1mm의 미세한 공차와 음영 디테일을 현장 시공 소장들이 한치의 오차 없이 그대로 구축해 나갑니다. 그것이 우리 인테리어의 품위이자 책임감입니다.
+              {hpCms.philosophyPara2}
             </p>
           </div>
         </div>
+
+        {/* Dynamic Featured Reviews Integration inside Brand Philosophy/History */}
+        {featuredReviews.length > 0 && (
+          <div className="pt-16 border-t border-brand-border/40">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-start">
+              <div className="lg:col-span-3">
+                <span className="text-[10px] uppercase tracking-[0.3em] text-brand-muted/70 block">
+                  SELECTED VOICES
+                </span>
+                <h4 className="text-xs uppercase tracking-[0.2em] text-[#111111] mt-2 font-normal">
+                  고객 상생 수기
+                </h4>
+              </div>
+              
+              <div className="lg:col-span-9 grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-12 lg:gap-16">
+                {featuredReviews.map((rev) => (
+                  <div key={rev.id} className="space-y-4 font-sans text-justify flex flex-col justify-between h-full">
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-baseline border-b border-brand-border/20 pb-2">
+                        <span className="text-[10px] font-medium tracking-wider text-[#111111]">{rev.clientName}</span>
+                        <span className="text-[9px] uppercase tracking-[0.15em] text-brand-muted font-light">{rev.category}</span>
+                      </div>
+                      <p className="text-[11px] font-light leading-relaxed text-brand-muted tracking-wide italic whitespace-pre-line">
+                        {rev.quote}
+                      </p>
+                    </div>
+                    <div className="flex justify-between items-center text-[9px] text-brand-muted/70 pt-4 font-mono mt-auto border-t border-brand-border/10">
+                      <span className="tracking-widest">{rev.date || 'N/A'}</span>
+                      {rev.rating !== undefined && rev.rating > 0 && (
+                        <span className="tracking-widest flex items-center gap-0.5 text-[#111111] text-[8px]">
+                          {'★'.repeat(rev.rating)}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
       </section>
 
       {/* 3. FEATURED PROJECTS ARCHITECTURAL GRID */}
@@ -129,18 +322,18 @@ export default function Home({ projects, setView, setSelectedProjectId, settings
         <div className="flex justify-between items-baseline border-b border-brand-border pb-6 mb-16">
           <div className="space-y-1">
             <span className="text-[10px] uppercase tracking-[0.3em] text-brand-muted/70 block">
-              02 — Editorial Curation
+              {hpCms.featuredNum} — {hpCms.featuredLabel}
             </span>
             <h3 className="text-sm uppercase tracking-[0.2em] text-[#111111] font-light">
-              Featured Spaces (선정작)
+              {hpCms.featuredTitle}
             </h3>
           </div>
           <button
             id="view-all-portfolio"
-            onClick={() => setView('portfolio')}
+            onClick={() => setView((hpCms.featuredBtnUrl || 'portfolio') as any)}
             className="text-[10px] tracking-[0.1em] text-brand-muted hover:text-[#111111] transition-colors focus:outline-none flex items-center gap-2 cursor-pointer pb-1 border-b border-transparent hover:border-brand-dark"
           >
-            <span>전체 포트폴리오 보기</span>
+            <span>{hpCms.featuredBtnText}</span>
             <ArrowRight size={10} />
           </button>
         </div>
@@ -148,7 +341,6 @@ export default function Home({ projects, setView, setSelectedProjectId, settings
         {/* Asymmetrical composition for high-end look */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-16 md:gap-24">
           {featuredProjects.map((project, idx) => {
-            // Give even projects an offset to create dynamic asymmetric vertical flow
             const isEven = idx % 2 === 1;
             return (
               <motion.div
@@ -162,12 +354,12 @@ export default function Home({ projects, setView, setSelectedProjectId, settings
                 transition={{ duration: 1, ease: 'easeOut' }}
               >
                 {/* Image Wrap */}
-                <div className="w-full aspect-[4/3] md:aspect-[3/2] overflow-hidden bg-brand-border relative mb-6">
+                <div className="w-full h-auto aspect-square md:aspect-[3/2] overflow-hidden bg-brand-bg relative mb-6 border border-brand-border/40">
                   <img
-                    src={project.image || 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=1200'}
+                    src={project.imageMobile || project.image || 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=1200'}
                     alt={project.title || "Bathroom Interior Project"}
                     loading="lazy"
-                    className="w-full h-full object-cover transition-all duration-700 ease-out scale-100 group-hover:scale-[1.02]"
+                    className="w-full h-auto md:h-full object-contain md:object-cover bg-[#fafaf9] transition-all duration-700 ease-out scale-100 group-hover:scale-[1.02]"
                     referrerPolicy="no-referrer"
                     onError={(e) => {
                       e.currentTarget.src = 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=1200';
@@ -196,71 +388,76 @@ export default function Home({ projects, setView, setSelectedProjectId, settings
         </div>
       </section>
 
-      {/* 4. BUSINESS CORE VALUES (1204DESIGN INSPIRED FUNCTIONALITY) */}
+      {/* 4. BUSINESS CORE VALUES */}
       <section id="trust-core-business" className="bg-white/40 border-y border-brand-border py-28 mb-36">
         <div className="max-w-[1400px] mx-auto px-6 md:px-12">
           <div className="max-w-xl mb-16">
             <span className="text-[10px] uppercase tracking-[0.3em] text-brand-muted/70 block">
-              03 — Integrity & Precision
+              {hpCms.integrityNum} — {hpCms.integrityLabel}
             </span>
             <h2 className="text-xl md:text-2xl font-light tracking-[0.1em] text-[#111111] mt-2 mb-6">
-              투명성 회계제도와 직직영 책임 시공의 약속
+              {hpCms.integrityTitle}
             </h2>
             <p className="text-xs font-light text-brand-muted leading-relaxed tracking-wide">
-              광주 인테리어 업체 중 유일하게 투명한 상세 명세 자재 원가 내역서를 계약 전 100% 가감 없이 공유하며, 중간 마진 명세 일체의 요소를 정출하는 정제된 1204DESIGN 비즈니스 투명성 공식을 엄수합니다.
+              {hpCms.integrityDesc}
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-8">
             <div className="space-y-4">
-              <span className="text-[10px] uppercase tracking-[0.25em] text-brand-muted block">01 / 정가 원가 공개</span>
-              <h3 className="text-sm font-light tracking-widest text-[#111111]">자재 등급 정찰제</h3>
+              <span className="text-[10px] uppercase tracking-[0.25em] text-brand-muted block">{hpCms.col1Num}</span>
+              <h3 className="text-sm font-light tracking-widest text-[#111111]">{hpCms.col1Title}</h3>
               <p className="text-xs text-brand-muted font-light leading-relaxed">
-                계약하는 세밀 자재 하나까지 단위 수량과 도소매 단가를 투명하게 공개해 가라 자재나 임의 변경 행위가 애초에 불가능하도록 회계 감독선을 수립합니다.
+                {hpCms.col1Desc}
               </p>
             </div>
             
             <div className="space-y-4">
-              <span className="text-[10px] uppercase tracking-[0.25em] text-brand-muted block">02 / 직영 소장제</span>
-              <h3 className="text-sm font-light tracking-widest text-[#111111]">실내건축공업 라이선스 소지</h3>
+              <span className="text-[10px] uppercase tracking-[0.25em] text-brand-muted block">{hpCms.col2Num}</span>
+              <h3 className="text-sm font-light tracking-widest text-[#111111]">{hpCms.col2Title}</h3>
               <p className="text-xs text-brand-muted font-light leading-relaxed">
-                외주 대마에 전적으로 시공을 위탁하는 타 업체들과 달리 본사의 15년 차 경력 정규 면허 기술진이 도면과 동일한 자재의 접합률을 실시간 전담 감독합니다.
+                {hpCms.col2Desc}
               </p>
             </div>
 
             <div className="space-y-4">
-              <span className="text-[10px] uppercase tracking-[0.25em] text-brand-muted block">03 / 3개년 웰니스 점검</span>
-              <h3 className="text-sm font-light tracking-widest text-[#111111]">무상 AS 및 사후 복구 기술</h3>
+              <span className="text-[10px] uppercase tracking-[0.25em] text-brand-muted block">{hpCms.col3Num}</span>
+              <h3 className="text-sm font-light tracking-widest text-[#111111]">{hpCms.col3Title}</h3>
               <p className="text-xs text-brand-muted font-light leading-relaxed">
-                하자 이행 증권 상의 기간을 뛰어넘어, 사후 3개년간 자사 소속 시공 사후 수련팀이 6달 간격으로 실내 습도 밸런스와 오크 가구 뒤틀림 복원을 무료로 리포팅합니다.
+                {hpCms.col3Desc}
               </p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* 5. PRIMARY CONVERSION CTA SYSTEM (CTA MODULE 01 + CTA MODULE 02) */}
+      {/* 5. PRIMARY CONVERSION CTA SYSTEM */}
       <section id="conversion-cta-block" className="max-w-[1400px] mx-auto px-6 md:px-12 mb-36 border-t border-brand-border/60 pt-28">
         <div className="max-w-xl mb-16">
           <span className="text-[10px] uppercase tracking-[0.3em] text-brand-muted/70 block">
-            04 — HIGH CONVERSION PORTALS
+            {hpCms.conversionNum} — {hpCms.conversionLabel}
           </span>
           <h2 className="text-xl md:text-2xl font-light tracking-[0.1em] text-[#111111] mt-2 mb-4">
-            공학적 투명성과 시적 여백의 기획 채널
+            {hpCms.conversionTitle}
           </h2>
           <p className="text-xs font-light text-brand-muted leading-relaxed tracking-wide">
-            강인스튜디오가 제공하는 두 가지 특화 상담 포털입니다. 정밀한 원가 설계를 위한 예상 견적서 제출과 간편하고 신속한 대표 전속 통화 예약 중 선호하시는 경로를 이행하십시오.
+            {hpCms.conversionDesc}
           </p>
         </div>
 
-        <HomeConversionCTAs setView={setView} />
+        <HomeConversionCTAs setView={setView} homepageCms={hpCms} />
       </section>
     </div>
   );
 }
 
-// Subcomponent to organize forms cleanly in interactive state
-function HomeConversionCTAs({ setView }: { setView: (view: NavView) => void }) {
+// Interactive Subcomponent with customized labels
+interface HomeConversionCTAsProps {
+  setView: (view: NavView) => void;
+  homepageCms: HomepageCmsConfig;
+}
+
+function HomeConversionCTAs({ setView, homepageCms }: HomeConversionCTAsProps) {
   // Form 01 - Fast Estimate Inquiry
   const [estName, setEstName] = useState('');
   const [estPhone, setEstPhone] = useState('');
@@ -307,7 +504,7 @@ function HomeConversionCTAs({ setView }: { setView: (view: NavView) => void }) {
       status: 'Pending' as const
     };
 
-    // Save lead submission directly to Supabase Database (No localStorage fallback)
+    // Save lead submission directly to Supabase Database
     const newLead = {
       id: newEst.id,
       type: 'Quick Estimate (우선 견적 신청)',
@@ -367,7 +564,7 @@ function HomeConversionCTAs({ setView }: { setView: (view: NavView) => void }) {
       })
     };
 
-    // Save consultation submission directly to Supabase Database (No localStorage fallback)
+    // Save consultation submission directly to Supabase Database
     import('../lib/leads').then(({ addLeadSubmission }) => {
       addLeadSubmission({
         lead: newConPort,
@@ -384,7 +581,7 @@ function HomeConversionCTAs({ setView }: { setView: (view: NavView) => void }) {
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-      {/* CTA MODULE 01: 우리집 / 나의가게 예상견적 받아보기 */}
+      {/* CTA MODULE 01 */}
       <div className="border border-brand-border p-8 bg-brand-bg/10 relative space-y-6 flex flex-col justify-between">
         {showEstSuccess && (
           <div className="absolute inset-0 bg-[#111111]/95 text-white p-8 flex flex-col justify-center items-center text-center z-10 space-y-3">
@@ -398,17 +595,17 @@ function HomeConversionCTAs({ setView }: { setView: (view: NavView) => void }) {
 
         <div className="space-y-4">
           <h3 className="text-sm font-normal tracking-widest text-brand-dark flex justify-between items-baseline border-b border-brand-border/40 pb-4">
-            <span>01 / 우리집 예상견적 받아보기</span>
+            <span>01 / {homepageCms.portal1Title}</span>
             <span className="text-[9px] text-brand-muted font-mono tracking-wider font-light">ESTIMATE PORTAL</span>
           </h3>
           <p className="text-[11px] font-light text-brand-muted leading-relaxed tracking-wide">
-            평수와 원가 기준을 빠르게 연산하여 가도면 상담을 예약하는 간섭 없는 인스턴트 견적 채널입니다. 더 면밀한 정보는 언제든 견적문의 탭의 7단계 도구를 실행하십시오.
+            {homepageCms.portal1Desc}
           </p>
           
           <form onSubmit={handleEstSubmit} className="space-y-3.5 pt-2">
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1">
-                <label className="text-[9px] text-brand-muted tracking-wider uppercase">고객 성함</label>
+                <label className="text-[9px] text-brand-muted tracking-wider uppercase">{homepageCms.form1NameLabel}</label>
                 <input
                   type="text"
                   placeholder="실명 입력"
@@ -418,7 +615,7 @@ function HomeConversionCTAs({ setView }: { setView: (view: NavView) => void }) {
                 />
               </div>
               <div className="space-y-1">
-                <label className="text-[9px] text-brand-muted tracking-wider uppercase">대표 번호</label>
+                <label className="text-[9px] text-brand-muted tracking-wider uppercase">{homepageCms.form1PhoneLabel}</label>
                 <input
                   type="tel"
                   placeholder="010-0000-0000"
@@ -431,7 +628,7 @@ function HomeConversionCTAs({ setView }: { setView: (view: NavView) => void }) {
 
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1">
-                <label className="text-[9px] text-brand-muted tracking-wider uppercase">공간 분야</label>
+                <label className="text-[9px] text-brand-muted tracking-wider uppercase">{homepageCms.form1TypeLabel}</label>
                 <select
                   value={estType}
                   onChange={(e) => setEstType(e.target.value)}
@@ -449,7 +646,7 @@ function HomeConversionCTAs({ setView }: { setView: (view: NavView) => void }) {
                 </select>
               </div>
               <div className="space-y-1">
-                <label className="text-[9px] text-brand-muted tracking-wider uppercase">분양 면적 (평형)</label>
+                <label className="text-[9px] text-brand-muted tracking-wider uppercase">{homepageCms.form1AreaLabel}</label>
                 <input
                   type="number"
                   placeholder="예: 32"
@@ -461,7 +658,7 @@ function HomeConversionCTAs({ setView }: { setView: (view: NavView) => void }) {
             </div>
 
             <div className="space-y-1">
-              <label className="text-[9px] text-brand-muted tracking-wider uppercase">보유 예산 규모</label>
+              <label className="text-[9px] text-brand-muted tracking-wider uppercase">{homepageCms.form1BudgetLabel}</label>
               <select
                 value={estBudget}
                 onChange={(e) => setEstBudget(e.target.value)}
@@ -500,7 +697,7 @@ function HomeConversionCTAs({ setView }: { setView: (view: NavView) => void }) {
         </div>
       </div>
 
-      {/* CTA MODULE 02: 간편상담 받아보기 (QUICK CONSULTATION) */}
+      {/* CTA MODULE 02 */}
       <div className="border border-brand-border p-8 bg-brand-bg/10 relative space-y-6 flex flex-col justify-between">
         {showConSuccess && (
           <div className="absolute inset-0 bg-[#111111]/95 text-white p-8 flex flex-col justify-center items-center text-center z-10 space-y-3">
@@ -514,17 +711,17 @@ function HomeConversionCTAs({ setView }: { setView: (view: NavView) => void }) {
 
         <div className="space-y-4">
           <h3 className="text-sm font-normal tracking-widest text-brand-dark flex justify-between items-baseline border-b border-brand-border/40 pb-4">
-            <span>02 / 간편 유선 긴급상담 받아보기</span>
+            <span>02 / {homepageCms.portal2Title}</span>
             <span className="text-[9px] text-brand-muted font-mono tracking-wider font-light">QUICK CALL</span>
           </h3>
           <p className="text-[11px] font-light text-brand-muted leading-relaxed tracking-wide">
-            복잡한 서류 절차가 아닌, 단순 시공 가부 여부 및 사옥 예약 방법론 등을 바리스타 처럼 빠르고 격조 있게 물어보는 1분 직통 신청 창구입니다.
+            {homepageCms.portal2Desc}
           </p>
           
           <form onSubmit={handleConSubmit} className="space-y-3.5 pt-2">
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1">
-                <label className="text-[9px] text-brand-muted tracking-wider uppercase">대표 성함</label>
+                <label className="text-[9px] text-brand-muted tracking-wider uppercase">{homepageCms.form2NameLabel}</label>
                 <input
                   type="text"
                   placeholder="실명 기재"
@@ -534,7 +731,7 @@ function HomeConversionCTAs({ setView }: { setView: (view: NavView) => void }) {
                 />
               </div>
               <div className="space-y-1">
-                <label className="text-[9px] text-brand-muted tracking-wider uppercase">전화 번호</label>
+                <label className="text-[9px] text-brand-muted tracking-wider uppercase">{homepageCms.form2PhoneLabel}</label>
                 <input
                   type="tel"
                   placeholder="010-0000-0000"
@@ -547,7 +744,7 @@ function HomeConversionCTAs({ setView }: { setView: (view: NavView) => void }) {
 
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1">
-                <label className="text-[9px] text-brand-muted tracking-wider uppercase">문의 카테고리</label>
+                <label className="text-[9px] text-brand-muted tracking-wider uppercase">{homepageCms.form2TypeLabel}</label>
                 <select
                   value={conType}
                   onChange={(e) => setConType(e.target.value)}
@@ -565,7 +762,7 @@ function HomeConversionCTAs({ setView }: { setView: (view: NavView) => void }) {
                 </select>
               </div>
               <div className="space-y-1">
-                <label className="text-[9px] text-brand-muted tracking-wider uppercase">통화 희망 시간대</label>
+                <label className="text-[9px] text-brand-muted tracking-wider uppercase">{homepageCms.form2TimeLabel}</label>
                 <select
                   value={conTime}
                   onChange={(e) => setConTime(e.target.value)}
@@ -580,7 +777,7 @@ function HomeConversionCTAs({ setView }: { setView: (view: NavView) => void }) {
             </div>
 
             <div className="space-y-1">
-              <label className="text-[9px] text-brand-muted tracking-wider uppercase">간단 문의 사항</label>
+              <label className="text-[9px] text-brand-muted tracking-wider uppercase">{homepageCms.form2DescLabel}</label>
               <input
                 type="text"
                 placeholder="예: 예산 한계 속 조적 욕실 구현 가능 여부"
@@ -616,4 +813,3 @@ function HomeConversionCTAs({ setView }: { setView: (view: NavView) => void }) {
     </div>
   );
 }
-

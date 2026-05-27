@@ -1,8 +1,13 @@
 import { useState, FormEvent, useRef, ChangeEvent } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { MapPin, Phone, Mail, Clock, ArrowRight, Upload, Paperclip, Send, Sparkles } from 'lucide-react';
+import { ContactCmsConfig } from '../types';
 
-export default function Contact() {
+interface ContactProps {
+  contactCms: ContactCmsConfig;
+}
+
+export default function Contact({ contactCms }: ContactProps) {
   // Advanced Inquiry states
   const [name, setName] = useState('');
   const [phoneNum, setPhoneNum] = useState('');
@@ -139,13 +144,13 @@ export default function Contact() {
       {/* Page Header */}
       <div className="mb-20 space-y-4">
         <span className="text-[10px] uppercase tracking-[0.3em] text-brand-muted/70 block">
-          Establish Connection — 커뮤니케이션 오피스 연결
+          {contactCms?.topLabel || "Establish Connection — 커뮤니케이션 오피스 연결"}
         </span>
         <h1 className="text-2xl md:text-3xl font-extralight tracking-[0.16em] text-[#111111] uppercase">
-          오시는 길 & 기획 문의
+          {contactCms?.topTitle || "오시는 길 & 기획 문의"}
         </h1>
         <p className="text-xs font-light text-brand-muted max-w-xl leading-relaxed tracking-wider mt-2">
-          강인스튜디오 사옥은 광주 남구 양림동 역사문화거리에 위치해 있습니다. 설계 미팅 및 자재 큐레이션 체험은 사전 예약제로 진행되오니 출발 전 온라인 정밀 양식 또는 유선 채널로 문의 주십시오.
+          {contactCms?.topDesc || "강인스튜디오 사옥은 광주 남구 양림동 역사문화거리에 위치해 있습니다. 설계 미팅 및 자재 큐레이션 체험은 사전 예약제로 진행되오니 출발 전 온라인 정밀 양식 또는 유선 채널로 문의 주십시오."}
         </p>
       </div>
 
@@ -155,45 +160,65 @@ export default function Contact() {
         <div className="lg:col-span-4 space-y-12">
           <div className="space-y-6">
             <h3 className="text-xs uppercase tracking-[0.2em] text-[#111111] font-semibold">
-              ● STUDIO ADdRESS
+              {contactCms?.addressSectionTitle || "● STUDIO ADdRESS"}
             </h3>
             <div className="space-y-3 font-light text-xs text-brand-muted leading-relaxed tracking-wide">
-              <p className="text-[#111111] font-normal">광주광역시 남구 양림동 24-12 강인스튜디오 빌딩 1F</p>
-              <p>지번: 남구 양림동 24-12 (기독병원 근처 복합거리)</p>
-              <a 
-                href="https://map.naver.com" 
-                target="_blank" 
-                rel="noreferrer" 
-                className="text-brand-dark hover:text-brand-muted font-normal underline underline-offset-4 focus:outline-none inline-flex items-center gap-1 mt-1 text-[11px]"
-              >
-                <span>Naver Map으로 경로 확인</span>
-                <ArrowRight size={10} />
-              </a>
+              <p className="text-[#111111] font-normal">{contactCms?.addressMain || "광주광역시 남구 양림동 24-12 강인스튜디오 빌딩 1F"}</p>
+              <p>{contactCms?.addressSub || "지번: 남구 양림동 24-12 (기독병원 근처 복합거리)"}</p>
+              {contactCms?.addressMapLinkUrl && (
+                <a 
+                  href={contactCms.addressMapLinkUrl} 
+                  target="_blank" 
+                  rel="noreferrer" 
+                  className="text-brand-dark hover:text-brand-muted font-normal underline underline-offset-4 focus:outline-none inline-flex items-center gap-1 mt-1 text-[11px]"
+                >
+                  <span>{contactCms.addressMapLinkText || "Naver Map으로 경로 확인"}</span>
+                  <ArrowRight size={10} />
+                </a>
+              )}
             </div>
           </div>
 
           <div className="space-y-6 border-t border-brand-border/60 pt-8">
             <h3 className="text-xs uppercase tracking-[0.2em] text-[#111111] font-semibold">
-              ● CALL & CHANNEL
+              {contactCms?.channelSectionTitle || "● CALL & CHANNEL"}
             </h3>
             <div className="space-y-3 font-light text-xs text-brand-muted leading-relaxed tracking-wide">
-              <p>대표 유선전화: <a href="tel:0625151204" className="text-[#111111] font-normal hover:underline">062.515.1204</a></p>
-              <p>상담 직통 모바일: <span className="text-[#111111] font-normal">010.5515.1204</span></p>
-              <p>공식 이메일: <a href="mailto:contact@ganginstudio.com" className="text-[#111111] font-normal hover:underline">contact@ganginstudio.com</a></p>
-              <p>카카오 채널: <span className="text-brand-dark font-normal">@강인스튜디오</span></p>
+              <p>대표 유선전화: <a href={`tel:${contactCms?.channelMainPhone || "0625151204"}`} className="text-[#111111] font-normal hover:underline">{contactCms?.channelMainPhone || "062.515.1204"}</a></p>
+              <p>상담 직통 모바일: <span className="text-[#111111] font-normal">{contactCms?.channelMobilePhone || "010.5515.1204"}</span></p>
+              <p>공식 이메일: <a href={`mailto:${contactCms?.channelEmail || "contact@ganginstudio.com"}`} className="text-[#111111] font-normal hover:underline">{contactCms?.channelEmail || "contact@ganginstudio.com"}</a></p>
+              <p>카카오 채널: <a href={contactCms?.channelKakaoUrl || "https://pf.kakao.com/_xganginstudio"} target="_blank" rel="noreferrer" className="text-brand-dark font-normal hover:underline">{contactCms?.channelKakaoText || "@강인스튜디오"}</a></p>
             </div>
+            {contactCms?.buttonShow && (
+              <div className="pt-2">
+                <a 
+                  href={contactCms.buttonUrl || "https://pf.kakao.com/_xganginstudio"} 
+                  target="_blank" 
+                  rel="noreferrer" 
+                  className="px-4 py-2 bg-brand-dark text-white text-[9px] uppercase tracking-widest font-semibold hover:bg-black transition-colors rounded-none inline-flex items-center gap-2"
+                >
+                  <span>{contactCms.buttonText || "카카오톡 공식 채널 빠른 상담"}</span>
+                  <ArrowRight size={10} />
+                </a>
+              </div>
+            )}
           </div>
 
           <div className="space-y-6 border-t border-brand-border/60 pt-8">
             <h3 className="text-xs uppercase tracking-[0.2em] text-[#111111] font-semibold">
-              ● WORK HOUR SCheDULE
+              {contactCms?.workSectionTitle || "● WORK HOUR SCheDULE"}
             </h3>
             <div className="space-y-2.5 font-light text-xs text-brand-muted leading-relaxed tracking-wide">
-              <p>평일: 10:00 - 18:00 (전면 예약제)</p>
-              <p>주말/공휴일: 사전 약정 미팅 수렴 건 운영</p>
+              <p>{contactCms?.workWeekday || "평일: 10:00 - 18:00 (전면 예약제)"}</p>
+              <p>{contactCms?.workWeekend || "주말/공휴일: 사전 약정 미팅 수렴 건 운영"}</p>
               <p className="text-[10px] text-brand-muted/70 italic">
-                * 현장 기술 감리 중 전화 수신이 다소 늦어질 수 있어, 부재중일 경우 직통 번호로 카카오톡을 남기시면 감사하겠습니다.
+                {contactCms?.workHolidayNotice || "* 현장 기술 감리 중 전화 수신이 다소 늦어질 수 있어, 부재중일 경우 직통 번호로 카카오톡을 남기시면 감사하겠습니다."}
               </p>
+              {contactCms?.workAdditionalNote && (
+                <p className="text-[10px] text-brand-muted/70 italic">
+                  {contactCms.workAdditionalNote}
+                </p>
+              )}
             </div>
           </div>
         </div>
@@ -201,59 +226,87 @@ export default function Contact() {
         {/* Right Side: Highly Aesthetic Vector Map */}
         <div className="lg:col-span-8 space-y-6">
           <div className="border border-brand-border p-3.5 bg-white/40">
-            {/* Minimalist Grid and Lines Map drawing */}
-            <div className="relative w-full aspect-video border border-brand-border/90 bg-[#F2F1EC] overflow-hidden flex items-center justify-center">
-              
-              {/* Decorative Subtle Grid Lines to express Architect blueprints */}
-              <div className="absolute inset-0 grid grid-cols-6 grid-rows-4 opacity-[0.05]" style={{ backgroundImage: 'radial-gradient(#111 1px, transparent 1px)', backgroundSize: '24px 24px' }} />
-              
-              {/* Asymmetric stylized map elements */}
-              <div className="absolute w-[2px] h-full bg-[#E2E1DA] left-[40%]" />
-              <div className="absolute w-[2px] h-full bg-[#E2E1DA] left-[75%]" />
-              <div className="absolute h-[2px] w-full bg-[#E2E1DA] top-[45%]" />
-              
-              {/* River/Park styled Area */}
-              <div className="absolute right-4 top-4 w-28 h-20 bg-[#E7E7E1]/60 flex items-center justify-center font-sans text-[10px] text-brand-muted/40 tracking-wider">
-                양림역사공원
+            {contactCms?.mapEmbed ? (
+              <div 
+                className="w-full aspect-video border border-brand-border bg-white overflow-hidden flex items-center justify-center p-0"
+                dangerouslySetInnerHTML={{ __html: contactCms.mapEmbed }}
+              />
+            ) : contactCms?.mapImage ? (
+              <div className="w-full aspect-video border border-brand-border bg-white overflow-hidden flex items-center justify-center p-0">
+                <img 
+                  referrerPolicy="no-referrer"
+                  src={contactCms.mapImage} 
+                  alt="Studio Map" 
+                  className="w-full h-full object-cover"
+                />
               </div>
+            ) : (
+              /* Minimalist Grid and Lines Map drawing */
+              <div className="relative w-full aspect-video border border-brand-border/90 bg-[#F2F1EC] overflow-hidden flex items-center justify-center">
+                
+                {/* Decorative Subtle Grid Lines to express Architect blueprints */}
+                <div className="absolute inset-0 grid grid-cols-6 grid-rows-4 opacity-[0.05]" style={{ backgroundImage: 'radial-gradient(#111 1px, transparent 1px)', backgroundSize: '24px 24px' }} />
+                
+                {/* Asymmetric stylized map elements */}
+                <div className="absolute w-[2px] h-full bg-[#E2E1DA] left-[40%]" />
+                <div className="absolute w-[2px] h-full bg-[#E2E1DA] left-[75%]" />
+                <div className="absolute h-[2px] w-full bg-[#E2E1DA] top-[45%]" />
+                
+                {/* River/Park styled Area */}
+                <div className="absolute right-4 top-4 w-28 h-20 bg-[#E7E7E1]/60 flex items-center justify-center font-sans text-[10px] text-brand-muted/40 tracking-wider">
+                  양림역사공원
+                </div>
 
-              {/* Gwangju Christian Hospital block */}
-              <div className="absolute left-6 top-8 w-32 h-16 border border-brand-border bg-white/50 flex flex-col justify-center px-4 font-sans text-[10px] text-brand-muted/70 tracking-widest leading-relaxed">
-                <span className="font-light">Gwangju Christian</span>
-                <span className="text-[8px] opacity-75">광주기독병원 사거리</span>
-              </div>
+                {/* Gwangju Christian Hospital block */}
+                <div className="absolute left-6 top-8 w-32 h-16 border border-brand-border bg-white/50 flex flex-col justify-center px-4 font-sans text-[10px] text-brand-muted/70 tracking-widest leading-relaxed">
+                  <span className="font-light">Gwangju Christian</span>
+                  <span className="text-[8px] opacity-75">광주기독병원 사거리</span>
+                </div>
 
-              {/* Yangnim Community Center block */}
-              <div className="absolute left-20 bottom-8 w-28 h-12 border border-brand-border bg-white/50 flex flex-col justify-center px-4 font-sans text-[10px] text-brand-muted/70 tracking-widest leading-relaxed">
-                <span className="font-light">Center BLOCK</span>
-                <span className="text-[8px] opacity-75">양림동 행정센터</span>
-              </div>
+                {/* Yangnim Community Center block */}
+                <div className="absolute left-20 bottom-8 w-28 h-12 border border-brand-border bg-white/50 flex flex-col justify-center px-4 font-sans text-[10px] text-brand-muted/70 tracking-widest leading-relaxed">
+                  <span className="font-light">Center BLOCK</span>
+                  <span className="text-[8px] opacity-75">양림동 행정센터</span>
+                </div>
 
-              {/* GANG IN STUDIO HQ mark node */}
-              <div className="absolute left-[40%] top-[45%] -translate-x-[50%] -translate-y-[50%] z-20 flex flex-col items-center">
-                <div className="relative">
-                  {/* Slow pulsing circle */}
-                  <div className="absolute -inset-2 rounded-full border border-brand-dark/45 animate-ping opacity-75" />
-                  <div className="w-4 h-4 bg-brand-dark text-white rounded-none flex items-center justify-center text-[7.5px] font-mono shadow-md">
-                    G
+                {/* GANG IN STUDIO HQ mark node */}
+                <div className="absolute left-[40%] top-[45%] -translate-x-[50%] -translate-y-[50%] z-20 flex flex-col items-center">
+                  <div className="relative">
+                    {/* Slow pulsing circle */}
+                    <div className="absolute -inset-2 rounded-full border border-brand-dark/45 animate-ping opacity-75" />
+                    <div className="w-4 h-4 bg-brand-dark text-white rounded-none flex items-center justify-center text-[7.5px] font-mono shadow-md">
+                      G
+                    </div>
+                  </div>
+                  
+                  {/* Minimal Label box */}
+                  <div className="bg-[#111111] text-[#F7F6F2] py-2 px-3.5 mt-2.5 shadow-sm space-y-0.5">
+                    <p className="text-[9px] font-light tracking-[0.2em] uppercase whitespace-nowrap">
+                      {contactCms?.mapMarkerTitle || "GANG IN STUDIO HQ"}
+                    </p>
+                    <p className="text-[7.5px] text-brand-stone/75 font-light tracking-wide whitespace-nowrap">
+                      {contactCms?.mapMarkerDesc || "남구 양림동 24-12 사옥 1F"}
+                    </p>
                   </div>
                 </div>
-                
-                {/* Minimal Label box */}
-                <div className="bg-[#111111] text-[#F7F6F2] py-2 px-3.5 mt-2.5 shadow-sm space-y-0.5">
-                  <p className="text-[9px] font-light tracking-[0.2em] uppercase whitespace-nowrap">GANG IN STUDIO HQ</p>
-                  <p className="text-[7.5px] text-brand-stone/75 font-light tracking-wide whitespace-nowrap">남구 양림동 24-12 사옥 1F</p>
-                </div>
-              </div>
 
-              {/* Road names */}
-              <p className="absolute bottom-[58%] left-[10%] text-[8px] tracking-[0.2em] uppercase text-brand-muted/50 font-mono">Yangnim-ro Street</p>
-              <p className="absolute left-[46%] top-[12%] text-[8px] tracking-[0.2em] uppercase text-brand-muted/50 font-mono rotate-90">Heritage Main Way</p>
-            </div>
+                {/* Road names */}
+                <p className="absolute bottom-[58%] left-[10%] text-[8px] tracking-[0.2em] uppercase text-brand-muted/50 font-mono">Yangnim-ro Street</p>
+                <p className="absolute left-[46%] top-[12%] text-[8px] tracking-[0.2em] uppercase text-brand-muted/50 font-mono rotate-90">Heritage Main Way</p>
+              </div>
+            )}
           </div>
           <p className="text-[10px] font-light text-brand-muted/70 tracking-widest leading-relaxed text-right">
-            * Map represents GANG IN STUDIO headquarters corner in Gwangju.
+            {contactCms?.mapMarkerDesc ? `* ${contactCms.mapMarkerDesc}` : "* Map represents GANG IN STUDIO headquarters corner in Gwangju."}
           </p>
+          <div className="flex gap-4 justify-end text-[10px] font-mono text-brand-muted/80 pt-1">
+            {contactCms?.naverMapLink && (
+              <a href={contactCms.naverMapLink} target="_blank" rel="noreferrer" className="hover:text-brand-dark underline underline-offset-2">Naver Map</a>
+            )}
+            {contactCms?.kakaoMapLink && (
+              <a href={contactCms.kakaoMapLink} target="_blank" rel="noreferrer" className="hover:text-brand-dark underline underline-offset-2">Kakao Map</a>
+            )}
+          </div>
         </div>
       </div>
 

@@ -21,10 +21,40 @@
     color: #111111;
     font-family: var(--font-sans);
     font-weight: 400;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.08em;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     min-height: 100vh;
+  }
+
+  /* Unify global font-family strictly matching Pretendard across ALL elements */
+  *, ::before, ::after {
+    font-family: var(--font-sans) !important;
+  }
+
+  /* Keep the same font weight and letter spacing style as the current top category menu button:
+     - Force all bold, black, or extrabold headings to use a unified medium/semibold weight (not bold/black/harsh)
+     - Force all light, extra-light, or thin elements to use a unified clean normal weight (400)
+  */
+  .font-bold, .font-semibold, .font-extrabold, .font-black, strong {
+    font-weight: 500 !important;
+  }
+
+  .font-light, .font-extralight, .font-thin {
+    font-weight: 400 !important;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-weight: 400 !important;
+  }
+
+  button, input, textarea, select, label {
+    font-family: var(--font-sans) !important;
+  }
+
+  /* Unify global letter-spacing to the exact top category navigation menu letter-spacing (0.08em) */
+  body, h1, h2, h3, h4, h5, h6, p, span, a, button, input, textarea, select, label, div, li, ul, form, footer, header, nav, section {
+    letter-spacing: 0.08em !important;
   }
 
   /* Custom thin scrollbar for minimalist feeling */
