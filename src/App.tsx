@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { NavView, Project } from './types';
 import {
@@ -67,6 +67,16 @@ export default function App() {
   // Also persist/manage categories state (No localStorage fallback)
   const [categories, setCategories] = useState<ServiceCategory[]>(DEFAULT_CATEGORIES);
 
+  const lastSavedState = useRef<{
+    projects?: string;
+    packages?: string;
+    faq?: string;
+    reviews?: string;
+    blog?: string;
+    settings?: string;
+    categories?: string;
+  }>({});
+
   // Hydrate state from Supabase on mount if configured
   useEffect(() => {
     async function loadSupabase() {
@@ -84,6 +94,17 @@ export default function App() {
           const defaultCategories = DEFAULT_CATEGORIES;
           const remoteCategories = await fetchSupabaseState<ServiceCategory[]>('gangin_categories', defaultCategories);
 
+          // Seed state cache to bypass redundant initial mount writebacks
+          lastSavedState.current = {
+            projects: JSON.stringify(remoteProjects),
+            packages: JSON.stringify(remotePackages),
+            faq: JSON.stringify(remoteFaq),
+            reviews: JSON.stringify(remoteReviews),
+            blog: JSON.stringify(remoteBlog),
+            settings: JSON.stringify(remoteSettings),
+            categories: JSON.stringify(remoteCategories)
+          };
+
           setProjects(remoteProjects);
           setPackages(remotePackages);
           setFaq(remoteFaq);
@@ -100,27 +121,58 @@ export default function App() {
     loadSupabase();
   }, []);
 
-  // Dynamic automatic synchronization exclusively to Supabase on state alteration
+  // Dynamic automatic synchronization exclusively to Supabase on state alteration (Optimized difference checked writes)
   useEffect(() => {
     if (!isHydrated) return;
     
-    saveState({
-      projects,
-      packages,
-      faq,
-      reviews,
-      blog,
-      settings
-    });
-
-    // Asynchronously save categories to Supabase
-    async function syncCategories() {
+    async function syncState() {
       const { saveSupabaseState, isSupabaseConfigured } = await import('./lib/supabase');
-      if (isSupabaseConfigured) {
-        saveSupabaseState('gangin_categories', categories);
+      if (!isSupabaseConfigured) return;
+
+      const pStr = JSON.stringify(projects);
+      if (pStr !== lastSavedState.current.projects) {
+        lastSavedState.current.projects = pStr;
+        await saveSupabaseState('gangin_projects', projects);
+      }
+
+      const pkgStr = JSON.stringify(packages);
+      if (pkgStr !== lastSavedState.current.packages) {
+        lastSavedState.current.packages = pkgStr;
+        await saveSupabaseState('gangin_packages', packages);
+      }
+
+      const faqStr = JSON.stringify(faq);
+      if (faqStr !== lastSavedState.current.faq) {
+        lastSavedState.current.faq = faqStr;
+        await saveSupabaseState('gangin_faq', faq);
+      }
+
+      const revStr = JSON.stringify(reviews);
+      if (revStr !== lastSavedState.current.reviews) {
+        lastSavedState.current.reviews = revStr;
+        await saveSupabaseState('gangin_reviews', reviews);
+      }
+
+      const blogStr = JSON.stringify(blog);
+      if (blogStr !== lastSavedState.current.blog) {
+        lastSavedState.current.blog = blogStr;
+        await saveSupabaseState('gangin_blog', blog);
+      }
+
+      const setStr = JSON.stringify(settings);
+      if (setStr !== lastSavedState.current.settings) {
+        lastSavedState.current.settings = setStr;
+        await saveSupabaseState('gangin_settings', settings);
+      }
+
+      const catStr = JSON.stringify(categories);
+      if (catStr !== lastSavedState.current.categories) {
+        lastSavedState.current.categories = catStr;
+        await saveSupabaseState('gangin_categories', categories);
       }
     }
-    syncCategories();
+
+    syncState();
   }, [projects, packages, faq, reviews, blog, settings, categories, isHydrated]);
 
   // Supabase Real-time Subscription for true live updates across tabs/clients
@@ -143,23 +195,31 @@ export default function App() {
             const value = row.value;
             
             console.log(`[Supabase Live Update] "${key}" changed remotely.`, value);
-            
             if (value === undefined || value === null) return;
             
+            const stringified = JSON.stringify(value);
+            
             if (key === 'gangin_projects') {
-              setProjects(prev => JSON.stringify(prev) !== JSON.stringify(value) ? value : prev);
+              lastSavedState.current.projects = stringified;
+              setProjects(prev => JSON.stringify(prev) !== stringified ? value : prev);
             } else if (key === 'gangin_packages') {
-              setPackages(prev => JSON.stringify(prev) !== JSON.stringify(value) ? value : prev);
+              lastSavedState.current.packages = stringified;
+              setPackages(prev => JSON.stringify(prev) !== stringified ? value : prev);
             } else if (key === 'gangin_faq') {
-              setFaq(prev => JSON.stringify(prev) !== JSON.stringify(value) ? value : prev);
+              lastSavedState.current.faq = stringified;
+              setFaq(prev => JSON.stringify(prev) !== stringified ? value : prev);
             } else if (key === 'gangin_reviews') {
-              setReviews(prev => JSON.stringify(prev) !== JSON.stringify(value) ? value : prev);
+              lastSavedState.current.reviews = stringified;
+              setReviews(prev => JSON.stringify(prev) !== stringified ? value : prev);
             } else if (key === 'gangin_blog') {
-              setBlog(prev => JSON.stringify(prev) !== JSON.stringify(value) ? value : prev);
+              lastSavedState.current.blog = stringified;
+              setBlog(prev => JSON.stringify(prev) !== stringified ? value : prev);
             } else if (key === 'gangin_settings') {
-              setSettings(prev => JSON.stringify(prev) !== JSON.stringify(value) ? value : prev);
+              lastSavedState.current.settings = stringified;
+              setSettings(prev => JSON.stringify(prev) !== stringified ? value : prev);
             } else if (key === 'gangin_categories') {
-              setCategories(prev => JSON.stringify(prev) !== JSON.stringify(value) ? value : prev);
+              lastSavedState.current.categories = stringified;
+              setCategories(prev => JSON.stringify(prev) !== stringified ? value : prev);
             }
           }
         )

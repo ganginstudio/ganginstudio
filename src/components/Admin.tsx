@@ -10,7 +10,7 @@ import {
   ServicePackage,
   ServiceCategory
 } from '../types';
-import { uploadPortfolioImage } from '../lib/supabase';
+import { uploadPortfolioImage, isSupabaseOffline } from '../lib/supabase';
 import {
   Lock,
   Plus,
@@ -162,6 +162,19 @@ export default function Admin({
   // Unified leads logging states
   const [allLeads, setAllLeads] = useState<any[]>([]);
   const [estimatesLog, setEstimatesLog] = useState<any[]>([]);
+  const [isOffline, setIsOffline] = useState<boolean>(isSupabaseOffline);
+
+  React.useEffect(() => {
+    function handleStatus(e: any) {
+      if (e && e.detail) {
+        setIsOffline(!!e.detail.offline);
+      }
+    }
+    window.addEventListener('supabase-status-change', handleStatus);
+    return () => {
+      window.removeEventListener('supabase-status-change', handleStatus);
+    };
+  }, []);
 
   // Load leads from Supabase Database on mount and tab shifts (No localStorage usage)
   React.useEffect(() => {
@@ -618,6 +631,12 @@ export default function Admin({
         <div>
           <span className="text-[8px] uppercase tracking-widest text-brand-muted block font-mono">GANG IN CMS</span>
           <h2 className="text-sm font-semibold text-[#111111] tracking-widest mt-1 uppercase">콘텐츠 수정 센터</h2>
+          {isOffline && (
+            <div className="mt-3 p-3 bg-amber-50/80 border border-amber-200/60 text-amber-800 text-[10.5px] leading-relaxed font-normal font-sans">
+              <p className="font-semibold mb-1 flex items-center gap-1 text-[11px]">⚠️ Supabase가 오프라인 상태입니다</p>
+              <p className="opacity-90">선언된 데이터베이스 주소(<code className="font-mono text-[9px] bg-amber-100 px-1 rounded">fgmzebxdynou...</code>)가 정지되었거나 일시적으로 만료되었습니다. 작업물은 안전하게 인-메모리에 실시간 보호/유지됩니다.</p>
+            </div>
+          )}
         </div>
 
         <nav className="flex flex-col space-y-1.5 text-xs text-brand-dark font-light tracking-wide">
