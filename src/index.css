@@ -20,8 +20,8 @@
     background-color: #FFFFFF;
     color: #111111;
     font-family: var(--font-sans);
-    font-weight: 300;
-    letter-spacing: 0.06em;
+    font-weight: 400;
+    letter-spacing: 0.05em;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     min-height: 100vh;

@@ -1,14 +1,16 @@
 import { useState, useEffect } from 'react';
-import { NavView } from '../types';
+import { NavView, SiteSettings, NavItemConfig } from '../types';
 import { Menu, X } from 'lucide-react';
 
 interface NavigationProps {
   currentView: NavView;
   setView: (view: NavView) => void;
   resetProject: () => void;
+  settings?: SiteSettings;
+  navItems?: NavItemConfig[];
 }
 
-export default function Navigation({ currentView, setView, resetProject }: NavigationProps) {
+export default function Navigation({ currentView, setView, resetProject, settings, navItems }: NavigationProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
 
@@ -24,17 +26,21 @@ export default function Navigation({ currentView, setView, resetProject }: Navig
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const navItems: { label: string; view: NavView; labelKr: string }[] = [
-    { label: 'Home', view: 'home', labelKr: '홈' },
-    { label: 'Portfolio', view: 'portfolio', labelKr: '포트폴리오' },
-    { label: 'Services', view: 'categories', labelKr: '분야별 서비스' },
-    { label: 'Pricing', view: 'pricing', labelKr: '요금정찰제' },
-    { label: 'Estimate', view: 'estimate', labelKr: '견적문의' },
-    { label: 'Reviews', view: 'reviews', labelKr: '고객후기' },
-    { label: 'Journal', view: 'blog', labelKr: '건축칼럼' },
-    { label: 'FAQ', view: 'faq', labelKr: 'Q&A' },
-    { label: 'Admin', view: 'admin', labelKr: '관리자' },
+  const defaultNavItems: NavItemConfig[] = [
+    { id: 'nav_home', label: 'Home', view: 'home', labelKr: '홈', order: 1, show: true },
+    { id: 'nav_portfolio', label: 'Portfolio', view: 'portfolio', labelKr: '포트폴리오', order: 2, show: true },
+    { id: 'nav_categories', label: 'Services', view: 'categories', labelKr: '분야별 서비스', order: 3, show: true },
+    { id: 'nav_pricing', label: 'Pricing', view: 'pricing', labelKr: '요금정찰제', order: 4, show: true },
+    { id: 'nav_estimate', label: 'Estimate', view: 'estimate', labelKr: '견적문의', order: 5, show: true },
+    { id: 'nav_reviews', label: 'Reviews', view: 'reviews', labelKr: '고객후기', order: 6, show: true },
+    { id: 'nav_blog', label: 'Journal', view: 'blog', labelKr: '건축칼럼', order: 7, show: true },
+    { id: 'nav_faq', label: 'FAQ', view: 'faq', labelKr: 'Q&A', order: 8, show: true },
+    { id: 'nav_admin', label: 'Admin', view: 'admin', labelKr: '관리자', order: 9, show: true },
   ];
+
+  const activeNavItems = [...(navItems && navItems.length > 0 ? navItems : defaultNavItems)]
+    .filter(item => item.show)
+    .sort((a, b) => (a.order || 0) - (b.order || 0));
 
   const handleNavClick = (view: NavView) => {
     setView(view);
@@ -63,13 +69,13 @@ export default function Navigation({ currentView, setView, resetProject }: Navig
           }}
           className="flex flex-col tracking-[0.22em] text-[#111111] transition-opacity duration-300 hover:opacity-75 focus:outline-none"
         >
-          <span className="text-sm font-semibold md:text-base tracking-[0.28em]">GANG IN STUDIO</span>
-          <span className="text-[7.5px] text-brand-dark font-medium tracking-[0.45em] uppercase mt-0.5">Architecture & Space</span>
+          <span className="text-sm font-semibold md:text-base tracking-[0.28em] uppercase">{settings?.brandName || 'GANG IN STUDIO'}</span>
+          <span className="text-[7.5px] text-brand-dark font-medium tracking-[0.45em] uppercase mt-0.5">{settings?.subTitle || 'Architecture & Space'}</span>
         </a>
 
         {/* Desktop Navigation */}
         <nav id="desktop-nav-menu" className="hidden md:flex items-center space-x-12">
-          {navItems.map((item) => (
+          {activeNavItems.map((item) => (
             <button
               key={item.view}
               id={`nav-item-${item.view}`}
@@ -110,7 +116,7 @@ export default function Navigation({ currentView, setView, resetProject }: Navig
         }`}
       >
         <div className="flex flex-col space-y-8 mt-24">
-          {navItems.map((item, idx) => (
+          {activeNavItems.map((item, idx) => (
             <button
               key={item.view}
               id={`mobile-nav-item-${item.view}`}
@@ -135,11 +141,11 @@ export default function Navigation({ currentView, setView, resetProject }: Navig
             isMobileMenuOpen ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
           }`}
         >
-          <p className="font-light">GANG IN STUDIO — 광주 직영 대표 시공사</p>
-          <p className="font-light">T. 062 - 515 - 1204</p>
-          <p className="font-light">E. contact@ganginstudio.com</p>
+          <p className="font-light">{(settings?.brandName || 'GANG IN STUDIO').toUpperCase()} — 광주 직영 대표 시공사</p>
+          <p className="font-light">T. {settings?.phone || '062 - 515 - 1204'}</p>
+          <p className="font-light">E. {settings?.email || 'contact@ganginstudio.com'}</p>
           <p className="font-light text-brand-muted/50 text-[9px] mt-4">
-            © 2026 GANG IN STUDIO. LEIBAL INSPIRED.
+            © 2026 {(settings?.brandName || 'GANG IN STUDIO').toUpperCase()}. LEIBAL INSPIRED.
           </p>
         </div>
       </div>

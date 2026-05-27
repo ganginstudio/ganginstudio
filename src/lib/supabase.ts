@@ -2,8 +2,8 @@ import { createClient } from '@supabase/supabase-js';
 
 // Read values from Vite environment variables safely, with hardcoded production fallbacks
 const env = (import.meta as any).env || {};
-const supabaseUrl = env.VITE_SUPABASE_URL || 'https://fgmzebxdynouqhydljp.supabase.co';
-const supabaseAnonKey = env.VITE_SUPABASE_ANON_KEY || 'sb_publishable_uoTGEI5iASt05HFZpZm8fw_VowyPFlU';
+const supabaseUrl = env.VITE_SUPABASE_URL || 'https://qbxgaypvwqvmwdlaymsf.supabase.co';
+const supabaseAnonKey = env.VITE_SUPABASE_ANON_KEY || 'sb_publishable_RReQO4MvarIxtxaK2iVyyA_bKxWXW5g';
 
 export const isSupabaseConfigured = Boolean(supabaseUrl && supabaseAnonKey);
 
@@ -42,19 +42,20 @@ export async function fetchSupabaseState<T>(key: string, fallback: T): Promise<T
     if (error || !data) {
       if (error && (error.message.includes('Failed to fetch') || error.message.includes('fetch failed') || error.message.includes('getaddrinfo'))) {
         setSupabaseOfflineStatus(true);
-        console.warn(`[Supabase Status] Connection offline or project paused (fgmzebxdynouqhydljp). Please verify your Supabase endpoint is active.`);
+        console.warn(`[Supabase Status] Connection offline or project paused (qbxgaypvwqvmwdlaymsf). Please verify your Supabase endpoint is active.`);
       } else {
         console.warn(`[Supabase] Row fetch failed for "${key}". Using fallback.`, error?.message);
       }
       return fallback;
     }
     setSupabaseOfflineStatus(false);
+    console.log('[FETCH SUCCESS]', key);
     return data.value as T;
   } catch (err: any) {
     const errMsg = err?.message || String(err);
     if (errMsg.includes('Failed to fetch') || errMsg.includes('fetch failed') || errMsg.includes('getaddrinfo')) {
       setSupabaseOfflineStatus(true);
-      console.warn(`[Supabase Status] Connection exception. Supabase project (fgmzebxdynouqhydljp) is currently unreachable. Operating in-memory.`);
+      console.warn(`[Supabase Status] Connection exception. Supabase project (qbxgaypvwqvmwdlaymsf) is currently unreachable. Operating in-memory.`);
     } else {
       console.error(`[Supabase] Exception fetching "${key}":`, err);
     }
@@ -63,7 +64,9 @@ export async function fetchSupabaseState<T>(key: string, fallback: T): Promise<T
 }
 
 export async function saveSupabaseState<T>(key: string, value: T): Promise<boolean> {
+  console.log('[SAVE START]', key);
   if (!supabase) {
+    console.log('[SAVE FAILED]', key, 'Supabase client is not initialized');
     return false;
   }
   try {
@@ -79,9 +82,11 @@ export async function saveSupabaseState<T>(key: string, value: T): Promise<boole
       } else {
         console.error(`[Supabase] Upsert error for "${key}":`, error.message);
       }
+      console.log('[SAVE FAILED]', key, error.message);
       return false;
     }
     setSupabaseOfflineStatus(false);
+    console.log('[SAVE SUCCESS]', key);
 
     // Asynchronously update corresponding individual relational schemas for double-write reliability
     syncIndividualTables(key, value);
@@ -95,6 +100,7 @@ export async function saveSupabaseState<T>(key: string, value: T): Promise<boole
     } else {
       console.error(`[Supabase] Exception saving "${key}":`, err);
     }
+    console.log('[SAVE FAILED]', key, errMsg);
     return false;
   }
 }
@@ -237,7 +243,9 @@ async function syncIndividualTables(key: string, value: any) {
  * If storage upload fails, attempts fallback bucket and automatic creation if permissions allow.
  */
 export async function uploadPortfolioImage(file: File): Promise<string> {
+  console.log('[UPLOAD START]', file.name);
   if (!supabase) {
+    console.log('[UPLOAD FAILED]', 'Supabase client is not initialized.');
     throw new Error('Supabase client is not initialized.');
   }
 
@@ -253,39 +261,49 @@ export async function uploadPortfolioImage(file: File): Promise<string> {
     // Already exists or no create permissions which is completely fine
   }
 
-  const { data, error } = await supabase.storage
-    .from(bucketName)
-    .upload(filePath, file, {
-      cacheControl: '3600',
-      upsert: false
-    });
-
-  if (error) {
-    console.warn(`[Supabase Storage] Failed to upload to "${bucketName}". Trying "images" fallback bucket...`, error.message);
-    try {
-      await supabase.storage.createBucket('images', { public: true });
-    } catch (e) {}
-    
-    const fallbackRes = await supabase.storage
-      .from('images')
+  try {
+    const { data, error } = await supabase.storage
+      .from(bucketName)
       .upload(filePath, file, {
         cacheControl: '3600',
         upsert: false
       });
+
+    if (error) {
+      console.warn(`[Supabase Storage] Failed to upload to "${bucketName}". Trying "images" fallback bucket...`, error.message);
+      try {
+        await supabase.storage.createBucket('images', { public: true });
+      } catch (e) {}
       
-    if (fallbackRes.error) {
-      throw new Error(`Supabase Storage 업로드 실패. 버킷을 'gangin-portfolio' 또는 'images' 이름으로 생성하세요. 에러: ${fallbackRes.error.message}`);
+      const fallbackRes = await supabase.storage
+        .from('images')
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: false
+        });
+        
+      if (fallbackRes.error) {
+        console.log('[UPLOAD FAILED]', fallbackRes.error.message);
+        throw new Error(`Supabase Storage 업로드 실패. 버킷을 'gangin-portfolio' 또는 'images' 이름으로 생성하세요. 에러: ${fallbackRes.error.message}`);
+      }
+      
+      const { data: fallbackUrlData } = supabase.storage
+        .from('images')
+        .getPublicUrl(filePath);
+      
+      console.log('[UPLOAD SUCCESS]', fallbackUrlData.publicUrl);
+      return fallbackUrlData.publicUrl;
     }
-    
-    const { data: fallbackUrlData } = supabase.storage
-      .from('images')
+
+    const { data: publicUrlData } = supabase.storage
+      .from(bucketName)
       .getPublicUrl(filePath);
-    return fallbackUrlData.publicUrl;
+
+    console.log('[UPLOAD SUCCESS]', publicUrlData.publicUrl);
+    return publicUrlData.publicUrl;
+  } catch (err: any) {
+    const errMsg = err?.message || String(err);
+    console.log('[UPLOAD FAILED]', errMsg);
+    throw err;
   }
-
-  const { data: publicUrlData } = supabase.storage
-    .from(bucketName)
-    .getPublicUrl(filePath);
-
-  return publicUrlData.publicUrl;
 }

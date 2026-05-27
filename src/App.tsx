@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { NavView, Project } from './types';
+import { NavView, Project, NavItemConfig } from './types';
 import {
   getInitialState,
   saveState,
@@ -67,6 +67,20 @@ export default function App() {
   // Also persist/manage categories state (No localStorage fallback)
   const [categories, setCategories] = useState<ServiceCategory[]>(DEFAULT_CATEGORIES);
 
+  const DEFAULT_NAV_ITEMS: NavItemConfig[] = [
+    { id: 'nav_home', label: 'Home', view: 'home', labelKr: '홈', order: 1, show: true },
+    { id: 'nav_portfolio', label: 'Portfolio', view: 'portfolio', labelKr: '포트폴리오', order: 2, show: true },
+    { id: 'nav_categories', label: 'Services', view: 'categories', labelKr: '분야별 서비스', order: 3, show: true },
+    { id: 'nav_pricing', label: 'Pricing', view: 'pricing', labelKr: '요금정찰제', order: 4, show: true },
+    { id: 'nav_estimate', label: 'Estimate', view: 'estimate', labelKr: '견적문의', order: 5, show: true },
+    { id: 'nav_reviews', label: 'Reviews', view: 'reviews', labelKr: '고객후기', order: 6, show: true },
+    { id: 'nav_blog', label: 'Journal', view: 'blog', labelKr: '건축칼럼', order: 7, show: true },
+    { id: 'nav_faq', label: 'FAQ', view: 'faq', labelKr: 'Q&A', order: 8, show: true },
+    { id: 'nav_admin', label: 'Admin', view: 'admin', labelKr: '관리자', order: 9, show: true },
+  ];
+
+  const [navItems, setNavItems] = useState<NavItemConfig[]>(DEFAULT_NAV_ITEMS);
+
   const lastSavedState = useRef<{
     projects?: string;
     packages?: string;
@@ -75,6 +89,7 @@ export default function App() {
     blog?: string;
     settings?: string;
     categories?: string;
+    navItems?: string;
   }>({});
 
   // Hydrate state from Supabase on mount if configured
@@ -94,6 +109,8 @@ export default function App() {
           const defaultCategories = DEFAULT_CATEGORIES;
           const remoteCategories = await fetchSupabaseState<ServiceCategory[]>('gangin_categories', defaultCategories);
 
+          const remoteNavItems = await fetchSupabaseState<NavItemConfig[]>('gangin_nav_items', DEFAULT_NAV_ITEMS);
+
           // Seed state cache to bypass redundant initial mount writebacks
           lastSavedState.current = {
             projects: JSON.stringify(remoteProjects),
@@ -102,7 +119,8 @@ export default function App() {
             reviews: JSON.stringify(remoteReviews),
             blog: JSON.stringify(remoteBlog),
             settings: JSON.stringify(remoteSettings),
-            categories: JSON.stringify(remoteCategories)
+            categories: JSON.stringify(remoteCategories),
+            navItems: JSON.stringify(remoteNavItems)
           };
 
           setProjects(remoteProjects);
@@ -112,6 +130,7 @@ export default function App() {
           setBlog(remoteBlog);
           setSettings(remoteSettings);
           setCategories(remoteCategories);
+          setNavItems(remoteNavItems);
         } catch (e) {
           console.error('[Supabase] Hydration failed, using default states:', e);
         }
@@ -170,10 +189,16 @@ export default function App() {
         lastSavedState.current.categories = catStr;
         await saveSupabaseState('gangin_categories', categories);
       }
+
+      const navStr = JSON.stringify(navItems);
+      if (navStr !== lastSavedState.current.navItems) {
+        lastSavedState.current.navItems = navStr;
+        await saveSupabaseState('gangin_nav_items', navItems);
+      }
     }
 
     syncState();
-  }, [projects, packages, faq, reviews, blog, settings, categories, isHydrated]);
+  }, [projects, packages, faq, reviews, blog, settings, categories, navItems, isHydrated]);
 
   // Supabase Real-time Subscription for true live updates across tabs/clients
   useEffect(() => {
@@ -220,6 +245,9 @@ export default function App() {
             } else if (key === 'gangin_categories') {
               lastSavedState.current.categories = stringified;
               setCategories(prev => JSON.stringify(prev) !== stringified ? value : prev);
+            } else if (key === 'gangin_nav_items') {
+              lastSavedState.current.navItems = stringified;
+              setNavItems(prev => JSON.stringify(prev) !== stringified ? value : prev);
             }
           }
         )
@@ -287,6 +315,8 @@ export default function App() {
         currentView={currentView}
         setView={setView}
         resetProject={resetProject}
+        settings={settings}
+        navItems={navItems}
       />
 
       {/* Main Page Layout Dynamic Routing */}
@@ -380,6 +410,7 @@ export default function App() {
             blog={blog}
             settings={settings}
             categories={categories}
+            navItems={navItems}
             onUpdateProjects={setProjects}
             onUpdatePackages={setPackages}
             onUpdateFAQ={setFaq}
@@ -387,6 +418,7 @@ export default function App() {
             onUpdateBlog={setBlog}
             onUpdateSettings={setSettings}
             onUpdateCategories={setCategories}
+            onUpdateNavItems={setNavItems}
           />
         )}
       </main>
@@ -571,6 +603,7 @@ export default function App() {
       <Footer
         setView={setView}
         resetProject={resetProject}
+        settings={settings}
       />
     </div>
   );

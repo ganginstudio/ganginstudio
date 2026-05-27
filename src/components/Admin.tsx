@@ -8,7 +8,8 @@ import {
   BlogPost,
   SiteSettings,
   ServicePackage,
-  ServiceCategory
+  ServiceCategory,
+  NavItemConfig
 } from '../types';
 import { uploadPortfolioImage, isSupabaseOffline } from '../lib/supabase';
 import {
@@ -38,6 +39,7 @@ interface AdminProps {
   blog: BlogPost[];
   settings: SiteSettings;
   categories: ServiceCategory[];
+  navItems?: NavItemConfig[];
   onUpdateProjects: (updated: Project[]) => void;
   onUpdatePackages: (updated: ServicePackage[]) => void;
   onUpdateFAQ: (updated: FAQItem[]) => void;
@@ -45,6 +47,7 @@ interface AdminProps {
   onUpdateBlog: (updated: BlogPost[]) => void;
   onUpdateSettings: (updated: SiteSettings) => void;
   onUpdateCategories: (updated: ServiceCategory[]) => void;
+  onUpdateNavItems?: (updated: NavItemConfig[]) => void;
 }
 
 const dataURLtoFile = (dataurl: string, filename: string): File => {
@@ -144,20 +147,22 @@ export default function Admin({
   blog,
   settings,
   categories,
+  navItems,
   onUpdateProjects,
   onUpdatePackages,
   onUpdateFAQ,
   onUpdateReviews,
   onUpdateBlog,
   onUpdateSettings,
-  onUpdateCategories
+  onUpdateCategories,
+  onUpdateNavItems
 }: AdminProps) {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [password, setPassword] = useState<string>('');
   const [errorMsg, setErrorMsg] = useState<string>('');
   
   // Tabs management
-  const [currentTab, setCurrentTab] = useState<'settings' | 'portfolio' | 'packages' | 'categories' | 'faq' | 'reviews' | 'blog' | 'leads'>('settings');
+  const [currentTab, setCurrentTab] = useState<'settings' | 'portfolio' | 'packages' | 'categories' | 'faq' | 'reviews' | 'blog' | 'leads' | 'navigation'>('settings');
 
   // Unified leads logging states
   const [allLeads, setAllLeads] = useState<any[]>([]);
@@ -238,6 +243,14 @@ export default function Admin({
 
   // Temp local edit states
   const [localSettings, setLocalSettings] = useState<SiteSettings>({ ...settings });
+
+  // Keep localSettings updated when the global settings finish loading or update remotely
+  React.useEffect(() => {
+    if (settings) {
+      setLocalSettings({ ...settings });
+      console.log('[BASIC SETTINGS FETCH SUCCESS]');
+    }
+  }, [settings]);
   
   // Project editing
   const [editingProject, setEditingProject] = useState<Project | null>(null);
@@ -301,9 +314,25 @@ export default function Admin({
   };
 
   // 1. Settings save handler
-  const handleSaveSettings = () => {
-    onUpdateSettings(localSettings);
-    alert('기본 디자인 환경 및 SEO 메타태그 설정이 완벽히 저장되었습니다.');
+  const handleSaveSettings = async () => {
+    console.log('[BASIC SETTINGS SAVE START]');
+    try {
+      const { saveSupabaseState } = await import('../lib/supabase');
+      // Direct write to the backend
+      const isSaved = await saveSupabaseState('gangin_settings', localSettings);
+      
+      if (isSaved) {
+        console.log('[BASIC SETTINGS SUPABASE UPSERT SUCCESS]');
+        onUpdateSettings(localSettings);
+        alert('기본 디자인 환경 및 SEO 메타태그 설정이 완벽히 저장되었습니다.');
+      } else {
+        console.log('[BASIC SETTINGS SAVE FAILED]');
+        alert('설정 저장에 실패했습니다. Supabase 연결 혹은 권한 설정을 확인하세요.');
+      }
+    } catch (saveError) {
+      console.log('[BASIC SETTINGS SAVE FAILED]', saveError);
+      alert('설정 동기화 도중 데이터베이스 예외가 감지되었습니다.');
+    }
   };
 
   // Robust Async File processing with validation & WebP conversion connected to Supabase Storage
@@ -634,7 +663,7 @@ export default function Admin({
           {isOffline && (
             <div className="mt-3 p-3 bg-amber-50/80 border border-amber-200/60 text-amber-800 text-[10.5px] leading-relaxed font-normal font-sans">
               <p className="font-semibold mb-1 flex items-center gap-1 text-[11px]">⚠️ Supabase가 오프라인 상태입니다</p>
-              <p className="opacity-90">선언된 데이터베이스 주소(<code className="font-mono text-[9px] bg-amber-100 px-1 rounded">fgmzebxdynou...</code>)가 정지되었거나 일시적으로 만료되었습니다. 작업물은 안전하게 인-메모리에 실시간 보호/유지됩니다.</p>
+              <p className="opacity-90">선언된 데이터베이스 주소(<code className="font-mono text-[9px] bg-amber-100 px-1 rounded">qbxgaypvwqvmwdlaymsf...</code>)가 정지되었거나 일시적으로 만료되었습니다. 작업물은 안전하게 인-메모리에 실시간 보호/유지됩니다.</p>
             </div>
           )}
         </div>
@@ -718,6 +747,16 @@ export default function Admin({
           >
             <ClipboardList size={13} />
             <span>통합 공간 견적 및 상담 내역 ({allLeads.length + estimatesLog.filter(e => !allLeads.some(l => l.id === e.id)).length})</span>
+          </button>
+
+          <button
+            onClick={() => { setCurrentTab('navigation'); setEditingProject(null); }}
+            className={`flex items-center gap-2.5 py-3.5 px-4 text-start rounded-none transition-colors cursor-pointer ${
+              currentTab === 'navigation' ? 'bg-brand-dark text-white font-medium' : 'hover:bg-brand-bg/60 text-brand-muted hover:text-brand-dark'
+            }`}
+          >
+            <ClipboardList size={13} />
+            <span>상단 메뉴 관리</span>
           </button>
         </nav>
       </aside>
@@ -1892,6 +1931,147 @@ export default function Admin({
                 </div>
               </div>
             )}
+          </div>
+        )}
+
+        {/* TAB 9: NAVIGATION MENU MANAGEMENT */}
+        {currentTab === 'navigation' && (
+          <div className="space-y-8">
+            <div className="border-b border-brand-border pb-4 flex justify-between items-end">
+              <div>
+                <h3 className="text-sm font-semibold text-brand-dark uppercase tracking-widest">상단 메뉴 관리</h3>
+                <p className="text-[10px] text-brand-muted font-light mt-1">
+                  홈페이지 상단 헤더 및 모바일 내비게이션에 노출되는 메뉴의 한글명, 영문명, 연결링크(뷰) 및 노출 순서를 일괄 관리합니다.
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <span className="text-[10px] uppercase font-semibold text-brand-dark tracking-widest block">● 메뉴 목록 설정</span>
+              
+              <div className="border border-brand-border/60 divide-y divide-brand-border/40 bg-white overflow-x-auto">
+                <div className="min-w-[700px]">
+                  <div className="grid grid-cols-12 gap-4 p-3 bg-brand-bg/30 text-[10px] font-semibold text-brand-dark uppercase tracking-wider">
+                    <div className="col-span-3">메뉴 한글명 (Label KR)</div>
+                    <div className="col-span-3">메뉴 영문명 (Label EN)</div>
+                    <div className="col-span-2 text-center">링크 뷰 (Link URL/View)</div>
+                    <div className="col-span-2 text-center">정렬 순서 (Order)</div>
+                    <div className="col-span-2 text-right">노출 여부 (Show)</div>
+                  </div>
+
+                  {navItems && navItems.map((item, idx) => (
+                    <div key={item.id || item.view} className="grid grid-cols-12 gap-4 p-4 items-center">
+                      <div className="col-span-3">
+                        <input
+                          type="text"
+                          value={item.labelKr}
+                          onChange={(e) => {
+                            const updated = [...navItems];
+                            updated[idx] = { ...item, labelKr: e.target.value };
+                            if (onUpdateNavItems) onUpdateNavItems(updated);
+                          }}
+                          className="w-full bg-[#FFFFFF] border border-brand-border/80 px-3 py-2 text-xs focus:outline-none focus:border-brand-dark font-sans"
+                          placeholder="예: 홈"
+                        />
+                      </div>
+                      <div className="col-span-3">
+                        <input
+                          type="text"
+                          value={item.label}
+                          onChange={(e) => {
+                            const updated = [...navItems];
+                            updated[idx] = { ...item, label: e.target.value };
+                            if (onUpdateNavItems) onUpdateNavItems(updated);
+                          }}
+                          className="w-full bg-[#FFFFFF] border border-brand-border/80 px-3 py-2 text-xs focus:outline-none focus:border-brand-dark font-sans"
+                          placeholder="예: Home"
+                        />
+                      </div>
+                      <div className="col-span-2">
+                        <input
+                          type="text"
+                          value={item.view}
+                          onChange={(e) => {
+                            const updated = [...navItems];
+                            updated[idx] = { ...item, view: e.target.value as any };
+                            if (onUpdateNavItems) onUpdateNavItems(updated);
+                          }}
+                          className="w-full bg-[#FFFFFF] border border-brand-border/80 px-3 py-2 text-xs font-mono text-center focus:outline-none focus:border-brand-dark"
+                          placeholder="예: home"
+                        />
+                      </div>
+                      <div className="col-span-2">
+                        <input
+                          type="number"
+                          value={item.order}
+                          onChange={(e) => {
+                            const updated = [...navItems];
+                            updated[idx] = { ...item, order: parseInt(e.target.value, 10) || 0 };
+                            if (onUpdateNavItems) onUpdateNavItems(updated);
+                          }}
+                          className="w-full bg-[#FFFFFF] border border-brand-border/80 px-3 py-2 text-xs text-center focus:outline-none focus:border-brand-dark font-sans"
+                        />
+                      </div>
+                      <div className="col-span-2 flex items-center justify-end">
+                        <label className="relative inline-flex items-center cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={item.show}
+                            onChange={(e) => {
+                              const updated = [...navItems];
+                              updated[idx] = { ...item, show: e.target.checked };
+                              if (onUpdateNavItems) onUpdateNavItems(updated);
+                            }}
+                            className="sr-only peer"
+                          />
+                          <div className="w-9 h-5 bg-gray-200 rounded-full peer peer-checked:bg-brand-dark after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:after:translate-x-full"></div>
+                          <span className="ml-2 text-[10px] font-medium text-brand-dark min-w-[32px] text-right font-sans">
+                            {item.show ? '노출' : '숨김'}
+                          </span>
+                        </label>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="p-4 bg-brand-bg/20 border border-brand-border/40 text-[10px] text-brand-muted leading-relaxed space-y-1">
+                <p className="font-semibold text-brand-dark mb-1">💡 상단 메뉴 관리 사용 가이드</p>
+                <p>• 레이블(한글명/영문명)을 입력 후 하단의 **"메뉴 설정 일괄 보존하기"**를 누르지 않아도 임시 실시간 미리보기에 배치가 바뀝니다. 클라우드에 영구 적용하려면 하단 보존 버튼을 반드시 한 번 누르십시오.</p>
+                <p>• 기본적으로 설정 제공되는 메뉴 뷰는 **home, portfolio, categories, pricing, estimate, reviews, blog, faq, admin** 등 연동 코드를 가리킵니다.</p>
+              </div>
+
+              <div id="save-nav-action-wrapper" className="pt-4 flex justify-end">
+                <button
+                  onClick={async () => {
+                    if (!navItems) return;
+                    console.log('[SAVE START] gangin_nav_items');
+                    try {
+                      const { saveSupabaseState, isSupabaseConfigured } = await import('../lib/supabase');
+                      if (isSupabaseConfigured) {
+                        const success = await saveSupabaseState('gangin_nav_items', navItems);
+                        if (success) {
+                          console.log('[SAVE SUCCESS] gangin_nav_items');
+                          alert('기본 상단 메뉴 구성이 데이터베이스에 완벽히 보관되었습니다.');
+                        } else {
+                          console.log('[SAVE FAILED] gangin_nav_items');
+                          alert('데이터베이스 저장 중 서버 연결장애가 발생했습니다.');
+                        }
+                      } else {
+                        console.log('[SAVE FAILED] gangin_nav_items - Supabase offline');
+                        alert('데이터베이스 연결 오프라인으로 수동 조치 전까지 로컬 가상 환경에 유지됩니다.');
+                      }
+                    } catch (err: any) {
+                      console.log('[SAVE FAILED] gangin_nav_items', err?.message || err);
+                    }
+                  }}
+                  className="bg-brand-dark hover:bg-neutral-800 text-white font-semibold text-xs py-3.5 px-8 flex items-center gap-2 transition-colors cursor-pointer"
+                >
+                  <Save size={13} />
+                  <span>메뉴 설정 일괄 보존하기</span>
+                </button>
+              </div>
+            </div>
           </div>
         )}
       </main>

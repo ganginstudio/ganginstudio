@@ -1,11 +1,12 @@
-import { NavView } from '../types';
+import { NavView, SiteSettings } from '../types';
 
 interface FooterProps {
   setView: (view: NavView) => void;
   resetProject: () => void;
+  settings?: SiteSettings;
 }
 
-export default function Footer({ setView, resetProject }: FooterProps) {
+export default function Footer({ setView, resetProject, settings }: FooterProps) {
   const handleNavClick = (view: NavView) => {
     setView(view);
     resetProject();
@@ -22,6 +23,14 @@ export default function Footer({ setView, resetProject }: FooterProps) {
     '욕실 인테리어 디자인'
   ];
 
+  const brandName = settings?.brandName || 'GANG IN STUDIO';
+  const address = settings?.address || '광주광역시 남구 양림동 24-12 강인스튜디오 빌딩 1F';
+  const phone = settings?.phone || '062.515.1204';
+  const email = settings?.email || 'contact@ganginstudio.com';
+  const blogUrl = settings?.blog || 'https://blog.naver.com';
+  const instagramUrl = settings?.instagram || 'https://instagram.com';
+  const kakaotalkUrl = settings?.kakaotalk || 'https://pf.kakao.com';
+
   return (
     <footer id="main-footer" className="bg-[#111111] text-[#F7F6F2] pt-24 pb-16 px-6 md:px-12 border-t border-brand-dark">
       <div className="max-w-[1400px] mx-auto">
@@ -29,7 +38,7 @@ export default function Footer({ setView, resetProject }: FooterProps) {
           
           {/* Column 1: Brand block */}
           <div className="space-y-4 md:col-span-1">
-            <h3 className="text-lg font-light tracking-[0.25em] text-[#F7F6F2]">GANG IN STUDIO</h3>
+            <h3 className="text-lg font-light tracking-[0.25em] text-[#F7F6F2]">{brandName}</h3>
             <p className="text-[11px] leading-relaxed tracking-widest text-[#6B6B6B] font-light max-w-sm">
               우리는 완벽한 디테일과 순수 건축 가치를 기반으로 주거와 상가를 기획하고 시공하는 광주 대표 인테리어 전문 디자인 오피스입니다. 
             </p>
@@ -89,9 +98,9 @@ export default function Footer({ setView, resetProject }: FooterProps) {
           <div className="space-y-4">
             <h4 className="text-[11px] uppercase tracking-[0.2em] text-[#F7F6F2]/50 font-normal">Contact</h4>
             <div className="space-y-2.5 text-[11px] font-light tracking-wide text-brand-muted leading-relaxed">
-              <p>주소: 광주광역시 남구 양림동 24-12 강인스튜디오 빌딩 1F</p>
-              <p>전화: <a href="tel:0625151204" className="hover:text-white transition-colors duration-300 font-light">062.515.1204</a> (상담문의)</p>
-              <p>이메일: <a href="mailto:contact@ganginstudio.com" className="hover:text-white transition-colors">contact@ganginstudio.com</a></p>
+              <p>주소: {address}</p>
+              <p>전화: <a href={`tel:${phone.replace(/[^0-9]/g, '')}`} className="hover:text-white transition-colors duration-300 font-light">{phone}</a> (상담문의)</p>
+              <p>이메일: <a href={`mailto:${email}`} className="hover:text-white transition-colors">{email}</a></p>
               <p>운영시간: 월 - 금 10:00 - 18:00 (토/일 예약 미팅)</p>
             </div>
           </div>
@@ -101,17 +110,17 @@ export default function Footer({ setView, resetProject }: FooterProps) {
             <h4 className="text-[11px] uppercase tracking-[0.2em] text-[#F7F6F2]/50 font-normal">Channels</h4>
             <div className="space-y-3.5 text-[11px] font-light tracking-wide text-brand-muted">
               <p>
-                <a href="https://blog.naver.com" target="_blank" rel="noreferrer" className="hover:text-white transition-colors block">
+                <a href={blogUrl} target="_blank" rel="noreferrer" className="hover:text-white transition-colors block animate-pulse-subtle">
                   Naver Blog — 네이버 블로그 포트폴리오
                 </a>
               </p>
               <p>
-                <a href="https://instagram.com" target="_blank" rel="noreferrer" className="hover:text-white transition-colors block">
+                <a href={instagramUrl} target="_blank" rel="noreferrer" className="hover:text-white transition-colors block">
                   Instagram — 인스타그램 스토리
                 </a>
               </p>
               <p>
-                <a href="https://pf.kakao.com" target="_blank" rel="noreferrer" className="hover:text-white transition-colors block">
+                <a href={kakaotalkUrl} target="_blank" rel="noreferrer" className="hover:text-white transition-colors block">
                   KakaoTalk — 강인스튜디오 카카오톡 채널
                 </a>
               </p>

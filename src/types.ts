@@ -65,5 +65,14 @@ export interface PricingPackage {
   process: string[];
 }
 
+export interface NavItemConfig {
+  id: string;
+  label: string;
+  view: NavView;
+  labelKr: string;
+  order: number;
+  show: boolean;
+}
+
 import { FAQItem, CustomerReview, BlogPost, SiteSettings, ServicePackage, ServiceCategory } from './store';
 export type { FAQItem, CustomerReview, BlogPost, SiteSettings, ServicePackage, ServiceCategory };

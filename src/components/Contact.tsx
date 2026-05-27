@@ -213,7 +213,7 @@ export default function Contact() {
               <div className="absolute h-[2px] w-full bg-[#E2E1DA] top-[45%]" />
               
               {/* River/Park styled Area */}
-              <div className="absolute right-4 top-4 w-28 h-20 bg-[#E7E7E1]/60 flex items-center justify-center font-serif text-[10px] text-brand-muted/40 tracking-wider">
+              <div className="absolute right-4 top-4 w-28 h-20 bg-[#E7E7E1]/60 flex items-center justify-center font-sans text-[10px] text-brand-muted/40 tracking-wider">
                 양림역사공원
               </div>
 
