@@ -143,13 +143,16 @@ export default function Contact({ contactCms }: ContactProps) {
 
       {/* Page Header */}
       <div className="mb-20 space-y-4">
-        <span className="text-[10px] uppercase tracking-[0.3em] text-brand-muted/70 block">
-          {contactCms?.topLabel || "Establish Connection — 커뮤니케이션 오피스 연결"}
-        </span>
-        <h1 className="text-2xl md:text-3xl font-semibold tracking-[0.16em] text-[#111111] uppercase">
+        <div className="flex items-center gap-2">
+          <span className="flex items-center justify-center w-6 h-6 rounded-full bg-[#111111] text-white text-[10px] font-bold shrink-0">01</span>
+          <span className="text-[10px] uppercase tracking-[0.3em] text-[#111111] font-bold block">
+            {contactCms?.topLabel || "Establish Connection — 커뮤니케이션 오피스 연결"}
+          </span>
+        </div>
+        <h1 className="text-2xl md:text-3xl font-extrabold tracking-[0.16em] text-[#111111] uppercase">
           {contactCms?.topTitle || "오시는 길 & 기획 문의"}
         </h1>
-        <p className="text-xs font-light text-brand-muted max-w-xl leading-relaxed tracking-wider mt-2">
+        <p className="text-[13px] font-normal text-[#222222] max-w-xl leading-relaxed tracking-wider mt-2 text-justify">
           {contactCms?.topDesc || "강인스튜디오 사옥은 광주 남구 양림동 역사문화거리에 위치해 있습니다. 설계 미팅 및 자재 큐레이션 체험은 사전 예약제로 진행되오니 출발 전 온라인 정밀 양식 또는 유선 채널로 문의 주십시오."}
         </p>
       </div>
@@ -312,10 +315,13 @@ export default function Contact({ contactCms }: ContactProps) {
 
       {/* Advanced Inquiry System (정밀 기획상담 통합포럼) */}
       <div className="pt-24 max-w-4xl mx-auto">
-        <div className="text-center space-y-4 mb-16">
-          <span className="text-[9px] uppercase tracking-[0.3em] text-brand-muted block">02 — ADVANCED INQUIRY SYSTEM</span>
-          <h2 className="text-xl md:text-2xl font-semibold tracking-[0.15em] text-[#111111] uppercase">정밀 기획 상담 통합 양식</h2>
-          <p className="text-xs font-light text-brand-muted max-w-xl mx-auto leading-relaxed">
+        <div className="text-center space-y-4 mb-16 flex flex-col items-center">
+          <div className="flex items-center gap-2">
+            <span className="flex items-center justify-center w-6 h-6 rounded-full bg-[#111111] text-white text-[10px] font-bold shrink-0">02</span>
+            <span className="text-[10px] uppercase tracking-[0.3em] text-[#111111] font-bold block">02 — ADVANCED INQUIRY SYSTEM</span>
+          </div>
+          <h2 className="text-xl md:text-2xl font-bold tracking-[0.15em] text-[#111111] uppercase">정밀 기획 상담 통합 양식</h2>
+          <p className="text-[13px] font-normal text-[#222222] max-w-xl mx-auto leading-relaxed text-center">
             세부 평형 정보, 예산 기준 및 고객님이 소유하신 단가 참조 자료(지상도, 자재 가구 선호도)를 모두 첨부하여 공학자처럼 신속하게 일대일 디렉터 상담 예약 명세를 구성하는 고품격 접수처입니다.
           </p>
         </div>

@@ -273,26 +273,29 @@ export default function Home({ projects, reviews, setView, setSelectedProjectId,
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-24 items-baseline mb-16">
           {/* Tag */}
           <div className="lg:col-span-3">
-            <span className="text-[10px] uppercase tracking-[0.3em] text-brand-muted/70 block">
-              {hpCms.philosophyNum} — {hpCms.philosophyLabel}
-            </span>
-            <h2 className="text-xs uppercase tracking-[0.2em] text-[#111111] mt-2 font-normal">
+            <div className="flex items-center gap-2 mb-2">
+              <span className="flex items-center justify-center w-5 h-5 rounded-full bg-[#111111] text-white text-[9px] font-bold shrink-0">01</span>
+              <span className="text-[10px] uppercase tracking-[0.3em] text-[#111111] font-bold block">
+                {hpCms.philosophyLabel}
+              </span>
+            </div>
+            <h2 className="text-sm uppercase tracking-[0.2em] text-[#111111] mt-2 font-bold">
               {hpCms.philosophyTitle}
             </h2>
           </div>
 
           {/* Narrative */}
           <div className="lg:col-span-5 space-y-6">
-            <h3 className="text-xl md:text-2xl font-light tracking-[0.1em] text-brand-dark font-sans leading-relaxed">
+            <h3 className="text-xl md:text-2xl font-bold tracking-[0.1em] text-[#111111] font-sans leading-relaxed">
               {hpCms.philosophyHeadline}
             </h3>
           </div>
 
-          <div className="lg:col-span-4 text-xs font-light tracking-wide text-brand-muted leading-relaxed space-y-4">
-            <p>
+          <div className="lg:col-span-4 text-[13px] font-normal tracking-wide text-[#222222] leading-relaxed space-y-4">
+            <p className="leading-relaxed">
               {hpCms.philosophyPara1}
             </p>
-            <p>
+            <p className="leading-relaxed">
               {hpCms.philosophyPara2}
             </p>
           </div>
@@ -303,10 +306,13 @@ export default function Home({ projects, reviews, setView, setSelectedProjectId,
           <div className="pt-16 border-t border-brand-border/40">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-start">
               <div className="lg:col-span-3">
-                <span className="text-[10px] uppercase tracking-[0.3em] text-brand-muted/70 block">
-                  SELECTED VOICES
-                </span>
-                <h4 className="text-xs uppercase tracking-[0.2em] text-[#111111] mt-2 font-normal">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="flex items-center justify-center w-5 h-5 rounded-full bg-[#111111] text-white text-[9px] font-bold shrink-0">01-B</span>
+                  <span className="text-[10px] uppercase tracking-[0.3em] text-[#111111] font-bold block">
+                    SELECTED VOICES
+                  </span>
+                </div>
+                <h4 className="text-sm uppercase tracking-[0.2em] text-[#111111] mt-2 font-bold">
                   고객 상생 수기
                 </h4>
               </div>
@@ -315,18 +321,18 @@ export default function Home({ projects, reviews, setView, setSelectedProjectId,
                 {featuredReviews.map((rev) => (
                   <div key={rev.id} className="space-y-4 font-sans text-justify flex flex-col justify-between h-full">
                     <div className="space-y-3">
-                      <div className="flex justify-between items-baseline border-b border-brand-border/20 pb-2">
-                        <span className="text-[10px] font-medium tracking-wider text-[#111111]">{rev.clientName}</span>
-                        <span className="text-[9px] uppercase tracking-[0.15em] text-brand-muted font-light">{rev.category}</span>
+                      <div className="flex justify-between items-baseline border-b border-[#111111]/20 pb-2">
+                        <span className="text-xs font-bold tracking-wider text-[#111111]">{rev.clientName}</span>
+                        <span className="text-[10px] uppercase tracking-[0.15em] text-[#111111] font-bold">{rev.category}</span>
                       </div>
-                      <p className="text-[11px] font-light leading-relaxed text-brand-muted tracking-wide italic whitespace-pre-line">
-                        {rev.quote}
+                      <p className="text-[13px] font-normal leading-relaxed text-[#222222] tracking-wide italic whitespace-pre-line">
+                        "{rev.quote}"
                       </p>
                     </div>
-                    <div className="flex justify-between items-center text-[9px] text-brand-muted/70 pt-4 font-mono mt-auto border-t border-brand-border/10">
+                    <div className="flex justify-between items-center text-[10px] text-[#222222] font-semibold pt-4 font-mono mt-auto border-t border-brand-border/10">
                       <span className="tracking-widest">{rev.date || 'N/A'}</span>
                       {rev.rating !== undefined && rev.rating > 0 && (
-                        <span className="tracking-widest flex items-center gap-0.5 text-[#111111] text-[8px]">
+                        <span className="tracking-widest flex items-center gap-0.5 text-[#111111] text-[9px] font-bold">
                           {'★'.repeat(rev.rating)}
                         </span>
                       )}
@@ -341,22 +347,25 @@ export default function Home({ projects, reviews, setView, setSelectedProjectId,
 
       {/* 3. FEATURED PROJECTS ARCHITECTURAL GRID */}
       <section id="featured-projects" className="max-w-[1400px] mx-auto px-6 md:px-12 mb-32">
-        <div className="flex justify-between items-baseline border-b border-brand-border pb-6 mb-12">
+        <div className="flex justify-between items-baseline border-b-2 border-[#111111] pb-6 mb-12">
           <div className="space-y-1">
-            <span className="text-[10px] uppercase tracking-[0.3em] text-brand-muted/70 block">
-              {hpCms.featuredNum} — {hpCms.featuredLabel}
-            </span>
-            <h3 className="text-sm uppercase tracking-[0.2em] text-[#111111] font-semibold">
+            <div className="flex items-center gap-2 mb-2">
+              <span className="flex items-center justify-center w-5 h-5 rounded-full bg-[#111111] text-white text-[9px] font-bold shrink-0">02</span>
+              <span className="text-[10px] uppercase tracking-[0.3em] text-[#111111] font-bold block">
+                {hpCms.featuredLabel}
+              </span>
+            </div>
+            <h3 className="text-base uppercase tracking-[0.2em] text-[#111111] font-bold">
               {(hpCms.featuredTitle === "Featured Spaces (선정작)" || !hpCms.featuredTitle) ? "PORTFOLIO" : hpCms.featuredTitle.replace(" (선정작)", "")}
             </h3>
           </div>
           <button
             id="view-all-portfolio"
             onClick={() => setView((hpCms.featuredBtnUrl || 'portfolio') as any)}
-            className="text-[10px] tracking-[0.1em] text-brand-muted hover:text-[#111111] transition-colors focus:outline-none flex items-center gap-2 cursor-pointer pb-1 border-b border-transparent hover:border-brand-dark font-medium"
+            className="text-[11px] tracking-[0.1em] text-[#111111] font-bold hover:text-brand-muted transition-colors focus:outline-none flex items-center gap-2 cursor-pointer pb-1 border-b border-[#111111]"
           >
             <span>{hpCms.featuredBtnText}</span>
-            <ArrowRight size={10} />
+            <ArrowRight size={11} />
           </button>
         </div>
 
@@ -393,15 +402,15 @@ export default function Home({ projects, reviews, setView, setSelectedProjectId,
                 {/* Metadata Column */}
                 <div className="grid grid-cols-3 gap-4 border-b border-brand-border/40 pb-4">
                   <div className="col-span-2">
-                    <p className="text-[9px] uppercase tracking-[0.25em] text-brand-muted/80">{(project.category || 'Space')} — {project.year || '2026'}</p>
-                    <h4 className="text-sm font-semibold text-[#111111] tracking-wider mt-1.5 mb-1 group-hover:text-brand-muted transition-colors duration-300">
+                    <p className="text-[10px] uppercase tracking-[0.25em] text-[#222222] font-semibold">{(project.category || 'Space')} — {project.year || '2026'}</p>
+                    <h4 className="text-base font-bold text-[#111111] tracking-wider mt-1.5 mb-1 group-hover:text-brand-muted transition-colors duration-300">
                       {project.title || 'GANGIN Space'}
                     </h4>
-                    <p className="text-[10px] text-brand-muted font-light tracking-wide">{project.titleEn || ''}</p>
+                    <p className="text-xs text-[#222222] font-semibold tracking-wide">{project.titleEn || ''}</p>
                   </div>
                   <div className="text-right flex flex-col justify-end">
-                    <span className="text-[10px] text-brand-muted font-light tracking-widest">{project.location || 'Gwangju'}</span>
-                    <span className="text-[9px] text-brand-muted/50 font-mono mt-1">{project.area || 'N/A'}</span>
+                    <span className="text-xs text-[#111111] font-semibold tracking-widest">{project.location || 'Gwangju'}</span>
+                    <span className="text-[10px] text-[#222222] font-semibold font-mono mt-1">{project.area || 'N/A'}</span>
                   </div>
                 </div>
               </motion.div>
@@ -414,38 +423,50 @@ export default function Home({ projects, reviews, setView, setSelectedProjectId,
       <section id="trust-core-business" className="bg-white/40 border-y border-brand-border py-28 mb-36">
         <div className="max-w-[1400px] mx-auto px-6 md:px-12">
           <div className="max-w-xl mb-16">
-            <span className="text-[10px] uppercase tracking-[0.3em] text-brand-muted/70 block">
-              {hpCms.integrityNum} — {hpCms.integrityLabel}
-            </span>
-            <h2 className="text-xl md:text-2xl font-semibold tracking-[0.1em] text-[#111111] mt-2 mb-6">
+            <div className="flex items-center gap-2 mb-2">
+              <span className="flex items-center justify-center w-5 h-5 rounded-full bg-[#111111] text-white text-[9px] font-bold shrink-0">03</span>
+              <span className="text-[10px] uppercase tracking-[0.3em] text-[#111111] font-bold block">
+                {hpCms.integrityLabel}
+              </span>
+            </div>
+            <h2 className="text-xl md:text-2xl font-bold tracking-[0.1em] text-[#111111] mt-2 mb-6">
               {hpCms.integrityTitle}
             </h2>
-            <p className="text-xs font-light text-brand-muted leading-relaxed tracking-wide">
+            <p className="text-sm font-normal text-[#222222] leading-relaxed tracking-wide text-justify">
               {hpCms.integrityDesc}
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-8">
             <div className="space-y-4">
-              <span className="text-[10px] uppercase tracking-[0.25em] text-brand-muted block">{hpCms.col1Num}</span>
-              <h3 className="text-sm font-semibold tracking-widest text-[#111111]">{hpCms.col1Title}</h3>
-              <p className="text-xs text-brand-muted font-light leading-relaxed">
+              <div className="flex items-center gap-1.5">
+                <span className="flex items-center justify-center w-4 h-4 rounded-full bg-[#111111] text-white text-[8px] font-bold shrink-0">1</span>
+                <span className="text-[10px] uppercase tracking-[0.25em] text-[#111111] font-bold block">{hpCms.col1Num}</span>
+              </div>
+              <h3 className="text-base font-bold tracking-widest text-[#111111]">{hpCms.col1Title}</h3>
+              <p className="text-xs text-[#222222] font-normal leading-relaxed text-justify">
                 {hpCms.col1Desc}
               </p>
             </div>
             
             <div className="space-y-4">
-              <span className="text-[10px] uppercase tracking-[0.25em] text-brand-muted block">{hpCms.col2Num}</span>
-              <h3 className="text-sm font-semibold tracking-widest text-[#111111]">{hpCms.col2Title}</h3>
-              <p className="text-xs text-brand-muted font-light leading-relaxed">
+              <div className="flex items-center gap-1.5">
+                <span className="flex items-center justify-center w-4 h-4 rounded-full bg-[#111111] text-white text-[8px] font-bold shrink-0">2</span>
+                <span className="text-[10px] uppercase tracking-[0.25em] text-[#111111] font-bold block">{hpCms.col2Num}</span>
+              </div>
+              <h3 className="text-base font-bold tracking-widest text-[#111111]">{hpCms.col2Title}</h3>
+              <p className="text-xs text-[#222222] font-normal leading-relaxed text-justify">
                 {hpCms.col2Desc}
               </p>
             </div>
 
             <div className="space-y-4">
-              <span className="text-[10px] uppercase tracking-[0.25em] text-brand-muted block">{hpCms.col3Num}</span>
-              <h3 className="text-sm font-semibold tracking-widest text-[#111111]">{hpCms.col3Title}</h3>
-              <p className="text-xs text-brand-muted font-light leading-relaxed">
+              <div className="flex items-center gap-1.5">
+                <span className="flex items-center justify-center w-4 h-4 rounded-full bg-[#111111] text-white text-[8px] font-bold shrink-0">3</span>
+                <span className="text-[10px] uppercase tracking-[0.25em] text-[#111111] font-bold block">{hpCms.col3Num}</span>
+              </div>
+              <h3 className="text-base font-bold tracking-widest text-[#111111]">{hpCms.col3Title}</h3>
+              <p className="text-xs text-[#222222] font-normal leading-relaxed text-justify">
                 {hpCms.col3Desc}
               </p>
             </div>
@@ -456,13 +477,16 @@ export default function Home({ projects, reviews, setView, setSelectedProjectId,
       {/* 5. PRIMARY CONVERSION CTA SYSTEM */}
       <section id="conversion-cta-block" className="max-w-[1400px] mx-auto px-6 md:px-12 mb-36 border-t border-brand-border/60 pt-28">
         <div className="max-w-xl mb-16">
-          <span className="text-[10px] uppercase tracking-[0.3em] text-brand-muted/70 block">
-            {hpCms.conversionNum} — {hpCms.conversionLabel}
-          </span>
-          <h2 className="text-xl md:text-2xl font-light tracking-[0.1em] text-[#111111] mt-2 mb-4">
+          <div className="flex items-center gap-2 mb-2">
+            <span className="flex items-center justify-center w-5 h-5 rounded-full bg-[#111111] text-white text-[9px] font-bold shrink-0">04</span>
+            <span className="text-[10px] uppercase tracking-[0.3em] text-[#111111] font-bold block">
+              {hpCms.conversionLabel}
+            </span>
+          </div>
+          <h2 className="text-xl md:text-2xl font-bold tracking-[0.1em] text-[#111111] mt-2 mb-4">
             {hpCms.conversionTitle}
           </h2>
-          <p className="text-xs font-light text-brand-muted leading-relaxed tracking-wide">
+          <p className="text-sm font-normal text-[#222222] leading-relaxed tracking-wide text-justify">
             {hpCms.conversionDesc}
           </p>
         </div>

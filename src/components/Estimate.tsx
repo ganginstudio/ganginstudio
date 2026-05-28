@@ -268,24 +268,27 @@ export default function Estimate({ prefillCategory, prefillSpace, clearPrefill, 
         {/* Left Editorial Information Column */}
         <div className="lg:col-span-4 space-y-12 lg:sticky lg:top-32">
           <div className="space-y-4">
-            <span className="text-[10px] uppercase tracking-[0.3em] text-brand-muted/70 block">
-              01 — Multi-Step Custom Estimate
-            </span>
-            <h1 className="text-xl md:text-2xl font-extralight tracking-[0.18em] text-[#111111] uppercase leading-relaxed">
+            <div className="flex items-center gap-2">
+              <span className="flex items-center justify-center w-6 h-6 rounded-full bg-[#111111] text-white text-[10px] font-bold shrink-0">01</span>
+              <span className="text-[10px] uppercase tracking-[0.3em] text-[#111111] font-bold block">
+                01 — Multi-Step Custom Estimate
+              </span>
+            </div>
+            <h1 className="text-xl md:text-2xl font-bold tracking-[0.18em] text-[#111111] uppercase leading-relaxed">
               우리집 / 나의가게 <br/>예상견적 받아보기
             </h1>
-            <p className="text-xs font-light text-brand-muted leading-relaxed tracking-wider mt-2">
+            <p className="text-[13px] font-normal text-[#222222] leading-relaxed tracking-wider mt-2 text-justify">
               정량화된 시공 원가와 디테일한 도면 큐레이션을 제공하기 위해 운영되는 다단계 간편 가산출 시스템입니다. 각 항목을 성실히 이행해 주시면, 시공 원가 오차율 5% 이내의 정밀한 명세를 검수해 드립니다.
             </p>
           </div>
 
-          <div className="border-t border-brand-border/60 pt-8 space-y-4 text-xs font-light text-brand-muted">
-            <h4 className="text-[10px] uppercase tracking-[0.2em] text-[#111111] font-normal">● 프리미엄 기술 규정</h4>
-            <ul className="space-y-3.5 leading-relaxed tracking-wide">
-              <li>• 라이선스 정규 면허 기술진 본사 고정 배치</li>
-              <li>• 중간 수수료 소거 원가 명세 정찰제</li>
-              <li>• 하자 보완을 극대화한 건조 및 방수 4회 레이징 보증</li>
-              <li>• 하자 이행 초과 3개년 오피스 무료 복구권 제공</li>
+          <div className="border-t-2 border-[#111111] pt-8 space-y-4 text-[13px] font-normal text-[#222222]">
+            <h4 className="text-sm uppercase tracking-[0.2em] text-[#111111] font-bold">● 프리미엄 기술 규정</h4>
+            <ul className="space-y-3.5 leading-relaxed tracking-wide font-semibold">
+              <li className="text-[#111111]">• 라이선스 정규 면허 기술진 본사 고정 배치</li>
+              <li className="text-[#111111]">• 중간 수수료 소거 원가 명세 정찰제</li>
+              <li className="text-[#111111]">• 하자 보완을 극대화한 건조 및 방수 4회 레이징 보증</li>
+              <li className="text-[#111111]">• 하자 이행 초과 3개년 오피스 무료 복구권 제공</li>
             </ul>
           </div>
 

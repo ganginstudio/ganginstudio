@@ -68,9 +68,12 @@ export default function Portfolio({ projects, setSelectedProjectId, selectedProj
     <div id="portfolio-list-container" className="pt-32 pb-32 px-6 md:px-12 max-w-[1400px] mx-auto min-h-screen">
       {/* Intro Header */}
       <div className="mb-20 space-y-4">
-        <span className="text-[10px] uppercase tracking-[0.3em] font-bold text-brand-dark block">
-          Archived Works — 시공실적 선집
-        </span>
+        <div className="flex items-center gap-2">
+          <span className="flex items-center justify-center w-6 h-6 rounded-full bg-[#111111] text-white text-[10px] font-bold shrink-0">01</span>
+          <span className="text-[10px] uppercase tracking-[0.3em] font-bold text-[#111111] block">
+            Archived Works — 시공실적 선집
+          </span>
+        </div>
         <h1 className="text-2xl md:text-4xl font-extrabold tracking-[0.1em] text-[#111111] uppercase">
           포트폴리오
         </h1>
@@ -164,10 +167,7 @@ export default function Portfolio({ projects, setSelectedProjectId, selectedProj
                   </div>
                 </div>
 
-                {/* Mobile backup text layer only visible when under touch screen & not hovered */}
-                <div className="sm:hidden absolute bottom-0 left-0 w-full bg-[#111111]/70 backdrop-blur-xs p-2 text-center">
-                  <span className="text-[10px] text-white font-bold">{project.title}</span>
-                </div>
+
               </motion.div>
             ))}
           </AnimatePresence>

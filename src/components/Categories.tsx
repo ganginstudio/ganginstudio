@@ -73,13 +73,16 @@ export default function Categories({
     >
       {/* Editorial Header */}
       <div className="mb-14 space-y-3">
-        <span className="text-[10px] uppercase tracking-[0.3em] text-brand-muted/70 block">
-          SPECIALIZED SOLUTIONS
-        </span>
-        <h1 className="text-2xl md:text-3xl font-extralight tracking-[0.16em] text-[#111111] uppercase">
+        <div className="flex items-center gap-2">
+          <span className="flex items-center justify-center w-6 h-6 rounded-full bg-[#111111] text-white text-[10px] font-bold shrink-0">01</span>
+          <span className="text-[10px] uppercase tracking-[0.3em] text-[#111111] font-bold block">
+            SPECIALIZED SOLUTIONS
+          </span>
+        </div>
+        <h1 className="text-2xl md:text-3xl font-bold tracking-[0.16em] text-[#111111] uppercase">
           분야별 공간 제안
         </h1>
-        <p className="text-xs font-light text-brand-muted max-w-xl leading-relaxed tracking-wider">
+        <p className="text-[13px] font-normal text-[#222222] max-w-xl leading-relaxed tracking-wider text-justify">
           단순한 마감을 뛰어넘어 공간 사용자의 정서적 침묵과 비즈니스의 원초적 목적을 보증하기 위해, 강인스튜디오는 9가지 독자적 구조 설계 카테고리를 고유한 맞춤 시방 기준으로 운영합니다.
         </p>
       </div>
@@ -123,20 +126,20 @@ export default function Categories({
           {/* A. Minimal hero block */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
             <div className="lg:col-span-5 space-y-6">
-              <span className="text-[10px] uppercase tracking-widest text-brand-muted font-mono block">
+              <span className="text-[10px] uppercase tracking-widest text-[#111111] font-mono font-bold block">
                 Category Code: {activeCategory.nameEn}
               </span>
-              <h2 className="text-xl md:text-3xl font-light tracking-wide text-[#111111] leading-snug">
+              <h2 className="text-xl md:text-3xl font-bold tracking-wide text-[#111111] leading-snug">
                 {activeCategory.nameKr}
               </h2>
-              <p className="text-xs md:text-sm font-light text-brand-muted leading-relaxed tracking-wide">
+              <p className="text-[13px] font-normal text-[#222222] leading-relaxed tracking-wide text-justify">
                 {activeCategory.description}
               </p>
               
               <div className="pt-2">
                 <button
                   onClick={handleInquiryAction}
-                  className="px-8 py-3.5 bg-brand-dark text-white text-[11px] tracking-widest uppercase hover:bg-black transition-all cursor-pointer rounded-none"
+                  className="px-8 py-3.5 bg-brand-dark text-white text-[11px] tracking-widest font-bold uppercase hover:bg-black transition-all cursor-pointer rounded-none"
                 >
                   {activeCategory.nameKr} 견적서 신청하기
                 </button>
@@ -158,16 +161,16 @@ export default function Categories({
             {/* Scope */}
             <div className="space-y-6">
               <div className="flex items-center gap-2.5">
-                <ClipboardList size={14} className="text-brand-muted" />
-                <h3 className="text-xs uppercase tracking-[0.2em] font-medium text-[#111111]">
+                <span className="flex items-center justify-center w-5 h-5 rounded-full bg-[#111111] text-white text-[9px] font-bold shrink-0">02</span>
+                <h3 className="text-sm uppercase tracking-[0.2em] font-bold text-[#111111]">
                   세부 설계 및 완벽 시공 범위
                 </h3>
               </div>
-              <ul className="space-y-4 text-xs font-light text-brand-dark/90 leading-relaxed tracking-wide">
+              <ul className="space-y-4 text-[13px] font-normal text-[#222222] leading-relaxed tracking-wide">
                 {activeCategory.scope.map((item, idx) => (
                   <li key={idx} className="flex items-start gap-3">
-                    <span className="font-mono text-brand-muted/70 mt-0.5">0{idx + 1}</span>
-                    <span>{item}</span>
+                    <span className="font-mono text-[#111111] font-bold mt-0.5">0{idx + 1}</span>
+                    <span className="font-semibold">{item}</span>
                   </li>
                 ))}
               </ul>
@@ -176,16 +179,16 @@ export default function Categories({
             {/* Materials */}
             <div className="space-y-6">
               <div className="flex items-center gap-2.5">
-                <Palette size={14} className="text-brand-muted" />
-                <h3 className="text-xs uppercase tracking-[0.2em] font-medium text-[#111111]">
+                <span className="flex items-center justify-center w-5 h-5 rounded-full bg-[#111111] text-white text-[9px] font-bold shrink-0">03</span>
+                <h3 className="text-sm uppercase tracking-[0.2em] font-bold text-[#111111]">
                   천연 프리미엄 자재 매칭 큐레이션
                 </h3>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
                 {activeCategory.materials.map((mat, idx) => (
-                  <div key={idx} className="bg-white p-5 border border-brand-border/60 space-y-2 flex flex-col justify-between">
-                    <span className="text-[10px] font-medium text-brand-dark block tracking-widest">{mat.name}</span>
-                    <p className="text-[10px] leading-relaxed text-brand-muted font-light">{mat.desc}</p>
+                  <div key={idx} className="bg-white p-5 border-2 border-[#111111] space-y-2 flex flex-col justify-between">
+                    <span className="text-xs font-bold text-[#111111] block tracking-widest">{mat.name}</span>
+                    <p className="text-[11px] leading-relaxed text-[#222222] font-semibold">{mat.desc}</p>
                   </div>
                 ))}
               </div>
@@ -243,19 +246,21 @@ export default function Categories({
 
           {/* D. Process Explanation Timeline */}
           <div className="space-y-8">
-            <h3 className="text-xs uppercase tracking-[0.25em] text-[#111111] font-medium flex items-center gap-2.5">
-              <RefreshCw size={13} strokeWidth={1.5} />
-              <span>진행 절차 프로세스 (Process Flow)</span>
-            </h3>
+            <div className="flex items-center gap-2.5">
+              <span className="flex items-center justify-center w-5 h-5 rounded-full bg-[#111111] text-white text-[9px] font-bold shrink-0">04</span>
+              <h3 className="text-sm uppercase tracking-[0.25em] text-[#111111] font-bold">
+                진행 절차 프로세스 (Process Flow)
+              </h3>
+            </div>
             <div className="grid grid-cols-1 sm:grid-cols-5 gap-6">
               {activeCategory.process.map((step, idx) => (
-                <div key={idx} className="relative p-5 border border-brand-border/40 bg-white space-y-2">
-                  <span className="text-[10px] font-mono font-bold text-brand-muted block">STEP 0{idx + 1}</span>
-                  <p className="text-xs font-light text-brand-dark leading-relaxed">
+                <div key={idx} className="relative p-5 border-2 border-[#111111] bg-white space-y-2">
+                  <span className="text-[10px] font-mono font-bold text-[#111111] block">STEP 0{idx + 1}</span>
+                  <p className="text-xs font-semibold text-[#111111] leading-relaxed">
                     {step.split('. ')[1] || step}
                   </p>
                   {idx < 4 && (
-                    <span className="hidden sm:block absolute top-1/2 -right-4 transform -translate-y-1/2 text-brand-border z-10 text-xs">
+                    <span className="hidden sm:block absolute top-1/2 -right-4 transform -translate-y-1/2 text-[#111111] font-bold z-10 text-xs">
                       →
                     </span>
                   )}
@@ -264,15 +269,15 @@ export default function Categories({
             </div>
           </div>
 
-          {/* E. Connected Portfolio Showcase (VIBRANT NATURAL COLORS) */}
+          {/* E. Connected Portfolio Showcase */}
           {filteredProjects.length > 0 && (
             <div className="space-y-8 pt-6 border-t border-brand-border/40">
-              <span className="text-[10px] uppercase tracking-[0.3em] font-mono text-brand-muted block">
-                linked archives
-              </span>
-              <h3 className="text-xs uppercase tracking-[0.2em] font-medium text-brand-dark">
-                이 분야 실제 시공 완료작 (Color Archive)
-              </h3>
+              <div className="flex items-center gap-2.5">
+                <span className="flex items-center justify-center w-5 h-5 rounded-full bg-[#111111] text-white text-[9px] font-bold shrink-0">05</span>
+                <h3 className="text-sm uppercase tracking-[0.2em] font-bold text-[#111111]">
+                  이 분야 실제 시공 완료작 (Color Archive)
+                </h3>
+              </div>
               
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                 {filteredProjects.map((p) => (
@@ -293,12 +298,16 @@ export default function Categories({
                         }}
                       />
                     </div>
-                    <div className="flex justify-between items-baseline border-b border-brand-border/30 pb-2">
-                      <div>
-                        <h4 className="text-xs font-normal text-brand-dark">{p.title || 'GANGIN Space'}</h4>
-                        <span className="text-[9px] text-brand-muted font-light">{p.location || 'Gwangju'}</span>
+                    <div className="grid grid-cols-3 gap-4 border-b border-brand-border/40 pb-4">
+                      <div className="col-span-2">
+                        <h4 className="text-sm font-bold text-[#111111] tracking-wider mt-1.5 mb-1 group-hover:text-brand-muted transition-colors duration-300">
+                          {p.title || 'GANGIN Space'}
+                        </h4>
+                        <span className="text-xs text-[#222222] font-semibold tracking-wide">{p.location || 'Gwangju'}</span>
                       </div>
-                      <span className="text-[9px] text-brand-muted/70 font-mono">{p.area || 'N/A'}</span>
+                      <div className="text-right flex flex-col justify-end">
+                        <span className="text-[10px] text-[#222222] font-semibold font-mono mt-1">{p.area || 'N/A'}</span>
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -310,37 +319,39 @@ export default function Categories({
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 pt-12 border-t border-brand-border/40">
             {/* Reviews */}
             <div className="space-y-6">
-              <h3 className="text-xs uppercase tracking-[0.2em] text-[#111111] font-medium flex items-center gap-2">
-                <Star size={13} className="text-amber-500 fill-amber-500" />
-                <span>이 설계 분야 고객 수공 스토리</span>
-              </h3>
+              <div className="flex items-center gap-2.5">
+                <span className="flex items-center justify-center w-5 h-5 rounded-full bg-[#111111] text-white text-[9px] font-bold shrink-0">06</span>
+                <h3 className="text-sm uppercase tracking-[0.2em] text-[#111111] font-bold">
+                  이 설계 분야 고객 수공 스토리
+                </h3>
+              </div>
               
               <div className="space-y-6">
                 {connectedReviews.map((rev) => (
-                  <div key={rev.id} className="bg-brand-bg/40 p-6 border border-brand-border/50 space-y-3">
-                    <span className="text-[10px] font-mono text-brand-muted">{rev.clientName} | {rev.date}</span>
-                    <h4 className="text-xs font-normal text-brand-dark">"{rev.highlight}"</h4>
-                    <p className="text-[11px] leading-relaxed text-brand-muted font-light">{rev.story}</p>
+                  <div key={rev.id} className="bg-white p-6 border-2 border-[#111111] space-y-3">
+                    <span className="text-[11px] font-bold text-[#111111] block">{rev.clientName} | {rev.date}</span>
+                    <h4 className="text-sm font-bold text-[#111111]">"{rev.highlight}"</h4>
+                    <p className="text-[12px] leading-relaxed text-[#222222] font-semibold text-justify">{rev.story}</p>
                   </div>
                 ))}
               </div>
             </div>
 
             {/* General Inquiry Link */}
-            <div className="bg-brand-bg/50 p-8 flex flex-col justify-center items-center text-center space-y-6 border border-brand-border/40">
-              <span className="text-[10px] uppercase tracking-[0.3em] font-mono text-brand-muted">conversion hub</span>
-              <h3 className="text-md font-light text-brand-dark tracking-wide max-w-sm">
+            <div className="bg-[#fafaf9] p-8 flex flex-col justify-center items-center text-center space-y-6 border-2 border-[#111111]">
+              <span className="text-[10px] uppercase tracking-[0.3em] font-mono font-bold text-[#111111]">conversion hub</span>
+              <h3 className="text-md font-bold text-[#111111] tracking-wide max-w-sm">
                 해당 공간 레이아웃 맞춤 시안 및 미팅 신청
               </h3>
-              <p className="text-xs text-brand-muted font-light max-w-sm">
+              <p className="text-xs text-[#222222] font-semibold max-w-sm text-justify">
                 온라인 신청 후 평면도 분석 및 자재 연구를 사전에 준비하여 최상의 솔루션으로 1시간 미팅을 보증해 드립니다.
               </p>
               <button
                 onClick={handleInquiryAction}
-                className="group relative px-8 py-3.5 text-[10px] uppercase tracking-widest bg-brand-dark text-white hover:bg-black transition-all cursor-pointer flex items-center gap-2"
+                className="group relative px-8 py-3.5 text-[11px] font-bold uppercase tracking-widest bg-brand-dark text-white hover:bg-black transition-all cursor-pointer flex items-center gap-2"
               >
                 <span>간편 문의하러 가기</span>
-                <ArrowRight size={10} className="transform group-hover:translate-x-1 transition-transform" />
+                <ArrowRight size={11} className="transform group-hover:translate-x-1 transition-transform" />
               </button>
             </div>
           </div>
