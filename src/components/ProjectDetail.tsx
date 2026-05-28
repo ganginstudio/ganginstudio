@@ -109,122 +109,11 @@ export default function ProjectDetail({ project, onBack, setView, setEstimatePre
           </div>
         </section>
 
-        {/* 3. DESIGN PHILOSOPHY/CONCEPT STORY */}
-        <section className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-24 mb-32 items-baseline">
-          <div className="lg:col-span-4">
-            <span className="text-[9px] uppercase tracking-[0.3em] text-brand-muted block">02 — Concept Narrative</span>
-            <h3 className="text-sm uppercase tracking-[0.25em] text-[#111111] mt-2 font-normal">
-              Design Philosophy
-            </h3>
-          </div>
-          <div className="lg:col-span-8">
-            <p className="text-[14px] md:text-[15px] font-light leading-loose tracking-widest text-brand-dark/95 text-justify">
-              {project.concept || '강인스튜디오만의 철학으로 설계하고 완벽하게 구축한 고품격 공간 지향 디자인입니다.'}
-            </p>
-          </div>
-        </section>
-
-        {/* 4. MATERIAL PALETTE LABELS DESIGN */}
-        <section className="mb-32">
-          <span className="text-[9px] uppercase tracking-[0.3em] text-brand-muted block mb-8">03 — Tactile Materials</span>
-          
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
-            {(project.materials || ['천연 보수 스펙', '매트 텍스처 패널']).map((mat, i) => (
-              <div 
-                key={mat}
-                className="border border-brand-border p-6 flex flex-col justify-between h-40 bg-white/30"
-              >
-                <div className="flex justify-between items-start text-[10px] text-brand-muted/50 font-mono">
-                  <span>SPEC 0{i + 1}</span>
-                  <span>A-TYPE</span>
-                </div>
-                <div>
-                  <h4 className="text-xs font-light text-brand-dark tracking-widest mb-1.5">{mat}</h4>
-                  <p className="text-[9px] tracking-wide text-brand-muted">프리미엄 원산지 친환경 인증 스펙</p>
-                </div>
-              </div>
-            ))}
-            {/* Added standard stone background node mock to enhance LEIBAL realism */}
-            <div className="border border-brand-border p-6 flex flex-col justify-between h-40 bg-brand-stone/40">
-              <div className="flex justify-between items-start text-[10px] text-brand-muted/70 font-mono">
-                <span>AMBIENT TONE</span>
-                <span>STONE BEIGE</span>
-              </div>
-              <div>
-                <h4 className="text-xs font-light text-brand-dark tracking-widest mb-1.5">Warm Gray Plaster</h4>
-                <p className="text-[9px] tracking-wide text-brand-muted/70">반사율 18% 시각적 온화선 필터</p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* 5. STEP-BY-STEP DETAILED CONSTRUCTION PROCESS */}
-        <section className="mb-32">
-          <div className="border-b border-brand-border/40 pb-4 mb-12">
-            <span className="text-[9px] uppercase tracking-[0.3em] text-brand-muted block">04 — Construction Execution</span>
-            <h3 className="text-xs uppercase tracking-[0.25em] text-[#111111] mt-2 font-normal">
-              단계별 책임 시공 공정
-            </h3>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-8">
-            {(project.constructionProcess || [
-              { title: '수치 설계 및 도안 조율', description: '골조 수평 밸런스 점검 및 설계 레이아웃 조감 구축' }
-            ]).map((step, idx) => (
-              <div key={idx} className="space-y-4">
-                <span className="text-[12px] font-mono tracking-widest text-[#111111]/45 block">
-                  0{idx + 1} — PHASE
-                </span>
-                <h4 className="text-xs font-light text-[#111111] tracking-widest leading-relaxed">
-                  {step?.title || ''}
-                </h4>
-                <p className="text-xs text-brand-muted font-light leading-relaxed tracking-wide">
-                  {step?.description || ''}
-                </p>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* 6. BEFORE / AFTER STORY INTERACTION */}
-        <section className="mb-32 bg-white/40 border border-brand-border p-8 md:p-12">
-          <div className="max-w-xl mb-12">
-            <span className="text-[9px] uppercase tracking-[0.3em] text-brand-muted block">05 — Transformation Report</span>
-            <h3 className="text-xs uppercase tracking-[0.25em] text-[#111111] mt-2 font-normal">
-              구조적 대조 비포 & 애프터
-            </h3>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-16 pb-8 border-b border-brand-border/40 mb-8">
-            <div className="space-y-3">
-              <span className="text-[9px] uppercase tracking-widest text-[red]/70 font-semibold">
-                ● BEFORE STATE
-              </span>
-              <p className="text-xs text-brand-muted font-light leading-relaxed text-justify">
-                {project.beforeAfter?.beforeDescription || '철거 및 보수 보강이 시급해 보이던 공간입니다.'}
-              </p>
-            </div>
-            
-            <div className="space-y-3">
-              <span className="text-[9px] uppercase tracking-widest text-[green]/60 font-semibold">
-                ● AFTER RECONSTRUCTION
-              </span>
-              <p className="text-xs text-[#111111] font-light leading-relaxed text-justify">
-                {project.beforeAfter?.afterDescription || '하나의 완벽한 미적 질감이 흐르는 공간으로 거듭났습니다.'}
-              </p>
-            </div>
-          </div>
-
-          <p className="text-xs text-brand-muted italic font-light tracking-wide leading-relaxed">
-            * {project.beforeAfter?.desc || '불필요한 디테일을 비워 감도 높은 구조적 균형을 선물해 드렸습니다.'}
-          </p>
-        </section>
-
-        {/* 7. GALLERY SYSTEM */}
+        {/* 2. GALLERY SYSTEM */}
         {(project.gallery || []).length > 0 && (
           <section className="mb-32">
             <span className="text-[9px] uppercase tracking-[0.3em] text-brand-muted block mb-12">
-              06 — Gallery & Photographic Chronicles
+              Gallery Special — 공간별 상세 갤러리 아카이브
             </span>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
@@ -243,7 +132,7 @@ export default function ProjectDetail({ project, onBack, setView, setEstimatePre
                     />
                   </div>
                   <p className="text-[10px] tracking-wider text-brand-muted font-light">
-                    Fig. 0{index + 2} — {img.caption || ''}
+                    공간 상세 0{index + 1} — {img.caption || ''}
                   </p>
                 </div>
               ))}
