@@ -174,7 +174,7 @@ export default function Home({ projects, reviews, setView, setSelectedProjectId,
               animate={{ opacity: isCurrentlyLoaded ? 1 : 0 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.8, ease: 'easeInOut' }}
-              className="absolute inset-0 w-full h-full object-contain md:object-cover bg-neutral-950 grayscale-10 brightness-[0.93] contrast-[1.02]"
+              className="absolute inset-0 w-full h-full object-cover grayscale-10 brightness-[0.93] contrast-[1.02]"
               referrerPolicy="no-referrer"
               onLoad={() => {
                 if (activeSlide) {
