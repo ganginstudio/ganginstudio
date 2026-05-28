@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { NavView, Project, NavItemConfig, HeroCmsConfig, HomepageCmsConfig, ContactCmsConfig, PopupCmsConfig, BlogCmsConfig, PricingCmsConfig, EstimateCmsConfig } from './types';
+import { NavView, Project, NavItemConfig, HeroCmsConfig, HomepageCmsConfig, ContactCmsConfig, PopupCmsConfig, BlogCmsConfig, PricingCmsConfig, EstimateCmsConfig, StatsCmsConfig } from './types';
 import {
   getInitialState,
   saveState,
@@ -237,12 +237,25 @@ export default function App() {
     techRule4: "하자 이행 초과 3개년 오피스 무료 복구권 제공"
   };
 
+  const DEFAULT_STATS_CMS: StatsCmsConfig = {
+    show: true,
+    smallLabel: "PROJECT STATUS",
+    mainTitle: "공간을 맡기는 기준, 숫자로 증명합니다.",
+    stat1Label: "견적중",
+    stat1Number: 339,
+    stat2Label: "공사중",
+    stat2Number: 106,
+    stat3Label: "공사완료",
+    stat3Number: 8434
+  };
+
   const [heroCms, setHeroCms] = useState<HeroCmsConfig>(DEFAULT_HERO_CMS);
   const [homepageCms, setHomepageCms] = useState<HomepageCmsConfig>(DEFAULT_HOMEPAGE_CMS);
   const [contactCms, setContactCms] = useState<ContactCmsConfig>(DEFAULT_CONTACT_CMS);
   const [blogCms, setBlogCms] = useState<BlogCmsConfig>(DEFAULT_BLOG_CMS);
   const [pricingCms, setPricingCms] = useState<PricingCmsConfig>(DEFAULT_PRICING_CMS);
   const [estimateCms, setEstimateCms] = useState<EstimateCmsConfig>(DEFAULT_ESTIMATE_CMS);
+  const [statsCms, setStatsCms] = useState<StatsCmsConfig>(DEFAULT_STATS_CMS);
 
   const DEFAULT_NAV_ITEMS: NavItemConfig[] = [
     { id: 'nav_home', label: 'Home', view: 'home', labelKr: '홈', order: 1, show: true },
@@ -308,6 +321,8 @@ export default function App() {
           const remoteBlogCms = await fetchSupabaseState<BlogCmsConfig>('gangin_blog_cms', DEFAULT_BLOG_CMS);
           const remotePricingCms = await fetchSupabaseState<PricingCmsConfig>('gangin_pricing_cms', DEFAULT_PRICING_CMS);
           const remoteEstimateCms = await fetchSupabaseState<EstimateCmsConfig>('gangin_estimate_cms', DEFAULT_ESTIMATE_CMS);
+          const remoteStatsCms = await fetchSupabaseState<StatsCmsConfig>('gangin_stats_cms', DEFAULT_STATS_CMS);
+          console.log('[STATS SECTION FETCH SUCCESS]');
 
           // Seed state cache to bypass redundant initial mount writebacks
           lastSavedState.current = {
@@ -325,7 +340,8 @@ export default function App() {
             popupCms: JSON.stringify(remotePopupCms),
             blogCms: JSON.stringify(remoteBlogCms),
             pricingCms: JSON.stringify(remotePricingCms),
-            estimateCms: JSON.stringify(remoteEstimateCms)
+            estimateCms: JSON.stringify(remoteEstimateCms),
+            statsCms: JSON.stringify(remoteStatsCms)
           };
 
           setProjects(remoteProjects);
@@ -343,6 +359,7 @@ export default function App() {
           setBlogCms(remoteBlogCms);
           setPricingCms(remotePricingCms);
           setEstimateCms(remoteEstimateCms);
+          setStatsCms(remoteStatsCms);
         } catch (e) {
           console.error('[Supabase] Hydration failed, using default states:', e);
         }
@@ -479,10 +496,27 @@ export default function App() {
           console.error('Failed to sync estimate CMS state:', err);
         }
       }
+
+      const statsStr = JSON.stringify(statsCms);
+      if (statsStr !== lastSavedState.current.statsCms) {
+        lastSavedState.current.statsCms = statsStr;
+        console.log('[STATS SECTION SAVE START]');
+        try {
+          const success = await saveSupabaseState('gangin_stats_cms', statsCms);
+          if (success) {
+            console.log('[STATS SECTION SAVE SUCCESS]');
+          } else {
+            console.log('[STATS SECTION SAVE FAILED]');
+          }
+        } catch (err) {
+          console.error('Failed to sync stats CMS state:', err);
+          console.log('[STATS SECTION SAVE FAILED]');
+        }
+      }
     }
 
     syncState();
-  }, [projects, packages, faq, reviews, blog, settings, categories, navItems, heroCms, homepageCms, contactCms, popupCms, blogCms, pricingCms, estimateCms, isHydrated]);
+  }, [projects, packages, faq, reviews, blog, settings, categories, navItems, heroCms, homepageCms, contactCms, popupCms, blogCms, pricingCms, estimateCms, statsCms, isHydrated]);
 
   // Supabase Real-time Subscription for true live updates across tabs/clients
   useEffect(() => {
@@ -553,6 +587,9 @@ export default function App() {
             } else if (key === 'gangin_estimate_cms') {
               lastSavedState.current.estimateCms = stringified;
               setEstimateCms(prev => JSON.stringify(prev) !== stringified ? value : prev);
+            } else if (key === 'gangin_stats_cms') {
+              lastSavedState.current.statsCms = stringified;
+              setStatsCms(prev => JSON.stringify(prev) !== stringified ? value : prev);
             }
           }
         )
@@ -635,6 +672,7 @@ export default function App() {
             settings={settings}
             heroCms={heroCms}
             homepageCms={homepageCms}
+            statsCms={statsCms}
           />
         )}
 
@@ -729,6 +767,7 @@ export default function App() {
             blogCms={blogCms}
             pricingCms={pricingCms}
             estimateCms={estimateCms}
+            statsCms={statsCms}
             onUpdateProjects={setProjects}
             onUpdatePackages={setPackages}
             onUpdateFAQ={setFaq}
@@ -744,6 +783,7 @@ export default function App() {
             onUpdateBlogCms={setBlogCms}
             onUpdatePricingCms={setPricingCms}
             onUpdateEstimateCms={setEstimateCms}
+            onUpdateStatsCms={setStatsCms}
           />
         )}
       </main>

@@ -222,6 +222,19 @@ export interface EstimateCmsConfig {
   techRule4: string;
 }
 
+export interface StatsCmsConfig {
+  show: boolean;
+  smallLabel: string;
+  mainTitle: string;
+  stat1Label: string;
+  stat1Number: number;
+  stat2Label: string;
+  stat2Number: number;
+  stat3Label: string;
+  stat3Number: number;
+}
+
+
 
 import { FAQItem, CustomerReview, BlogPost, SiteSettings, ServicePackage, ServiceCategory } from './store';
 export type { FAQItem, CustomerReview, BlogPost, SiteSettings, ServicePackage, ServiceCategory };

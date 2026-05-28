@@ -1,6 +1,6 @@
 import { useState, useEffect, FormEvent } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Project, NavView, HeroCmsConfig, HomepageCmsConfig, CustomerReview } from '../types';
+import { Project, NavView, HeroCmsConfig, HomepageCmsConfig, CustomerReview, StatsCmsConfig } from '../types';
 import { ArrowRight, MoveDown, Sparkles, Send, Check } from 'lucide-react';
 
 interface HomeProps {
@@ -11,9 +11,17 @@ interface HomeProps {
   settings: any;
   heroCms: HeroCmsConfig;
   homepageCms: HomepageCmsConfig;
+  statsCms?: StatsCmsConfig;
 }
 
-export default function Home({ projects, reviews, setView, setSelectedProjectId, settings, heroCms, homepageCms }: HomeProps) {
+export default function Home({ projects, reviews, setView, setSelectedProjectId, settings, heroCms, homepageCms, statsCms }: HomeProps) {
+  // Helper for formatting statistics numbers
+  const formatNumber = (val: any) => {
+    if (val === undefined || val === null) return '';
+    const num = Number(val);
+    return isNaN(num) ? String(val) : num.toLocaleString('ko-KR');
+  };
+
   // Pull 3 featured projects for the homepage grid
   const featuredProjects = projects.filter(p => p.featured).slice(0, 3);
 
@@ -267,6 +275,61 @@ export default function Home({ projects, reviews, setView, setSelectedProjectId,
           <MoveDown size={14} className="animate-bounce" />
         </div>
       </section>
+
+      {/* 1.5 PERFORMANCE STATISTICS SECTION */}
+      {(!statsCms || statsCms.show !== false) && (
+        <section id="performance-statistics-section" className="max-w-[1400px] mx-auto px-6 md:px-12 mb-20 md:mb-28 animate-fade-in">
+          <div className="border-b border-brand-border/40 pb-16">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-24 items-baseline">
+              {/* Left Column: Title and Badge */}
+              <div className="lg:col-span-4 space-y-4">
+                <div className="flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 bg-brand-dark" />
+                  <span className="text-[10px] uppercase tracking-[0.3em] text-[#111111] font-bold block">
+                    {statsCms?.smallLabel || "PROJECT STATUS"}
+                  </span>
+                </div>
+                <h2 className="text-xl md:text-2.5xl font-bold tracking-[0.1em] text-[#111111] font-sans leading-relaxed">
+                  {statsCms?.mainTitle || "공간을 맡기는 기준, 숫자로 증명합니다."}
+                </h2>
+              </div>
+
+              {/* Right Column: Numbers */}
+              <div className="lg:col-span-8 grid grid-cols-3 gap-3 md:gap-12 border-t lg:border-t-0 border-brand-border/40 pt-8 lg:pt-0">
+                {/* Stat 1 */}
+                <div className="space-y-1.5 text-left">
+                  <p className="text-[10px] uppercase tracking-[0.25em] text-brand-muted/90 font-medium">
+                    {statsCms?.stat1Label || "견적중"}
+                  </p>
+                  <p className="text-2xl sm:text-3xl md:text-4.5xl font-bold font-mono tracking-tight text-[#111111]">
+                    {formatNumber(statsCms?.stat1Number ?? 339)}<span className="text-xs md:text-sm font-light font-sans ml-1 text-brand-muted/80">건</span>
+                  </p>
+                </div>
+
+                {/* Stat 2 */}
+                <div className="space-y-1.5 text-left border-l border-brand-border/40 pl-4 md:pl-12">
+                  <p className="text-[10px] uppercase tracking-[0.25em] text-brand-muted/90 font-medium">
+                    {statsCms?.stat2Label || "공사중"}
+                  </p>
+                  <p className="text-2xl sm:text-3xl md:text-4.5xl font-bold font-mono tracking-tight text-[#111111]">
+                    {formatNumber(statsCms?.stat2Number ?? 106)}<span className="text-xs md:text-sm font-light font-sans ml-1 text-brand-muted/80">건</span>
+                  </p>
+                </div>
+
+                {/* Stat 3 */}
+                <div className="space-y-1.5 text-left border-l border-brand-border/40 pl-4 md:pl-12">
+                  <p className="text-[10px] uppercase tracking-[0.25em] text-brand-muted/90 font-medium">
+                    {statsCms?.stat3Label || "공사완료"}
+                  </p>
+                  <p className="text-2xl sm:text-3xl md:text-4.5xl font-bold font-mono tracking-tight text-[#111111]">
+                    {formatNumber(statsCms?.stat3Number ?? 8434)}<span className="text-xs md:text-sm font-light font-sans ml-1 text-brand-muted/80">건</span>
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* 2. PHILOSOPHY HIGHLIGHT */}
       <section id="introduction-philosophy" className="max-w-[1400px] mx-auto px-6 md:px-12 mb-16 md:mb-24">

@@ -16,7 +16,8 @@ import {
   PopupCmsConfig,
   BlogCmsConfig,
   PricingCmsConfig,
-  EstimateCmsConfig
+  EstimateCmsConfig,
+  StatsCmsConfig
 } from '../types';
 import { uploadPortfolioImage, isSupabaseOffline } from '../lib/supabase';
 import {
@@ -37,7 +38,8 @@ import {
   RefreshCw,
   ClipboardList,
   MapPin,
-  Sparkles
+  Sparkles,
+  BarChart3
 } from 'lucide-react';
 
 interface AdminProps {
@@ -56,6 +58,7 @@ interface AdminProps {
   blogCms?: BlogCmsConfig;
   pricingCms?: PricingCmsConfig;
   estimateCms?: EstimateCmsConfig;
+  statsCms?: StatsCmsConfig;
   onUpdateProjects: (updated: Project[]) => void;
   onUpdatePackages: (updated: ServicePackage[]) => void;
   onUpdateFAQ: (updated: FAQItem[]) => void;
@@ -71,6 +74,7 @@ interface AdminProps {
   onUpdateBlogCms?: (updated: BlogCmsConfig) => void;
   onUpdatePricingCms?: (updated: PricingCmsConfig) => void;
   onUpdateEstimateCms?: (updated: EstimateCmsConfig) => void;
+  onUpdateStatsCms?: (updated: StatsCmsConfig) => void;
 }
 
 const dataURLtoFile = (dataurl: string, filename: string): File => {
@@ -178,6 +182,7 @@ export default function Admin({
   blogCms,
   pricingCms,
   estimateCms,
+  statsCms,
   onUpdateProjects,
   onUpdatePackages,
   onUpdateFAQ,
@@ -192,7 +197,8 @@ export default function Admin({
   onUpdatePopupCms,
   onUpdateBlogCms,
   onUpdatePricingCms,
-  onUpdateEstimateCms
+  onUpdateEstimateCms,
+  onUpdateStatsCms
 }: AdminProps) {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [password, setPassword] = useState<string>('');
@@ -879,6 +885,16 @@ export default function Admin({
           >
             <Layers size={13} />
             <span>기타 페이지 CMS</span>
+          </button>
+
+          <button
+            onClick={() => { setCurrentTab('statsCms'); setEditingProject(null); }}
+            className={`flex items-center gap-2.5 py-3.5 px-4 text-start rounded-none transition-colors cursor-pointer ${
+              currentTab === 'statsCms' ? 'bg-brand-dark text-white font-medium' : 'hover:bg-brand-bg/60 text-brand-muted hover:text-brand-dark'
+            }`}
+          >
+            <BarChart3 size={13} />
+            <span>실적 데이터 관리</span>
           </button>
         </nav>
       </aside>
@@ -3941,6 +3957,171 @@ export default function Admin({
                 >
                   <Save size={11} />
                   <span>견적 구성 보존</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {currentTab === 'statsCms' && (
+          <div className="space-y-8 animate-fade-in">
+            <div className="border-b border-brand-border pb-4">
+              <h3 className="text-sm font-semibold text-brand-dark uppercase tracking-widest">실적 데이터 관리 (Performance Statistics)</h3>
+              <p className="text-[10px] text-brand-muted font-light mt-1">
+                홈페이지 비주얼 영역 하단에 표시되는 실적 수치 섹션의 레이블명 및 숫자를 동적으로 제어합니다.
+              </p>
+            </div>
+
+            {/* General Configurations */}
+            <div className="border border-brand-border/60 bg-neutral-50 p-6 space-y-6">
+              <div className="border-b border-brand-border pb-2.5">
+                <h4 className="text-xs font-bold text-brand-dark uppercase tracking-wider flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-brand-dark" />
+                  기본 구성 및 활성화 조절
+                </h4>
+              </div>
+
+              <div className="space-y-4">
+                <div className="flex items-center gap-2.5 mb-4">
+                  <input
+                    type="checkbox"
+                    id="stats-show-toggle"
+                    checked={statsCms?.show !== false}
+                    onChange={(e) => onUpdateStatsCms?.({ ...(statsCms || { show: true, smallLabel: '', mainTitle: '', stat1Label: '', stat1Number: 0, stat2Label: '', stat2Number: 0, stat3Label: '', stat3Number: 0 }), show: e.target.checked })}
+                    className="w-4 h-4 text-brand-dark border-brand-border/60 focus:ring-brand-dark focus:ring-0 cursor-pointer"
+                  />
+                  <label htmlFor="stats-show-toggle" className="text-xs font-medium text-brand-dark cursor-pointer select-none">
+                    실적 데이터 섹션 활성화 및 홈페이지 노출 (Show Section)
+                  </label>
+                </div>
+
+                <div>
+                  <label className="text-[10px] uppercase font-semibold text-brand-dark block mb-1">상단 소분류 레이블 (Small LabelText)</label>
+                  <input
+                    type="text"
+                    value={statsCms?.smallLabel ?? ''}
+                    onChange={(e) => onUpdateStatsCms?.({ ...(statsCms || { show: true, smallLabel: '', mainTitle: '', stat1Label: '', stat1Number: 0, stat2Label: '', stat2Number: 0, stat3Label: '', stat3Number: 0 }), smallLabel: e.target.value })}
+                    className="w-full text-xs font-light p-2.5 bg-white border border-brand-border/60 focus:outline-none focus:border-brand-dark"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-[10px] uppercase font-semibold text-brand-dark block mb-1">섹션 메인 타이틀 (Main Title Heading)</label>
+                  <input
+                    type="text"
+                    value={statsCms?.mainTitle ?? ''}
+                    onChange={(e) => onUpdateStatsCms?.({ ...(statsCms || { show: true, smallLabel: '', mainTitle: '', stat1Label: '', stat1Number: 0, stat2Label: '', stat2Number: 0, stat3Label: '', stat3Number: 0 }), mainTitle: e.target.value })}
+                    className="w-full text-xs font-light p-2.5 bg-white border border-brand-border/60 focus:outline-none focus:border-brand-dark"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Stats Values Configurations */}
+            <div className="border border-brand-border/60 bg-neutral-50 p-6 space-y-6">
+              <div className="border-b border-brand-border pb-2.5">
+                <h4 className="text-xs font-bold text-brand-dark uppercase tracking-wider flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-brand-dark" />
+                  실적 지표 설정 (Statistics Block Metric Fields)
+                </h4>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {/* Stat 1 */}
+                <div className="border border-brand-border/40 p-4 bg-white space-y-3">
+                  <span className="text-[9px] text-brand-muted font-bold block uppercase tracking-wider">Metric 1 (첫 번째 실적)</span>
+                  <div>
+                    <label className="text-[9px] uppercase font-semibold text-brand-dark block mb-1">레이블 (Label)</label>
+                    <input
+                      type="text"
+                      value={statsCms?.stat1Label ?? ''}
+                      onChange={(e) => onUpdateStatsCms?.({ ...(statsCms || { show: true, smallLabel: '', mainTitle: '', stat1Label: '', stat1Number: 0, stat2Label: '', stat2Number: 0, stat3Label: '', stat3Number: 0 }), stat1Label: e.target.value })}
+                      className="w-full text-xs font-light p-2 bg-neutral-50 border border-brand-border/60 focus:outline-none focus:border-brand-dark"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[9px] uppercase font-semibold text-brand-dark block mb-1">수치 (Number Value)</label>
+                    <input
+                      type="number"
+                      value={statsCms?.stat1Number ?? 0}
+                      onChange={(e) => onUpdateStatsCms?.({ ...(statsCms || { show: true, smallLabel: '', mainTitle: '', stat1Label: '', stat1Number: 0, stat2Label: '', stat2Number: 0, stat3Label: '', stat3Number: 0 }), stat1Number: Number(e.target.value) })}
+                      className="w-full text-xs font-light p-2 bg-neutral-50 border border-brand-border/60 focus:outline-none focus:border-brand-dark font-mono"
+                    />
+                  </div>
+                </div>
+
+                {/* Stat 2 */}
+                <div className="border border-brand-border/40 p-4 bg-white space-y-3">
+                  <span className="text-[9px] text-brand-muted font-bold block uppercase tracking-wider">Metric 2 (두 번째 실적)</span>
+                  <div>
+                    <label className="text-[9px] uppercase font-semibold text-brand-dark block mb-1">레이블 (Label)</label>
+                    <input
+                      type="text"
+                      value={statsCms?.stat2Label ?? ''}
+                      onChange={(e) => onUpdateStatsCms?.({ ...(statsCms || { show: true, smallLabel: '', mainTitle: '', stat1Label: '', stat1Number: 0, stat2Label: '', stat2Number: 0, stat3Label: '', stat3Number: 0 }), stat2Label: e.target.value })}
+                      className="w-full text-xs font-light p-2 bg-neutral-50 border border-brand-border/60 focus:outline-none focus:border-brand-dark"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[9px] uppercase font-semibold text-brand-dark block mb-1">수치 (Number Value)</label>
+                    <input
+                      type="number"
+                      value={statsCms?.stat2Number ?? 0}
+                      onChange={(e) => onUpdateStatsCms?.({ ...(statsCms || { show: true, smallLabel: '', mainTitle: '', stat1Label: '', stat1Number: 0, stat2Label: '', stat2Number: 0, stat3Label: '', stat3Number: 0 }), stat2Number: Number(e.target.value) })}
+                      className="w-full text-xs font-light p-2 bg-neutral-50 border border-brand-border/60 focus:outline-none focus:border-brand-dark font-mono"
+                    />
+                  </div>
+                </div>
+
+                {/* Stat 3 */}
+                <div className="border border-brand-border/40 p-4 bg-white space-y-3">
+                  <span className="text-[9px] text-brand-muted font-bold block uppercase tracking-wider">Metric 3 (세 번째 실적)</span>
+                  <div>
+                    <label className="text-[9px] uppercase font-semibold text-brand-dark block mb-1">레이블 (Label)</label>
+                    <input
+                      type="text"
+                      value={statsCms?.stat3Label ?? ''}
+                      onChange={(e) => onUpdateStatsCms?.({ ...(statsCms || { show: true, smallLabel: '', mainTitle: '', stat1Label: '', stat1Number: 0, stat2Label: '', stat2Number: 0, stat3Label: '', stat3Number: 0 }), stat3Label: e.target.value })}
+                      className="w-full text-xs font-light p-2 bg-neutral-50 border border-brand-border/60 focus:outline-none focus:border-brand-dark"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[9px] uppercase font-semibold text-brand-dark block mb-1">수치 (Number Value)</label>
+                    <input
+                      type="number"
+                      value={statsCms?.stat3Number ?? 0}
+                      onChange={(e) => onUpdateStatsCms?.({ ...(statsCms || { show: true, smallLabel: '', mainTitle: '', stat1Label: '', stat1Number: 0, stat2Label: '', stat2Number: 0, stat3Label: '', stat3Number: 0 }), stat3Number: Number(e.target.value) })}
+                      className="w-full text-xs font-light p-2 bg-neutral-50 border border-brand-border/60 focus:outline-none focus:border-brand-dark font-mono"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Manual Save Button for Stats CMS */}
+              <div className="flex justify-end pt-2">
+                <button
+                  type="button"
+                  onClick={async () => {
+                    try {
+                      const { saveSupabaseState, isSupabaseConfigured } = await import('../lib/supabase');
+                      if (isSupabaseConfigured && statsCms) {
+                        const success = await saveSupabaseState('gangin_stats_cms', statsCms);
+                        if (success) {
+                          alert('실적 데이터 설정이 Supabase에 성공적으로 저장되었습니다.');
+                        } else {
+                          alert('데이터베이스 동기화 에러가 발생했습니다.');
+                        }
+                      } else {
+                        alert('메모리에 임시로 반영되었습니다 (연결 오프라인).');
+                      }
+                    } catch (e: any) {
+                      alert(`오류: ${e.message || e}`);
+                    }
+                  }}
+                  className="bg-brand-dark hover:bg-neutral-800 text-white font-medium text-[10px] py-2 px-5 flex items-center gap-1.5 transition-colors cursor-pointer"
+                >
+                  <Save size={11} />
+                  <span>실적 데이터 보존</span>
                 </button>
               </div>
             </div>
