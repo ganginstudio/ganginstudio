@@ -14,17 +14,20 @@ export default function Reviews({ reviews, setView }: ReviewsProps) {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.8 }}
-      className="pt-28 pb-32 max-w-[1240px] mx-auto px-6 md:px-12"
+      className="pt-16 md:pt-24 pb-16 md:pb-24 max-w-[1400px] mx-auto px-6 md:px-12"
     >
       {/* Page Header */}
-      <div className="mb-20 space-y-4">
-        <span className="text-[10px] uppercase tracking-[0.3em] text-brand-muted/70 block">
-          SHARED EXPERIENCES
-        </span>
-        <h1 className="text-2xl md:text-3xl font-extralight tracking-[0.16em] text-[#111111] uppercase">
-          상생 고객 수기
+      <div className="mb-10 space-y-3">
+        <div className="flex items-center gap-2">
+          <span className="flex items-center justify-center min-w-[24px] h-6 px-1.5 rounded-full bg-[#111111] text-white text-[10px] font-bold shrink-0">01</span>
+          <span className="text-[10px] uppercase tracking-[0.3em] text-[#111111] font-bold block">
+            SHARED EXPERIENCES — 고객 후기 선집
+          </span>
+        </div>
+        <h1 className="text-xl md:text-2xl font-bold tracking-[0.18em] text-[#111111] uppercase leading-relaxed">
+          고객 후기
         </h1>
-        <p className="text-xs font-light text-brand-muted max-w-xl leading-relaxed tracking-wider mt-2">
+        <p className="text-[13px] font-normal text-[#222222] max-w-xl leading-relaxed tracking-wider mt-2 text-justify">
           공간은 결국 사람이 누려야 합니다. 강인스튜디오와 정교하게 설계를 조율하고 한 치의 오차 없이 완공을 마주한 구성원들의 잔잔한 시방 건축 이야기를 가만히 안아 대화해 보세요.
         </p>
       </div>
@@ -62,20 +65,20 @@ export default function Reviews({ reviews, setView }: ReviewsProps) {
           >
             {/* Left metadata */}
             <div className="lg:col-span-4 space-y-4">
-              <span className="inline-block px-3 py-1 border border-brand-border text-[9px] uppercase tracking-[0.2em] font-light text-brand-muted">
+              <span className="inline-block px-3 py-1 border-2 border-[#111111] bg-white text-[9px] uppercase tracking-[0.2em] font-bold text-[#111111]">
                 {rev.category}
               </span>
-              <h3 className="text-md sm:text-lg font-light text-brand-dark tracking-wide font-sans">
+              <h3 className="text-md sm:text-lg font-bold text-[#111111] tracking-wide font-sans">
                 {rev.projectTitle}
               </h3>
               
               <div className="flex items-center gap-1">
                 {[...Array(rev.rating)].map((_, i) => (
-                  <Star key={i} size={11} className="fill-brand-dark text-brand-dark" />
+                  <Star key={i} size={11} className="fill-[#111111] text-[#111111]" />
                 ))}
               </div>
 
-              <div className="text-[11px] text-brand-muted/80 space-y-1 font-light tracking-wide pt-2">
+              <div className="text-[12px] text-[#222222] space-y-1.5 font-semibold tracking-wide pt-2">
                 <p>작성자: {rev.clientName}</p>
                 <p>준공일자: {rev.date}</p>
                 <p>시공인증: 강인 책임소장팀 완공</p>
@@ -89,13 +92,13 @@ export default function Reviews({ reviews, setView }: ReviewsProps) {
                 <div className="absolute left-0 top-0 text-brand-muted/30">
                   <MessageSquareCode size={22} strokeWidth={1.2} />
                 </div>
-                <h4 className="text-base md:text-xl font-light leading-relaxed tracking-wide text-brand-dark italic">
+                <h4 className="text-base md:text-xl font-bold leading-relaxed tracking-wide text-[#111111] italic">
                   {rev.quote}
                 </h4>
               </div>
 
               {/* Story */}
-              <div className="space-y-4 text-xs sm:text-sm font-light leading-relaxed text-brand-muted tracking-wide pl-6 md:pl-10">
+              <div className="space-y-4 text-[13px] font-normal leading-relaxed text-[#222222] tracking-wider pl-6 md:pl-10">
                 <p className="leading-7 whitespace-pre-line text-justify">
                   {rev.story}
                 </p>

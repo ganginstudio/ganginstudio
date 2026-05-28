@@ -1,14 +1,15 @@
 import { useState } from 'react';
 import { motion } from 'motion/react';
-import { NavView, ServicePackage } from '../types';
+import { NavView, ServicePackage, PricingCmsConfig } from '../types';
 import { Check } from 'lucide-react';
 
 interface PricingProps {
   setView: (view: NavView) => void;
   packages?: ServicePackage[];
+  pricingCms?: PricingCmsConfig;
 }
 
-export default function Pricing({ setView, packages }: PricingProps) {
+export default function Pricing({ setView, packages, pricingCms }: PricingProps) {
   // Main general packages filter
   const generalPackages = (packages || []).filter(p =>
     ['pack_basic', 'pack_standard', 'pack_premium'].includes(p.id)
@@ -68,13 +69,13 @@ export default function Pricing({ setView, packages }: PricingProps) {
       {/* Centered Image-Style Header */}
       <div className="text-center mb-20 space-y-4">
         <span className="text-[10px] uppercase tracking-[0.3em] text-brand-muted font-bold block">
-          DESIGN SERVICE
+          {pricingCms?.topLabel || "DESIGN SERVICE"}
         </span>
         <h1 className="text-2xl md:text-[36px] font-extrabold tracking-tight text-[#111111] leading-tight">
-          가격보다 앞선 브랜드의 <span className="border-b-2 border-brand-dark pb-1 text-brand-dark">진실된 가치</span>
+          {pricingCms?.title || "가격보다 앞선 브랜드의 진실된 가치"}
         </h1>
         <p className="text-xs md:text-[13px] font-light text-[#6B7280] max-w-2xl mx-auto leading-relaxed tracking-wide">
-          강인스튜디오는 단순한 마감이 아닌 브랜드의 가치와 라이프스타일을 바꾸는 전략적이고 고집스러운 시공을 추구합니다.
+          {pricingCms?.description || "강인스튜디오는 단순한 마감이 아닌 브랜드의 가치와 라이프스타일을 바꾸는 전략적이고 고집스러운 시공을 추구합니다."}
         </p>
       </div>
 

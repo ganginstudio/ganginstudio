@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { NavView, Project, NavItemConfig, HeroCmsConfig, HomepageCmsConfig, ContactCmsConfig, PopupCmsConfig } from './types';
+import { NavView, Project, NavItemConfig, HeroCmsConfig, HomepageCmsConfig, ContactCmsConfig, PopupCmsConfig, BlogCmsConfig, PricingCmsConfig, EstimateCmsConfig } from './types';
 import {
   getInitialState,
   saveState,
@@ -212,9 +212,37 @@ export default function App() {
     buttonShow: true
   };
 
+  const DEFAULT_BLOG_CMS: BlogCmsConfig = {
+    topLabel: "EDITORIAL STUDY & DIALOGUE — 건축칼럼 및 시방 보증서",
+    title: "건축칼럼",
+    description: "인테리어 전 아셔야 하는 자재 하자 요인과 원가 검토 노하우까지. 강인스튜디오 대표 기술진이 심혈을 기울여 다듬은 무슬릿 미미아 지식을 나누어 드립니다."
+  };
+
+  const DEFAULT_PRICING_CMS: PricingCmsConfig = {
+    topLabel: "DESIGN SERVICE",
+    title: "가격보다 앞선 브랜드의 진실된 가치",
+    description: "강인스튜디오는 단순한 마감이 아닌 브랜드의 가치와 라이프스타일을 바꾸는 전략적이고 고집스러운 시공을 추구합니다."
+  };
+
+  const DEFAULT_ESTIMATE_CMS: EstimateCmsConfig = {
+    step1Title: "어떤 공간을 예술화할지 선택해 주십시오.",
+    step1Desc: "주거 리모델링 및 프리미엄 조적 욕실, 고품격 상가 라운지 등 분야에 맞는 최적의 전문가를 배정합니다.",
+    sideLabel: "01 — Multi-Step Custom Estimate",
+    sideTitle: "우리집 / 나의가게 예상견적 받아보기",
+    sideDesc: "정량화된 시공 원가와 디테일한 도면 큐레이션을 제공하기 위해 운영되는 다단계 간편 가산출 시스템입니다. 각 항목을 성실히 이행해 주시면, 시공 원가 오차율 5% 이내의 정밀한 명세를 검수해 드립니다.",
+    techRuleTitle: "● 프리미엄 기술 규정",
+    techRule1: "라이선스 정규 면허 기술진 본사 고정 배치",
+    techRule2: "중간 수수료 소거 원가 명세 정찰제",
+    techRule3: "하자 보완을 극대화한 건조 및 방수 4회 레이징 보증",
+    techRule4: "하자 이행 초과 3개년 오피스 무료 복구권 제공"
+  };
+
   const [heroCms, setHeroCms] = useState<HeroCmsConfig>(DEFAULT_HERO_CMS);
   const [homepageCms, setHomepageCms] = useState<HomepageCmsConfig>(DEFAULT_HOMEPAGE_CMS);
   const [contactCms, setContactCms] = useState<ContactCmsConfig>(DEFAULT_CONTACT_CMS);
+  const [blogCms, setBlogCms] = useState<BlogCmsConfig>(DEFAULT_BLOG_CMS);
+  const [pricingCms, setPricingCms] = useState<PricingCmsConfig>(DEFAULT_PRICING_CMS);
+  const [estimateCms, setEstimateCms] = useState<EstimateCmsConfig>(DEFAULT_ESTIMATE_CMS);
 
   const DEFAULT_NAV_ITEMS: NavItemConfig[] = [
     { id: 'nav_home', label: 'Home', view: 'home', labelKr: '홈', order: 1, show: true },
@@ -277,6 +305,10 @@ export default function App() {
           const remotePopupCms = await fetchSupabaseState<PopupCmsConfig>('gangin_popup_cms', DEFAULT_POPUP_CMS);
           console.log('[POPUP CONTENT FETCH SUCCESS]');
 
+          const remoteBlogCms = await fetchSupabaseState<BlogCmsConfig>('gangin_blog_cms', DEFAULT_BLOG_CMS);
+          const remotePricingCms = await fetchSupabaseState<PricingCmsConfig>('gangin_pricing_cms', DEFAULT_PRICING_CMS);
+          const remoteEstimateCms = await fetchSupabaseState<EstimateCmsConfig>('gangin_estimate_cms', DEFAULT_ESTIMATE_CMS);
+
           // Seed state cache to bypass redundant initial mount writebacks
           lastSavedState.current = {
             projects: JSON.stringify(remoteProjects),
@@ -290,7 +322,10 @@ export default function App() {
             heroCms: JSON.stringify(remoteHeroCms),
             homepageCms: JSON.stringify(remoteHomepageCms),
             contactCms: JSON.stringify(remoteContactCms),
-            popupCms: JSON.stringify(remotePopupCms)
+            popupCms: JSON.stringify(remotePopupCms),
+            blogCms: JSON.stringify(remoteBlogCms),
+            pricingCms: JSON.stringify(remotePricingCms),
+            estimateCms: JSON.stringify(remoteEstimateCms)
           };
 
           setProjects(remoteProjects);
@@ -305,6 +340,9 @@ export default function App() {
           setHomepageCms(remoteHomepageCms);
           setContactCms(remoteContactCms);
           setPopupCms(remotePopupCms);
+          setBlogCms(remoteBlogCms);
+          setPricingCms(remotePricingCms);
+          setEstimateCms(remoteEstimateCms);
         } catch (e) {
           console.error('[Supabase] Hydration failed, using default states:', e);
         }
@@ -411,10 +449,40 @@ export default function App() {
           console.error('Failed to sync popup CMS state:', err);
         }
       }
+
+      const blgStr = JSON.stringify(blogCms);
+      if (blgStr !== lastSavedState.current.blogCms) {
+        lastSavedState.current.blogCms = blgStr;
+        try {
+          await saveSupabaseState('gangin_blog_cms', blogCms);
+        } catch (err) {
+          console.error('Failed to sync blog CMS state:', err);
+        }
+      }
+
+      const prcStr = JSON.stringify(pricingCms);
+      if (prcStr !== lastSavedState.current.pricingCms) {
+        lastSavedState.current.pricingCms = prcStr;
+        try {
+          await saveSupabaseState('gangin_pricing_cms', pricingCms);
+        } catch (err) {
+          console.error('Failed to sync pricing CMS state:', err);
+        }
+      }
+
+      const estStr = JSON.stringify(estimateCms);
+      if (estStr !== lastSavedState.current.estimateCms) {
+        lastSavedState.current.estimateCms = estStr;
+        try {
+          await saveSupabaseState('gangin_estimate_cms', estimateCms);
+        } catch (err) {
+          console.error('Failed to sync estimate CMS state:', err);
+        }
+      }
     }
 
     syncState();
-  }, [projects, packages, faq, reviews, blog, settings, categories, navItems, heroCms, homepageCms, contactCms, popupCms, isHydrated]);
+  }, [projects, packages, faq, reviews, blog, settings, categories, navItems, heroCms, homepageCms, contactCms, popupCms, blogCms, pricingCms, estimateCms, isHydrated]);
 
   // Supabase Real-time Subscription for true live updates across tabs/clients
   useEffect(() => {
@@ -476,6 +544,15 @@ export default function App() {
             } else if (key === 'gangin_popup_cms') {
               lastSavedState.current.popupCms = stringified;
               setPopupCms(prev => JSON.stringify(prev) !== stringified ? value : prev);
+            } else if (key === 'gangin_blog_cms') {
+              lastSavedState.current.blogCms = stringified;
+              setBlogCms(prev => JSON.stringify(prev) !== stringified ? value : prev);
+            } else if (key === 'gangin_pricing_cms') {
+              lastSavedState.current.pricingCms = stringified;
+              setPricingCms(prev => JSON.stringify(prev) !== stringified ? value : prev);
+            } else if (key === 'gangin_estimate_cms') {
+              lastSavedState.current.estimateCms = stringified;
+              setEstimateCms(prev => JSON.stringify(prev) !== stringified ? value : prev);
             }
           }
         )
@@ -574,6 +651,7 @@ export default function App() {
           <Pricing
             setView={setView}
             packages={packages}
+            pricingCms={pricingCms}
           />
         )}
 
@@ -586,6 +664,7 @@ export default function App() {
               setPrefillSpace('');
             }}
             setView={setView}
+            estimateCms={estimateCms}
           />
         )}
 
@@ -629,6 +708,7 @@ export default function App() {
           <Blog
             blogPosts={blog}
             setView={setView}
+            blogCms={blogCms}
           />
         )}
 
@@ -646,6 +726,9 @@ export default function App() {
             homepageCms={homepageCms}
             contactCms={contactCms}
             popupCms={popupCms}
+            blogCms={blogCms}
+            pricingCms={pricingCms}
+            estimateCms={estimateCms}
             onUpdateProjects={setProjects}
             onUpdatePackages={setPackages}
             onUpdateFAQ={setFaq}
@@ -658,6 +741,9 @@ export default function App() {
             onUpdateHomepageCms={setHomepageCms}
             onUpdateContactCms={setContactCms}
             onUpdatePopupCms={setPopupCms}
+            onUpdateBlogCms={setBlogCms}
+            onUpdatePricingCms={setPricingCms}
+            onUpdateEstimateCms={setEstimateCms}
           />
         )}
       </main>

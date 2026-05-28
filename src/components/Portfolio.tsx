@@ -65,16 +65,16 @@ export default function Portfolio({ projects, setSelectedProjectId, selectedProj
   }
 
   return (
-    <div id="portfolio-list-container" className="pt-32 pb-32 px-6 md:px-12 max-w-[1400px] mx-auto min-h-screen">
+    <div id="portfolio-list-container" className="pt-16 md:pt-24 pb-16 md:pb-24 px-6 md:px-12 max-w-[1400px] mx-auto min-h-screen">
       {/* Intro Header */}
-      <div className="mb-20 space-y-4">
+      <div className="mb-10 space-y-3">
         <div className="flex items-center gap-2">
-          <span className="flex items-center justify-center w-6 h-6 rounded-full bg-[#111111] text-white text-[10px] font-bold shrink-0">01</span>
+          <span className="flex items-center justify-center min-w-[24px] h-6 px-1.5 rounded-full bg-[#111111] text-white text-[10px] font-bold shrink-0">01</span>
           <span className="text-[10px] uppercase tracking-[0.3em] font-bold text-[#111111] block">
             Archived Works — 시공실적 선집
           </span>
         </div>
-        <h1 className="text-2xl md:text-4xl font-extrabold tracking-[0.1em] text-[#111111] uppercase">
+        <h1 className="text-xl md:text-2xl font-bold tracking-[0.18em] text-[#111111] uppercase leading-relaxed">
           포트폴리오
         </h1>
       </div>
@@ -82,7 +82,7 @@ export default function Portfolio({ projects, setSelectedProjectId, selectedProj
       {/* Category filter row with high-readability thicker gothic styling */}
       <div 
         id="portfolio-category-filter-row"
-        className="flex flex-wrap gap-x-6 gap-y-3 border-b border-brand-border/60 pb-8 mb-16 overflow-x-auto pb-4 hide-scrollbar"
+        className="flex flex-wrap gap-x-6 gap-y-3 border-b border-brand-border/60 pb-3 mb-8 overflow-x-auto hide-scrollbar"
       >
         {categories.map((cat) => (
           <button

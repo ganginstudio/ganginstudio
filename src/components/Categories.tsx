@@ -69,26 +69,26 @@ export default function Categories({
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.8 }}
-      className="pt-28 pb-32 max-w-[1400px] mx-auto px-6 md:px-12"
+      className="pt-16 md:pt-24 pb-16 md:pb-18 max-w-[1400px] mx-auto px-6 md:px-12"
     >
       {/* Editorial Header */}
-      <div className="mb-14 space-y-3">
+      <div className="mb-8 space-y-3">
         <div className="flex items-center gap-2">
-          <span className="flex items-center justify-center w-6 h-6 rounded-full bg-[#111111] text-white text-[10px] font-bold shrink-0">01</span>
+          <span className="flex items-center justify-center min-w-[24px] h-6 px-1.5 rounded-full bg-[#111111] text-white text-[10px] font-bold shrink-0">01</span>
           <span className="text-[10px] uppercase tracking-[0.3em] text-[#111111] font-bold block">
-            SPECIALIZED SOLUTIONS
+            SPECIALIZED SOLUTIONS — 분야별 설계 및 시공 가이드라인
           </span>
         </div>
-        <h1 className="text-2xl md:text-3xl font-bold tracking-[0.16em] text-[#111111] uppercase">
+        <h1 className="text-xl md:text-2xl font-bold tracking-[0.18em] text-[#111111] uppercase leading-relaxed">
           분야별 공간 제안
         </h1>
-        <p className="text-[13px] font-normal text-[#222222] max-w-xl leading-relaxed tracking-wider text-justify">
+        <p className="text-[13px] font-normal text-[#222222] max-w-xl leading-relaxed tracking-wider mt-2 text-justify">
           단순한 마감을 뛰어넘어 공간 사용자의 정서적 침묵과 비즈니스의 원초적 목적을 보증하기 위해, 강인스튜디오는 9가지 독자적 구조 설계 카테고리를 고유한 맞춤 시방 기준으로 운영합니다.
         </p>
       </div>
 
       {/* Categories Modern Tab Selector */}
-      <div className="overflow-x-auto scrollbar-none border-b border-brand-border/60 pb-3 mb-16">
+      <div className="overflow-x-auto scrollbar-none border-b border-brand-border/60 pb-3 mb-8 md:mb-10">
         <div className="flex gap-x-8 md:gap-x-12 min-w-max">
           {categories.map((cat) => (
             <button
@@ -121,7 +121,7 @@ export default function Categories({
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -15 }}
           transition={{ duration: 0.5 }}
-          className="space-y-24"
+          className="space-y-14 md:space-y-20"
         >
           {/* A. Minimal hero block */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
@@ -161,7 +161,7 @@ export default function Categories({
             {/* Scope */}
             <div className="space-y-6">
               <div className="flex items-center gap-2.5">
-                <span className="flex items-center justify-center w-5 h-5 rounded-full bg-[#111111] text-white text-[9px] font-bold shrink-0">02</span>
+                <span className="flex items-center justify-center min-w-[20px] h-5 px-1 rounded-full bg-[#111111] text-white text-[9px] font-bold shrink-0">02</span>
                 <h3 className="text-sm uppercase tracking-[0.2em] font-bold text-[#111111]">
                   세부 설계 및 완벽 시공 범위
                 </h3>
@@ -179,7 +179,7 @@ export default function Categories({
             {/* Materials */}
             <div className="space-y-6">
               <div className="flex items-center gap-2.5">
-                <span className="flex items-center justify-center w-5 h-5 rounded-full bg-[#111111] text-white text-[9px] font-bold shrink-0">03</span>
+                <span className="flex items-center justify-center min-w-[20px] h-5 px-1 rounded-full bg-[#111111] text-white text-[9px] font-bold shrink-0">03</span>
                 <h3 className="text-sm uppercase tracking-[0.2em] font-bold text-[#111111]">
                   천연 프리미엄 자재 매칭 큐레이션
                 </h3>
@@ -247,7 +247,7 @@ export default function Categories({
           {/* D. Process Explanation Timeline */}
           <div className="space-y-8">
             <div className="flex items-center gap-2.5">
-              <span className="flex items-center justify-center w-5 h-5 rounded-full bg-[#111111] text-white text-[9px] font-bold shrink-0">04</span>
+              <span className="flex items-center justify-center min-w-[20px] h-5 px-1 rounded-full bg-[#111111] text-white text-[9px] font-bold shrink-0">04</span>
               <h3 className="text-sm uppercase tracking-[0.25em] text-[#111111] font-bold">
                 진행 절차 프로세스 (Process Flow)
               </h3>
@@ -273,7 +273,7 @@ export default function Categories({
           {filteredProjects.length > 0 && (
             <div className="space-y-8 pt-6 border-t border-brand-border/40">
               <div className="flex items-center gap-2.5">
-                <span className="flex items-center justify-center w-5 h-5 rounded-full bg-[#111111] text-white text-[9px] font-bold shrink-0">05</span>
+                <span className="flex items-center justify-center min-w-[20px] h-5 px-1 rounded-full bg-[#111111] text-white text-[9px] font-bold shrink-0">05</span>
                 <h3 className="text-sm uppercase tracking-[0.2em] font-bold text-[#111111]">
                   이 분야 실제 시공 완료작 (Color Archive)
                 </h3>
@@ -320,7 +320,7 @@ export default function Categories({
             {/* Reviews */}
             <div className="space-y-6">
               <div className="flex items-center gap-2.5">
-                <span className="flex items-center justify-center w-5 h-5 rounded-full bg-[#111111] text-white text-[9px] font-bold shrink-0">06</span>
+                <span className="flex items-center justify-center min-w-[20px] h-5 px-1 rounded-full bg-[#111111] text-white text-[9px] font-bold shrink-0">06</span>
                 <h3 className="text-sm uppercase tracking-[0.2em] text-[#111111] font-bold">
                   이 설계 분야 고객 수공 스토리
                 </h3>

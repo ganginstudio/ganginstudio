@@ -269,12 +269,12 @@ export default function Home({ projects, reviews, setView, setSelectedProjectId,
       </section>
 
       {/* 2. PHILOSOPHY HIGHLIGHT */}
-      <section id="introduction-philosophy" className="max-w-[1400px] mx-auto px-6 md:px-12 mb-36">
+      <section id="introduction-philosophy" className="max-w-[1400px] mx-auto px-6 md:px-12 mb-16 md:mb-24">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-24 items-baseline mb-16">
           {/* Tag */}
           <div className="lg:col-span-3">
             <div className="flex items-center gap-2 mb-2">
-              <span className="flex items-center justify-center w-5 h-5 rounded-full bg-[#111111] text-white text-[9px] font-bold shrink-0">01</span>
+              <span className="flex items-center justify-center min-w-[20px] h-5 px-1 rounded-full bg-[#111111] text-white text-[9px] font-bold shrink-0">01</span>
               <span className="text-[10px] uppercase tracking-[0.3em] text-[#111111] font-bold block">
                 {hpCms.philosophyLabel}
               </span>
@@ -307,19 +307,19 @@ export default function Home({ projects, reviews, setView, setSelectedProjectId,
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-start">
               <div className="lg:col-span-3">
                 <div className="flex items-center gap-2 mb-2">
-                  <span className="flex items-center justify-center w-5 h-5 rounded-full bg-[#111111] text-white text-[9px] font-bold shrink-0">01-B</span>
+                  <span className="flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full bg-[#111111] text-white text-[9px] font-bold shrink-0">01-B</span>
                   <span className="text-[10px] uppercase tracking-[0.3em] text-[#111111] font-bold block">
                     SELECTED VOICES
                   </span>
                 </div>
                 <h4 className="text-sm uppercase tracking-[0.2em] text-[#111111] mt-2 font-bold">
-                  고객 상생 수기
+                  고객 후기
                 </h4>
               </div>
               
-              <div className="lg:col-span-9 grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-12 lg:gap-16">
+              <div className="lg:col-span-9 grid grid-cols-1 md:grid-cols-3 gap-8">
                 {featuredReviews.map((rev) => (
-                  <div key={rev.id} className="space-y-4 font-sans text-justify flex flex-col justify-between h-full">
+                  <div key={rev.id} className="border border-brand-border/60 p-6 bg-white space-y-4 font-sans text-justify flex flex-col justify-between h-full hover:bg-neutral-50 transition-colors duration-300">
                     <div className="space-y-3">
                       <div className="flex justify-between items-baseline border-b border-[#111111]/20 pb-2">
                         <span className="text-xs font-bold tracking-wider text-[#111111]">{rev.clientName}</span>
@@ -346,11 +346,11 @@ export default function Home({ projects, reviews, setView, setSelectedProjectId,
       </section>
 
       {/* 3. FEATURED PROJECTS ARCHITECTURAL GRID */}
-      <section id="featured-projects" className="max-w-[1400px] mx-auto px-6 md:px-12 mb-32">
-        <div className="flex justify-between items-baseline border-b-2 border-[#111111] pb-6 mb-12">
+      <section id="featured-projects" className="max-w-[1400px] mx-auto px-6 md:px-12 mb-16 md:mb-24">
+        <div className="flex justify-between items-baseline border-b border-brand-border/60 pb-6 mb-12">
           <div className="space-y-1">
             <div className="flex items-center gap-2 mb-2">
-              <span className="flex items-center justify-center w-5 h-5 rounded-full bg-[#111111] text-white text-[9px] font-bold shrink-0">02</span>
+              <span className="flex items-center justify-center min-w-[20px] h-5 px-1 rounded-full bg-[#111111] text-white text-[9px] font-bold shrink-0">02</span>
               <span className="text-[10px] uppercase tracking-[0.3em] text-[#111111] font-bold block">
                 {hpCms.featuredLabel}
               </span>
@@ -420,11 +420,11 @@ export default function Home({ projects, reviews, setView, setSelectedProjectId,
       </section>
 
       {/* 4. BUSINESS CORE VALUES */}
-      <section id="trust-core-business" className="bg-white/40 border-y border-brand-border py-28 mb-36">
+      <section id="trust-core-business" className="bg-white/40 border-y border-brand-border py-12 md:py-16 mb-16 md:mb-24">
         <div className="max-w-[1400px] mx-auto px-6 md:px-12">
           <div className="max-w-xl mb-16">
             <div className="flex items-center gap-2 mb-2">
-              <span className="flex items-center justify-center w-5 h-5 rounded-full bg-[#111111] text-white text-[9px] font-bold shrink-0">03</span>
+              <span className="flex items-center justify-center min-w-[20px] h-5 px-1 rounded-full bg-[#111111] text-white text-[9px] font-bold shrink-0">03</span>
               <span className="text-[10px] uppercase tracking-[0.3em] text-[#111111] font-bold block">
                 {hpCms.integrityLabel}
               </span>
@@ -440,7 +440,7 @@ export default function Home({ projects, reviews, setView, setSelectedProjectId,
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-8">
             <div className="space-y-4">
               <div className="flex items-center gap-1.5">
-                <span className="flex items-center justify-center w-4 h-4 rounded-full bg-[#111111] text-white text-[8px] font-bold shrink-0">1</span>
+                <span className="flex items-center justify-center min-w-[16px] h-4 px-1 rounded-full bg-[#111111] text-white text-[8px] font-bold shrink-0">1</span>
                 <span className="text-[10px] uppercase tracking-[0.25em] text-[#111111] font-bold block">{hpCms.col1Num}</span>
               </div>
               <h3 className="text-base font-bold tracking-widest text-[#111111]">{hpCms.col1Title}</h3>
@@ -451,7 +451,7 @@ export default function Home({ projects, reviews, setView, setSelectedProjectId,
             
             <div className="space-y-4">
               <div className="flex items-center gap-1.5">
-                <span className="flex items-center justify-center w-4 h-4 rounded-full bg-[#111111] text-white text-[8px] font-bold shrink-0">2</span>
+                <span className="flex items-center justify-center min-w-[16px] h-4 px-1 rounded-full bg-[#111111] text-white text-[8px] font-bold shrink-0">2</span>
                 <span className="text-[10px] uppercase tracking-[0.25em] text-[#111111] font-bold block">{hpCms.col2Num}</span>
               </div>
               <h3 className="text-base font-bold tracking-widest text-[#111111]">{hpCms.col2Title}</h3>
@@ -462,7 +462,7 @@ export default function Home({ projects, reviews, setView, setSelectedProjectId,
 
             <div className="space-y-4">
               <div className="flex items-center gap-1.5">
-                <span className="flex items-center justify-center w-4 h-4 rounded-full bg-[#111111] text-white text-[8px] font-bold shrink-0">3</span>
+                <span className="flex items-center justify-center min-w-[16px] h-4 px-1 rounded-full bg-[#111111] text-white text-[8px] font-bold shrink-0">3</span>
                 <span className="text-[10px] uppercase tracking-[0.25em] text-[#111111] font-bold block">{hpCms.col3Num}</span>
               </div>
               <h3 className="text-base font-bold tracking-widest text-[#111111]">{hpCms.col3Title}</h3>
@@ -475,10 +475,10 @@ export default function Home({ projects, reviews, setView, setSelectedProjectId,
       </section>
 
       {/* 5. PRIMARY CONVERSION CTA SYSTEM */}
-      <section id="conversion-cta-block" className="max-w-[1400px] mx-auto px-6 md:px-12 mb-36 border-t border-brand-border/60 pt-28">
+      <section id="conversion-cta-block" className="max-w-[1400px] mx-auto px-6 md:px-12 mb-16 md:mb-24 border-t border-brand-border/60 pt-12 md:pt-16">
         <div className="max-w-xl mb-16">
           <div className="flex items-center gap-2 mb-2">
-            <span className="flex items-center justify-center w-5 h-5 rounded-full bg-[#111111] text-white text-[9px] font-bold shrink-0">04</span>
+            <span className="flex items-center justify-center min-w-[20px] h-5 px-1 rounded-full bg-[#111111] text-white text-[9px] font-bold shrink-0">04</span>
             <span className="text-[10px] uppercase tracking-[0.3em] text-[#111111] font-bold block">
               {hpCms.conversionLabel}
             </span>

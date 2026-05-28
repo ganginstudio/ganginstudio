@@ -1,6 +1,6 @@
 import { useState, useEffect, FormEvent, useRef, ChangeEvent } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { EstimateSubmit, NavView } from '../types';
+import { EstimateSubmit, NavView, EstimateCmsConfig } from '../types';
 import { Check, Send, Sparkles, ClipboardList, Clock, Phone, Trash2, ChevronRight, Upload, Paperclip } from 'lucide-react';
 
 interface EstimateProps {
@@ -8,9 +8,10 @@ interface EstimateProps {
   prefillSpace: string;
   clearPrefill: () => void;
   setView: (view: NavView) => void;
+  estimateCms?: EstimateCmsConfig;
 }
 
-export default function Estimate({ prefillCategory, prefillSpace, clearPrefill, setView }: EstimateProps) {
+export default function Estimate({ prefillCategory, prefillSpace, clearPrefill, setView, estimateCms }: EstimateProps) {
   // 7-Step Progressive flow state
   const [step, setStep] = useState(1);
 
@@ -246,7 +247,7 @@ export default function Estimate({ prefillCategory, prefillSpace, clearPrefill, 
   };
 
   return (
-    <div id="estimate-view-container" className="pt-32 pb-32 px-6 md:px-12 max-w-[1400px] mx-auto min-h-screen">
+    <div id="estimate-view-container" className="pt-16 md:pt-24 pb-16 md:pb-24 px-6 md:px-12 max-w-[1400px] mx-auto min-h-screen">
       {/* Toast Notification */}
       <AnimatePresence>
         {showToast && (
@@ -269,26 +270,28 @@ export default function Estimate({ prefillCategory, prefillSpace, clearPrefill, 
         <div className="lg:col-span-4 space-y-12 lg:sticky lg:top-32">
           <div className="space-y-4">
             <div className="flex items-center gap-2">
-              <span className="flex items-center justify-center w-6 h-6 rounded-full bg-[#111111] text-white text-[10px] font-bold shrink-0">01</span>
+              <span className="flex items-center justify-center min-w-[24px] h-6 px-1.5 rounded-full bg-[#111111] text-white text-[10px] font-bold shrink-0">01</span>
               <span className="text-[10px] uppercase tracking-[0.3em] text-[#111111] font-bold block">
-                01 — Multi-Step Custom Estimate
+                {estimateCms?.sideLabel || "01 — Multi-Step Custom Estimate"}
               </span>
             </div>
-            <h1 className="text-xl md:text-2xl font-bold tracking-[0.18em] text-[#111111] uppercase leading-relaxed">
-              우리집 / 나의가게 <br/>예상견적 받아보기
+            <h1 className="text-xl md:text-2xl font-bold tracking-[0.18em] text-[#111111] uppercase leading-relaxed whitespace-pre-line">
+              {estimateCms?.sideTitle || "우리집 / 나의가게 \n예상견적 받아보기"}
             </h1>
             <p className="text-[13px] font-normal text-[#222222] leading-relaxed tracking-wider mt-2 text-justify">
-              정량화된 시공 원가와 디테일한 도면 큐레이션을 제공하기 위해 운영되는 다단계 간편 가산출 시스템입니다. 각 항목을 성실히 이행해 주시면, 시공 원가 오차율 5% 이내의 정밀한 명세를 검수해 드립니다.
+              {estimateCms?.sideDesc || "정량화된 시공 원가와 디테일한 도면 큐레이션을 제공하기 위해 운영되는 다단계 간편 가산출 시스템입니다. 각 항목을 성실히 이행해 주시면, 시공 원가 오차율 5% 이내의 정밀한 명세를 검수해 드립니다."}
             </p>
           </div>
 
           <div className="border-t-2 border-[#111111] pt-8 space-y-4 text-[13px] font-normal text-[#222222]">
-            <h4 className="text-sm uppercase tracking-[0.2em] text-[#111111] font-bold">● 프리미엄 기술 규정</h4>
+            <h4 className="text-sm uppercase tracking-[0.2em] text-[#111111] font-bold">
+              {estimateCms?.techRuleTitle || "● 프리미엄 기술 규정"}
+            </h4>
             <ul className="space-y-3.5 leading-relaxed tracking-wide font-semibold">
-              <li className="text-[#111111]">• 라이선스 정규 면허 기술진 본사 고정 배치</li>
-              <li className="text-[#111111]">• 중간 수수료 소거 원가 명세 정찰제</li>
-              <li className="text-[#111111]">• 하자 보완을 극대화한 건조 및 방수 4회 레이징 보증</li>
-              <li className="text-[#111111]">• 하자 이행 초과 3개년 오피스 무료 복구권 제공</li>
+              <li className="text-[#111111]">• {estimateCms?.techRule1 || "라이선스 정규 면허 기술진 본사 고정 배치"}</li>
+              <li className="text-[#111111]">• {estimateCms?.techRule2 || "중간 수수료 소거 원가 명세 정찰제"}</li>
+              <li className="text-[#111111]">• {estimateCms?.techRule3 || "하자 보완을 극대화한 건조 및 방수 4회 레이징 보증"}</li>
+              <li className="text-[#111111]">• {estimateCms?.techRule4 || "하자 이행 초과 3개년 오피스 무료 복구권 제공"}</li>
             </ul>
           </div>
 
@@ -372,9 +375,11 @@ export default function Estimate({ prefillCategory, prefillSpace, clearPrefill, 
                   className="space-y-6"
                 >
                   <div className="space-y-2">
-                    <h3 className="text-sm font-normal tracking-widest">어떤 공간을 예술화할지 선택해 주십시오.</h3>
+                    <h3 className="text-sm font-normal tracking-widest">
+                      {estimateCms?.step1Title || "어떤 공간을 예술화할지 선택해 주십시오."}
+                    </h3>
                     <p className="text-[10px] text-brand-muted tracking-wide font-light">
-                      주거 리모델링 및 프리미엄 조적 욕실, 고품격 상가 라운지 등 분야에 맞는 최적의 전문가를 배정합니다.
+                      {estimateCms?.step1Desc || "주거 리모델링 및 프리미엄 조적 욕실, 고품격 상가 라운지 등 분야에 맞는 최적의 전문가를 배정합니다."}
                     </p>
                   </div>
 

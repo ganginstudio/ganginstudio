@@ -127,7 +127,7 @@ export default function Contact({ contactCms }: ContactProps) {
       animate={{ opacity: 1 }}
       transition={{ duration: 0.8 }}
       id="contact-page-container"
-      className="pt-32 pb-32 px-6 md:px-12 max-w-[1400px] mx-auto min-h-screen"
+      className="pt-16 md:pt-24 pb-16 md:pb-24 px-6 md:px-12 max-w-[1400px] mx-auto min-h-screen"
     >
       {/* Toast */}
       <AnimatePresence>
@@ -142,14 +142,14 @@ export default function Contact({ contactCms }: ContactProps) {
       </AnimatePresence>
 
       {/* Page Header */}
-      <div className="mb-20 space-y-4">
+      <div className="mb-10 space-y-3">
         <div className="flex items-center gap-2">
-          <span className="flex items-center justify-center w-6 h-6 rounded-full bg-[#111111] text-white text-[10px] font-bold shrink-0">01</span>
+          <span className="flex items-center justify-center min-w-[24px] h-6 px-1.5 rounded-full bg-[#111111] text-white text-[10px] font-bold shrink-0">01</span>
           <span className="text-[10px] uppercase tracking-[0.3em] text-[#111111] font-bold block">
             {contactCms?.topLabel || "Establish Connection — 커뮤니케이션 오피스 연결"}
           </span>
         </div>
-        <h1 className="text-2xl md:text-3xl font-extrabold tracking-[0.16em] text-[#111111] uppercase">
+        <h1 className="text-xl md:text-2xl font-bold tracking-[0.18em] text-[#111111] uppercase leading-relaxed">
           {contactCms?.topTitle || "오시는 길 & 기획 문의"}
         </h1>
         <p className="text-[13px] font-normal text-[#222222] max-w-xl leading-relaxed tracking-wider mt-2 text-justify">
@@ -317,10 +317,10 @@ export default function Contact({ contactCms }: ContactProps) {
       <div className="pt-24 max-w-4xl mx-auto">
         <div className="text-center space-y-4 mb-16 flex flex-col items-center">
           <div className="flex items-center gap-2">
-            <span className="flex items-center justify-center w-6 h-6 rounded-full bg-[#111111] text-white text-[10px] font-bold shrink-0">02</span>
+            <span className="flex items-center justify-center min-w-[24px] h-6 px-1.5 rounded-full bg-[#111111] text-white text-[10px] font-bold shrink-0">02</span>
             <span className="text-[10px] uppercase tracking-[0.3em] text-[#111111] font-bold block">02 — ADVANCED INQUIRY SYSTEM</span>
           </div>
-          <h2 className="text-xl md:text-2xl font-bold tracking-[0.15em] text-[#111111] uppercase">정밀 기획 상담 통합 양식</h2>
+          <h2 className="text-xl md:text-2xl font-bold tracking-[0.18em] text-[#111111] uppercase">정밀 기획 상담 통합 양식</h2>
           <p className="text-[13px] font-normal text-[#222222] max-w-xl mx-auto leading-relaxed text-center">
             세부 평형 정보, 예산 기준 및 고객님이 소유하신 단가 참조 자료(지상도, 자재 가구 선호도)를 모두 첨부하여 공학자처럼 신속하게 일대일 디렉터 상담 예약 명세를 구성하는 고품격 접수처입니다.
           </p>

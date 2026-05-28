@@ -197,5 +197,31 @@ export interface PopupCmsConfig {
   delayTime: number; // in seconds
 }
 
+export interface BlogCmsConfig {
+  topLabel: string;
+  title: string;
+  description: string;
+}
+
+export interface PricingCmsConfig {
+  topLabel: string;
+  title: string;
+  description: string;
+}
+
+export interface EstimateCmsConfig {
+  step1Title: string;
+  step1Desc: string;
+  sideLabel: string;
+  sideTitle: string;
+  sideDesc: string;
+  techRuleTitle: string;
+  techRule1: string;
+  techRule2: string;
+  techRule3: string;
+  techRule4: string;
+}
+
+
 import { FAQItem, CustomerReview, BlogPost, SiteSettings, ServicePackage, ServiceCategory } from './store';
 export type { FAQItem, CustomerReview, BlogPost, SiteSettings, ServicePackage, ServiceCategory };

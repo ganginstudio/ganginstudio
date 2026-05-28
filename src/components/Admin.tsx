@@ -13,7 +13,10 @@ import {
   HeroCmsConfig,
   HomepageCmsConfig,
   ContactCmsConfig,
-  PopupCmsConfig
+  PopupCmsConfig,
+  BlogCmsConfig,
+  PricingCmsConfig,
+  EstimateCmsConfig
 } from '../types';
 import { uploadPortfolioImage, isSupabaseOffline } from '../lib/supabase';
 import {
@@ -50,6 +53,9 @@ interface AdminProps {
   homepageCms: HomepageCmsConfig;
   contactCms: ContactCmsConfig;
   popupCms: PopupCmsConfig;
+  blogCms?: BlogCmsConfig;
+  pricingCms?: PricingCmsConfig;
+  estimateCms?: EstimateCmsConfig;
   onUpdateProjects: (updated: Project[]) => void;
   onUpdatePackages: (updated: ServicePackage[]) => void;
   onUpdateFAQ: (updated: FAQItem[]) => void;
@@ -62,6 +68,9 @@ interface AdminProps {
   onUpdateHomepageCms: (updated: HomepageCmsConfig) => void;
   onUpdateContactCms: (updated: ContactCmsConfig) => void;
   onUpdatePopupCms: (updated: PopupCmsConfig) => void;
+  onUpdateBlogCms?: (updated: BlogCmsConfig) => void;
+  onUpdatePricingCms?: (updated: PricingCmsConfig) => void;
+  onUpdateEstimateCms?: (updated: EstimateCmsConfig) => void;
 }
 
 const dataURLtoFile = (dataurl: string, filename: string): File => {
@@ -166,6 +175,9 @@ export default function Admin({
   homepageCms,
   contactCms,
   popupCms,
+  blogCms,
+  pricingCms,
+  estimateCms,
   onUpdateProjects,
   onUpdatePackages,
   onUpdateFAQ,
@@ -177,7 +189,10 @@ export default function Admin({
   onUpdateHeroCms,
   onUpdateHomepageCms,
   onUpdateContactCms,
-  onUpdatePopupCms
+  onUpdatePopupCms,
+  onUpdateBlogCms,
+  onUpdatePricingCms,
+  onUpdateEstimateCms
 }: AdminProps) {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [password, setPassword] = useState<string>('');
@@ -855,6 +870,16 @@ export default function Admin({
             <Sparkles size={13} />
             <span>팝업 위젯 관리</span>
           </button>
+
+          <button
+            onClick={() => { setCurrentTab('pageHeadersCms'); setEditingProject(null); }}
+            className={`flex items-center gap-2.5 py-3.5 px-4 text-start rounded-none transition-colors cursor-pointer ${
+              currentTab === 'pageHeadersCms' ? 'bg-brand-dark text-white font-medium' : 'hover:bg-brand-bg/60 text-brand-muted hover:text-brand-dark'
+            }`}
+          >
+            <Layers size={13} />
+            <span>기타 페이지 CMS</span>
+          </button>
         </nav>
       </aside>
 
@@ -1461,8 +1486,29 @@ export default function Admin({
 
                 {/* Edit Scope Details */}
                 <div className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-1">
+                      <label className="text-[10px] text-brand-muted font-bold block">카테고리 한글명 (제목)</label>
+                      <input
+                        type="text"
+                        value={editingCategory.nameKr}
+                        onChange={(e) => setEditingCategory({ ...editingCategory, nameKr: e.target.value })}
+                        className="w-full text-xs font-semibold p-3 border border-brand-border/60 text-[#111111]"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[10px] text-brand-muted font-bold block">카테고리 영문명 (부제목)</label>
+                      <input
+                        type="text"
+                        value={editingCategory.nameEn}
+                        onChange={(e) => setEditingCategory({ ...editingCategory, nameEn: e.target.value })}
+                        className="w-full text-xs font-semibold p-3 border border-brand-border/60 text-[#111111]"
+                      />
+                    </div>
+                  </div>
+
                   <div className="space-y-1">
-                    <label className="text-[10px] text-brand-muted font-medium">상세 서술문 (Introduction)</label>
+                    <label className="text-[10px] text-brand-muted font-medium block">상세 서술문 (Introduction)</label>
                     <textarea
                       rows={3}
                       value={editingCategory.description}
@@ -3602,6 +3648,299 @@ export default function Admin({
                 >
                   <Save size={13} />
                   <span>팝업 위젯 구성 설정 영구 보존하기</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {currentTab === 'pageHeadersCms' && (
+          <div className="space-y-8 animate-fade-in">
+            <div className="border-b border-brand-border pb-4">
+              <h3 className="text-sm font-semibold text-brand-dark uppercase tracking-widest">추가 브랜드 페이지 레이블 관리 (Blog, Pricing, Estimate)</h3>
+              <p className="text-[10px] text-brand-muted font-light mt-1">
+                칼럼(Blog), 가격 안내(Pricing), 간편 견적(Estimate) 페이지 상단 텍스트 및 레이블 정보를 직접 제어합니다.
+              </p>
+            </div>
+
+            {/* SECTION 1: BLOG & COLUMN CMS */}
+            <div className="border border-brand-border/60 bg-neutral-50 p-6 space-y-6">
+              <div className="border-b border-brand-border pb-2.5">
+                <h4 className="text-xs font-bold text-brand-dark uppercase tracking-wider flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-brand-dark" />
+                  건축칼럼 (Blog Page) 헤더 설정
+                </h4>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="text-[10px] uppercase font-semibold text-brand-dark block mb-1">상단 레이블 (Top Badge Text)</label>
+                  <input
+                    type="text"
+                    value={blogCms?.topLabel ?? ''}
+                    onChange={(e) => onUpdateBlogCms?.({ ...(blogCms || { topLabel: '', title: '', description: '' }), topLabel: e.target.value })}
+                    className="w-full text-xs font-light p-2.5 bg-white border border-brand-border/60 focus:outline-none focus:border-brand-dark"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-[10px] uppercase font-semibold text-brand-dark block mb-1">칼럼 타이틀 (Main Title)</label>
+                  <input
+                    type="text"
+                    value={blogCms?.title ?? ''}
+                    onChange={(e) => onUpdateBlogCms?.({ ...(blogCms || { topLabel: '', title: '', description: '' }), title: e.target.value })}
+                    className="w-full text-xs font-light p-2.5 bg-white border border-brand-border/60 focus:outline-none focus:border-brand-dark"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-[10px] uppercase font-semibold text-brand-dark block mb-1">소제목 및 설명 (Narrative Description)</label>
+                  <textarea
+                    rows={3}
+                    value={blogCms?.description ?? ''}
+                    onChange={(e) => onUpdateBlogCms?.({ ...(blogCms || { topLabel: '', title: '', description: '' }), description: e.target.value })}
+                    className="w-full text-xs font-light p-2.5 bg-white border border-brand-border/60 focus:outline-none focus:border-brand-dark leading-relaxed"
+                  />
+                </div>
+              </div>
+
+              {/* Manual Save Button for Blog CMS */}
+              <div className="flex justify-end">
+                <button
+                  type="button"
+                  onClick={async () => {
+                    try {
+                      const { saveSupabaseState, isSupabaseConfigured } = await import('../lib/supabase');
+                      if (isSupabaseConfigured && blogCms) {
+                        const success = await saveSupabaseState('gangin_blog_cms', blogCms);
+                        if (success) {
+                          alert('칼럼 페이지 헤더 설정이 Supabase에 저장전송 되었습니다.');
+                        } else {
+                          alert('데이터베이스 동기화 에러가 발생했습니다.');
+                        }
+                      } else {
+                        alert('메모리에 임시로 반영되었습니다 (연결 오프라인).');
+                      }
+                    } catch (e: any) {
+                      alert(`오류: ${e.message || e}`);
+                    }
+                  }}
+                  className="bg-brand-dark hover:bg-neutral-800 text-white font-medium text-[10px] py-2 px-5 flex items-center gap-1.5 transition-colors cursor-pointer"
+                >
+                  <Save size={11} />
+                  <span>칼럼 헤더 보존</span>
+                </button>
+              </div>
+            </div>
+
+            {/* SECTION 2: PRICING CMS */}
+            <div className="border border-brand-border/60 bg-neutral-50 p-6 space-y-6">
+              <div className="border-b border-brand-border pb-2.5">
+                <h4 className="text-xs font-bold text-brand-dark uppercase tracking-wider flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-brand-dark" />
+                  가격 안내 (Pricing Page) 헤더 설정
+                </h4>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="text-[10px] uppercase font-semibold text-brand-dark block mb-1">상단 소분류 레이블 (Top Badge Text)</label>
+                  <input
+                    type="text"
+                    value={pricingCms?.topLabel ?? ''}
+                    onChange={(e) => onUpdatePricingCms?.({ ...(pricingCms || { topLabel: '', title: '', description: '' }), topLabel: e.target.value })}
+                    className="w-full text-xs font-light p-2.5 bg-white border border-brand-border/60 focus:outline-none focus:border-brand-dark"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-[10px] uppercase font-semibold text-brand-dark block mb-1">메인 타이틀 (Main Title / Heading)</label>
+                  <input
+                    type="text"
+                    value={pricingCms?.title ?? ''}
+                    onChange={(e) => onUpdatePricingCms?.({ ...(pricingCms || { topLabel: '', title: '', description: '' }), title: e.target.value })}
+                    className="w-full text-xs font-light p-2.5 bg-white border border-brand-border/60 focus:outline-none focus:border-brand-dark"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-[10px] uppercase font-semibold text-brand-dark block mb-1">헤더 설명 (Header Hero Subtitle)</label>
+                  <textarea
+                    rows={3}
+                    value={pricingCms?.description ?? ''}
+                    onChange={(e) => onUpdatePricingCms?.({ ...(pricingCms || { topLabel: '', title: '', description: '' }), description: e.target.value })}
+                    className="w-full text-xs font-light p-2.5 bg-white border border-brand-border/60 focus:outline-none focus:border-brand-dark leading-relaxed"
+                  />
+                </div>
+              </div>
+
+              {/* Manual Save Button for Pricing CMS */}
+              <div className="flex justify-end">
+                <button
+                  type="button"
+                  onClick={async () => {
+                    try {
+                      const { saveSupabaseState, isSupabaseConfigured } = await import('../lib/supabase');
+                      if (isSupabaseConfigured && pricingCms) {
+                        const success = await saveSupabaseState('gangin_pricing_cms', pricingCms);
+                        if (success) {
+                          alert('가격 페이지 헤더 설정이 Supabase에 저장전송 되었습니다.');
+                        } else {
+                          alert('데이터베이스 동기화 에러가 발생했습니다.');
+                        }
+                      } else {
+                        alert('메모리에 임시로 반영되었습니다 (연결 오프라인).');
+                      }
+                    } catch (e: any) {
+                      alert(`오류: ${e.message || e}`);
+                    }
+                  }}
+                  className="bg-brand-dark hover:bg-neutral-800 text-white font-medium text-[10px] py-2 px-5 flex items-center gap-1.5 transition-colors cursor-pointer"
+                >
+                  <Save size={11} />
+                  <span>가격 헤더 보존</span>
+                </button>
+              </div>
+            </div>
+
+            {/* SECTION 3: ESTIMATE CMS */}
+            <div className="border border-brand-border/60 bg-neutral-50 p-6 space-y-6">
+              <div className="border-b border-brand-border pb-2.5">
+                <h4 className="text-xs font-bold text-brand-dark uppercase tracking-wider flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-brand-dark" />
+                  간편 견적 (Estimate Page) 설정
+                </h4>
+              </div>
+
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-[10px] uppercase font-semibold text-brand-dark block mb-1">상단 레이블 (Side Label)</label>
+                    <input
+                      type="text"
+                      value={estimateCms?.sideLabel ?? ''}
+                      onChange={(e) => onUpdateEstimateCms?.({ ...(estimateCms || { sideLabel: '', sideTitle: '', sideDesc: '', step1Title: '', step1Desc: '', techRuleTitle: '', techRule1: '', techRule2: '', techRule3: '', techRule4: '' }), sideLabel: e.target.value })}
+                      className="w-full text-xs font-light p-2.5 bg-white border border-brand-border/60 focus:outline-none focus:border-brand-dark"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] uppercase font-semibold text-brand-dark block mb-1">기본 타이틀 (Side Title)</label>
+                    <input
+                      type="text"
+                      value={estimateCms?.sideTitle ?? ''}
+                      onChange={(e) => onUpdateEstimateCms?.({ ...(estimateCms || { sideLabel: '', sideTitle: '', sideDesc: '', step1Title: '', step1Desc: '', techRuleTitle: '', techRule1: '', techRule2: '', techRule3: '', techRule4: '' }), sideTitle: e.target.value })}
+                      className="w-full text-xs font-light p-2.5 bg-white border border-brand-border/60 focus:outline-none focus:border-brand-dark"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-[10px] uppercase font-semibold text-brand-dark block mb-1">측면 상세 설명 (Side Description)</label>
+                  <textarea
+                    rows={3}
+                    value={estimateCms?.sideDesc ?? ''}
+                    onChange={(e) => onUpdateEstimateCms?.({ ...(estimateCms || { sideLabel: '', sideTitle: '', sideDesc: '', step1Title: '', step1Desc: '', techRuleTitle: '', techRule1: '', techRule2: '', techRule3: '', techRule4: '' }), sideDesc: e.target.value })}
+                    className="w-full text-xs font-light p-2.5 bg-white border border-brand-border/60 focus:outline-none focus:border-brand-dark leading-relaxed"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-brand-border/40">
+                  <div>
+                    <label className="text-[10px] uppercase font-semibold text-brand-dark block mb-1">1단계 질문 제목 (Step 1 Question)</label>
+                    <input
+                      type="text"
+                      value={estimateCms?.step1Title ?? ''}
+                      onChange={(e) => onUpdateEstimateCms?.({ ...(estimateCms || { sideLabel: '', sideTitle: '', sideDesc: '', step1Title: '', step1Desc: '', techRuleTitle: '', techRule1: '', techRule2: '', techRule3: '', techRule4: '' }), step1Title: e.target.value })}
+                      className="w-full text-xs font-light p-2.5 bg-white border border-brand-border/60 focus:outline-none focus:border-brand-dark"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] uppercase font-semibold text-brand-dark block mb-1">1단계 부연 설명 (Step 1 Subtext)</label>
+                    <input
+                      type="text"
+                      value={estimateCms?.step1Desc ?? ''}
+                      onChange={(e) => onUpdateEstimateCms?.({ ...(estimateCms || { sideLabel: '', sideTitle: '', sideDesc: '', step1Title: '', step1Desc: '', techRuleTitle: '', techRule1: '', techRule2: '', techRule3: '', techRule4: '' }), step1Desc: e.target.value })}
+                      className="w-full text-xs font-light p-2.5 bg-white border border-brand-border/60 focus:outline-none focus:border-brand-dark"
+                    />
+                  </div>
+                </div>
+
+                <div className="pt-4 border-t border-brand-border/40 space-y-3">
+                  <div>
+                    <label className="text-[10px] uppercase font-semibold text-brand-dark block mb-1">프리미엄 기술 규정 문구 (Rules Heading)</label>
+                    <input
+                      type="text"
+                      value={estimateCms?.techRuleTitle ?? ''}
+                      onChange={(e) => onUpdateEstimateCms?.({ ...(estimateCms || { sideLabel: '', sideTitle: '', sideDesc: '', step1Title: '', step1Desc: '', techRuleTitle: '', techRule1: '', techRule2: '', techRule3: '', techRule4: '' }), techRuleTitle: e.target.value })}
+                      className="w-full text-xs font-light p-2.5 bg-white border border-brand-border/60 focus:outline-none focus:border-brand-dark"
+                    />
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-[10px] uppercase font-semibold text-brand-dark block mb-1">규정 1 (Rule 1)</label>
+                      <input
+                        type="text"
+                        value={estimateCms?.techRule1 ?? ''}
+                        onChange={(e) => onUpdateEstimateCms?.({ ...(estimateCms || { sideLabel: '', sideTitle: '', sideDesc: '', step1Title: '', step1Desc: '', techRuleTitle: '', techRule1: '', techRule2: '', techRule3: '', techRule4: '' }), techRule1: e.target.value })}
+                        className="w-full text-xs font-light p-2.5 bg-white border border-brand-border/60 focus:outline-none focus:border-brand-dark"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[10px] uppercase font-semibold text-brand-dark block mb-1">규정 2 (Rule 2)</label>
+                      <input
+                        type="text"
+                        value={estimateCms?.techRule2 ?? ''}
+                        onChange={(e) => onUpdateEstimateCms?.({ ...(estimateCms || { sideLabel: '', sideTitle: '', sideDesc: '', step1Title: '', step1Desc: '', techRuleTitle: '', techRule1: '', techRule2: '', techRule3: '', techRule4: '' }), techRule2: e.target.value })}
+                        className="w-full text-xs font-light p-2.5 bg-white border border-brand-border/60 focus:outline-none focus:border-brand-dark"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[10px] uppercase font-semibold text-brand-dark block mb-1">규정 3 (Rule 3)</label>
+                      <input
+                        type="text"
+                        value={estimateCms?.techRule3 ?? ''}
+                        onChange={(e) => onUpdateEstimateCms?.({ ...(estimateCms || { sideLabel: '', sideTitle: '', sideDesc: '', step1Title: '', step1Desc: '', techRuleTitle: '', techRule1: '', techRule2: '', techRule3: '', techRule4: '' }), techRule3: e.target.value })}
+                        className="w-full text-xs font-light p-2.5 bg-white border border-brand-border/60 focus:outline-none focus:border-brand-dark"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[10px] uppercase font-semibold text-brand-dark block mb-1">규정 4 (Rule 4)</label>
+                      <input
+                        type="text"
+                        value={estimateCms?.techRule4 ?? ''}
+                        onChange={(e) => onUpdateEstimateCms?.({ ...(estimateCms || { sideLabel: '', sideTitle: '', sideDesc: '', step1Title: '', step1Desc: '', techRuleTitle: '', techRule1: '', techRule2: '', techRule3: '', techRule4: '' }), techRule4: e.target.value })}
+                        className="w-full text-xs font-light p-2.5 bg-white border border-brand-border/60 focus:outline-none focus:border-brand-dark"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Manual Save Button for Estimate CMS */}
+              <div className="flex justify-end pt-2">
+                <button
+                  type="button"
+                  onClick={async () => {
+                    try {
+                      const { saveSupabaseState, isSupabaseConfigured } = await import('../lib/supabase');
+                      if (isSupabaseConfigured && estimateCms) {
+                        const success = await saveSupabaseState('gangin_estimate_cms', estimateCms);
+                        if (success) {
+                          alert('견적 페이지 설정이 Supabase에 저장전송 되었습니다.');
+                        } else {
+                          alert('데이터베이스 동기화 에러가 발생했습니다.');
+                        }
+                      } else {
+                        alert('메모리에 임시로 반영되었습니다 (연결 오프라인).');
+                      }
+                    } catch (e: any) {
+                      alert(`오류: ${e.message || e}`);
+                    }
+                  }}
+                  className="bg-brand-dark hover:bg-neutral-800 text-white font-medium text-[10px] py-2 px-5 flex items-center gap-1.5 transition-colors cursor-pointer"
+                >
+                  <Save size={11} />
+                  <span>견적 구성 보존</span>
                 </button>
               </div>
             </div>

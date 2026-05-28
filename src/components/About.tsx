@@ -8,29 +8,29 @@ export default function About() {
       animate={{ opacity: 1 }}
       transition={{ duration: 0.8 }}
       id="about-studio-container"
-      className="pt-32 pb-32 px-6 md:px-12 max-w-[1400px] mx-auto min-h-screen"
+      className="pt-16 md:pt-24 pb-16 md:pb-24 px-6 md:px-12 max-w-[1400px] mx-auto min-h-screen"
     >
       {/* Intro Header */}
-      <div className="mb-24 space-y-4">
+      <div className="mb-12 space-y-4">
         <div className="flex items-center gap-2">
-          <span className="flex items-center justify-center w-6 h-6 rounded-full bg-[#111111] text-white text-[10px] font-bold shrink-0">01</span>
-          <span className="text-[10px] uppercase tracking-[0.3em] text-[#111111] font-semibold block">
+          <span className="flex items-center justify-center min-w-[24px] h-6 px-1.5 rounded-full bg-[#111111] text-white text-[10px] font-bold shrink-0">01</span>
+          <span className="text-[10px] uppercase tracking-[0.3em] text-[#111111] font-bold block">
             Studio Philosophy & Approaches — 디자인 철학 및 시공 접근법
           </span>
         </div>
-        <h1 className="text-2xl md:text-3xl font-bold tracking-[0.16em] text-[#111111] uppercase">
+        <h1 className="text-xl md:text-2xl font-bold tracking-[0.18em] text-[#111111] uppercase leading-relaxed">
           강인 소개
         </h1>
-        <p className="text-[15px] font-medium text-[#111111] max-w-2xl leading-relaxed tracking-wider mt-4">
+        <p className="text-[13px] font-normal text-[#222222] max-w-2xl leading-relaxed tracking-wider mt-2 text-justify">
           “{PHILOSOPHY_NARRATIVES.intro}”
         </p>
       </div>
 
       {/* Philosophy Editorial Columns Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 lg:gap-24 items-start mb-32 pb-16 border-b border-brand-border/60">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 lg:gap-24 items-start mb-16 pb-12 border-b border-brand-border/60">
         <div className="lg:col-span-4">
           <div className="flex items-center gap-2.5">
-            <span className="flex items-center justify-center w-5 h-5 rounded-full bg-[#111111] text-white text-[9px] font-bold shrink-0">01</span>
+            <span className="flex items-center justify-center min-w-[20px] h-5 px-1 rounded-full bg-[#111111] text-white text-[9px] font-bold shrink-0">01</span>
             <span className="text-[9px] uppercase tracking-[0.3em] text-[#111111] font-bold block">PHILOSOPHY 01</span>
           </div>
           <h2 className="text-base uppercase tracking-widest text-[#111111] mt-3 font-bold">
@@ -47,10 +47,10 @@ export default function About() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 lg:gap-24 items-start mb-32 pb-16 border-b border-brand-border/60">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 lg:gap-24 items-start mb-16 pb-12 border-b border-brand-border/60">
         <div className="lg:col-span-4">
           <div className="flex items-center gap-2.5">
-            <span className="flex items-center justify-center w-5 h-5 rounded-full bg-[#111111] text-white text-[9px] font-bold shrink-0">02</span>
+            <span className="flex items-center justify-center min-w-[20px] h-5 px-1 rounded-full bg-[#111111] text-white text-[9px] font-bold shrink-0">02</span>
             <span className="text-[9px] uppercase tracking-[0.3em] text-[#111111] font-bold block">PHILOSOPHY 02</span>
           </div>
           <h2 className="text-base uppercase tracking-widest text-[#111111] mt-3 font-bold">
@@ -67,10 +67,10 @@ export default function About() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 lg:gap-24 items-start mb-32 pb-16 border-b border-brand-border/60">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 lg:gap-24 items-start mb-16 pb-12 border-b border-brand-border/60">
         <div className="lg:col-span-4">
           <div className="flex items-center gap-2.5">
-            <span className="flex items-center justify-center w-5 h-5 rounded-full bg-[#111111] text-white text-[9px] font-bold shrink-0">03</span>
+            <span className="flex items-center justify-center min-w-[20px] h-5 px-1 rounded-full bg-[#111111] text-white text-[9px] font-bold shrink-0">03</span>
             <span className="text-[9px] uppercase tracking-[0.3em] text-[#111111] font-bold block">PRIME SERVICE 03</span>
           </div>
           <h2 className="text-base uppercase tracking-widest text-[#111111] mt-3 font-bold">
@@ -91,7 +91,7 @@ export default function About() {
       <section id="studio-directors-team">
         <div className="mb-12">
           <div className="flex items-center gap-2.5">
-            <span className="flex items-center justify-center w-5 h-5 rounded-full bg-[#111111] text-white text-[9px] font-bold shrink-0">04</span>
+            <span className="flex items-center justify-center min-w-[20px] h-5 px-1 rounded-full bg-[#111111] text-white text-[9px] font-bold shrink-0">04</span>
             <span className="text-[9px] uppercase tracking-[0.3em] text-[#111111] font-bold block">04 — Leadership Roles</span>
           </div>
           <h3 className="text-base uppercase tracking-[0.2em] text-[#111111] mt-2 font-bold">
