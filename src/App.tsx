@@ -736,7 +736,7 @@ export default function App() {
             className="flex flex-col justify-center items-center text-brand-dark cursor-pointer active:bg-brand-bg select-none"
           >
             <FileText size={15} className="text-brand-dark" />
-            <span className="text-[8.5px] mt-1 font-bold tracking-widest text-[#111111]">포폴검색</span>
+            <span className="text-[8.5px] mt-1 font-bold tracking-widest text-[#111111]">포트폴리오</span>
           </button>
 
           <button
@@ -756,21 +756,21 @@ export default function App() {
           </button>
 
           <a
-            href={settings.kakaotalk}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex flex-col justify-center items-center text-brand-dark cursor-pointer active:bg-brand-bg select-none"
-          >
-            <MessageSquare size={15} className="text-brand-dark" />
-            <span className="text-[8.5px] mt-1 font-bold tracking-widest text-[#111111]">카톡문의</span>
-          </a>
-
-          <a
             href={`tel:${settings.phone}`}
             className="flex flex-col justify-center items-center text-brand-dark cursor-pointer active:bg-brand-bg select-none"
           >
             <Phone size={15} className="text-brand-dark" />
-            <span className="text-[8.5px] mt-1 font-bold tracking-widest text-[#111111]">기술전화</span>
+            <span className="text-[8.5px] mt-1 font-bold tracking-widest text-[#111111]">전화문의</span>
+          </a>
+
+          <a
+            href={settings.instagram}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex flex-col justify-center items-center text-brand-dark cursor-pointer active:bg-brand-bg select-none"
+          >
+            <Instagram size={15} className="text-brand-dark" />
+            <span className="text-[8.5px] mt-1 font-bold tracking-widest text-[#111111]">인스타그램</span>
           </a>
         </div>
       </div>
