@@ -160,11 +160,11 @@ export default function Home({ projects, reviews, setView, setSelectedProjectId,
   const isCurrentlyLoaded = loadedSlides[activeSlide?.id];
 
   return (
-    <div id="home-view-container" className="pt-24 min-h-screen">
+    <div id="home-view-container" className="pt-0 min-h-screen">
       {/* 1. HERO SECTION WITH IMAGE SLIDER */}
-      <section id="hero-section" className="relative h-[85vh] md:h-[90vh] bg-neutral-950 flex items-center px-6 md:px-12 mb-32 overflow-hidden">
+      <section id="hero-section" className="relative h-[85vh] md:h-[90vh] bg-white flex items-center px-6 md:px-12 mb-32 overflow-hidden">
         {/* Slider Background wrapper - Pure fade transitions */}
-        <div className="absolute inset-0 z-0 bg-neutral-950">
+        <div className="absolute inset-0 z-0 bg-white">
           <AnimatePresence mode="wait">
             <motion.img
               key={activeSlide?.id || 'fallback'}
