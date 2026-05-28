@@ -131,6 +131,20 @@ export default function Home({ projects, reviews, setView, setSelectedProjectId,
   const finalSlides = orderedSlides.length > 0 ? orderedSlides : [slideTemplates[0]];
 
   const [slideIdx, setSlideIdx] = useState(0);
+  const [loadedSlides, setLoadedSlides] = useState<Record<string, boolean>>({});
+
+  // Background Preloading for Hero Slides to prevent flash / broken image symbols on mobile
+  useEffect(() => {
+    finalSlides.forEach(slide => {
+      if (slide && slide.url && !loadedSlides[slide.id]) {
+        const img = new Image();
+        img.src = slide.url;
+        img.onload = () => {
+          setLoadedSlides(prev => ({ ...prev, [slide.id]: true }));
+        };
+      }
+    });
+  }, [finalSlides]);
 
   // Automatic transition clock
   useEffect(() => {
@@ -142,6 +156,9 @@ export default function Home({ projects, reviews, setView, setSelectedProjectId,
     return () => clearInterval(intervalId);
   }, [finalSlides.length, hCms.interval]);
 
+  const activeSlide = finalSlides[slideIdx] || finalSlides[0];
+  const isCurrentlyLoaded = loadedSlides[activeSlide?.id];
+
   return (
     <div id="home-view-container" className="pt-24 min-h-screen">
       {/* 1. HERO SECTION WITH IMAGE SLIDER */}
@@ -150,15 +167,20 @@ export default function Home({ projects, reviews, setView, setSelectedProjectId,
         <div className="absolute inset-0 z-0 bg-neutral-950">
           <AnimatePresence mode="wait">
             <motion.img
-              key={finalSlides[slideIdx]?.id || 'fallback'}
-              src={finalSlides[slideIdx]?.url}
+              key={activeSlide?.id || 'fallback'}
+              src={activeSlide?.url}
               alt="GANG IN STUDIO Principal Space Slide"
               initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
+              animate={{ opacity: isCurrentlyLoaded ? 1 : 0 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 1.0, ease: 'easeInOut' }}
+              transition={{ duration: 0.8, ease: 'easeInOut' }}
               className="absolute inset-0 w-full h-full object-contain md:object-cover bg-neutral-950 grayscale-10 brightness-[0.93] contrast-[1.02]"
               referrerPolicy="no-referrer"
+              onLoad={() => {
+                if (activeSlide) {
+                  setLoadedSlides(prev => ({ ...prev, [activeSlide.id]: true }));
+                }
+              }}
             />
           </AnimatePresence>
           <div className="absolute inset-y-0 left-0 w-full h-full bg-[#111111]/10 bg-gradient-to-t from-[#ffffff] via-transparent to-transparent z-10" />
@@ -172,10 +194,10 @@ export default function Home({ projects, reviews, setView, setSelectedProjectId,
             transition={{ duration: 1.2, ease: [0.25, 0.1, 0.25, 1] }}
             className="max-w-2xl text-[#111111]"
           >
-            {/* Super thin architectural heading */}
-            <h1 className="text-2xl sm:text-3xl md:text-5xl font-extralight tracking-widest leading-[1.6] mb-8 font-sans">
+            {/* Super strong/premium architectural heading */}
+            <h1 className="text-2xl sm:text-3xl md:text-5xl font-semibold tracking-widest leading-[1.6] mb-8 font-sans">
               {hCms.headlineLine1 || "공간을 디자인하고"} <br />
-              <span className="font-light">{hCms.headlineLine2 || "시공까지 책임집니다."}</span>
+              <span className="font-semibold">{hCms.headlineLine2 || "시공까지 책임집니다."}</span>
             </h1>
 
             {/* Sub-capabilities */}
@@ -318,28 +340,28 @@ export default function Home({ projects, reviews, setView, setSelectedProjectId,
       </section>
 
       {/* 3. FEATURED PROJECTS ARCHITECTURAL GRID */}
-      <section id="featured-projects" className="max-w-[1400px] mx-auto px-6 md:px-12 mb-36">
-        <div className="flex justify-between items-baseline border-b border-brand-border pb-6 mb-16">
+      <section id="featured-projects" className="max-w-[1400px] mx-auto px-6 md:px-12 mb-32">
+        <div className="flex justify-between items-baseline border-b border-brand-border pb-6 mb-12">
           <div className="space-y-1">
             <span className="text-[10px] uppercase tracking-[0.3em] text-brand-muted/70 block">
               {hpCms.featuredNum} — {hpCms.featuredLabel}
             </span>
-            <h3 className="text-sm uppercase tracking-[0.2em] text-[#111111] font-light">
-              {hpCms.featuredTitle}
+            <h3 className="text-sm uppercase tracking-[0.2em] text-[#111111] font-semibold">
+              {(hpCms.featuredTitle === "Featured Spaces (선정작)" || !hpCms.featuredTitle) ? "PORTFOLIO" : hpCms.featuredTitle.replace(" (선정작)", "")}
             </h3>
           </div>
           <button
             id="view-all-portfolio"
             onClick={() => setView((hpCms.featuredBtnUrl || 'portfolio') as any)}
-            className="text-[10px] tracking-[0.1em] text-brand-muted hover:text-[#111111] transition-colors focus:outline-none flex items-center gap-2 cursor-pointer pb-1 border-b border-transparent hover:border-brand-dark"
+            className="text-[10px] tracking-[0.1em] text-brand-muted hover:text-[#111111] transition-colors focus:outline-none flex items-center gap-2 cursor-pointer pb-1 border-b border-transparent hover:border-brand-dark font-medium"
           >
             <span>{hpCms.featuredBtnText}</span>
             <ArrowRight size={10} />
           </button>
         </div>
 
-        {/* Asymmetrical composition for high-end look */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-16 md:gap-24">
+        {/* Asymmetrical composition for high-end look / gap tighter to fix spacing on mobile */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-24">
           {featuredProjects.map((project, idx) => {
             const isEven = idx % 2 === 1;
             return (
@@ -353,13 +375,13 @@ export default function Home({ projects, reviews, setView, setSelectedProjectId,
                 viewport={{ once: true, margin: '-100px' }}
                 transition={{ duration: 1, ease: 'easeOut' }}
               >
-                {/* Image Wrap */}
-                <div className="w-full h-auto aspect-square md:aspect-[3/2] overflow-hidden bg-brand-bg relative mb-6 border border-brand-border/40">
+                {/* Image Wrap - h-auto on mobile prevents cropping and keeps high-contrast bg */}
+                <div className="w-full h-auto md:aspect-[3/2] overflow-hidden bg-brand-bg relative mb-3 md:mb-6 border border-brand-border/40">
                   <img
                     src={project.imageMobile || project.image || 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=1200'}
                     alt={project.title || "Bathroom Interior Project"}
                     loading="lazy"
-                    className="w-full h-auto md:h-full object-contain md:object-cover bg-[#fafaf9] transition-all duration-700 ease-out scale-100 group-hover:scale-[1.02]"
+                    className="w-full h-auto block md:h-full md:object-cover bg-[#fafaf9] transition-all duration-700 ease-out scale-100 group-hover:scale-[1.02]"
                     referrerPolicy="no-referrer"
                     onError={(e) => {
                       e.currentTarget.src = 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=1200';
@@ -372,7 +394,7 @@ export default function Home({ projects, reviews, setView, setSelectedProjectId,
                 <div className="grid grid-cols-3 gap-4 border-b border-brand-border/40 pb-4">
                   <div className="col-span-2">
                     <p className="text-[9px] uppercase tracking-[0.25em] text-brand-muted/80">{(project.category || 'Space')} — {project.year || '2026'}</p>
-                    <h4 className="text-sm font-light text-[#111111] tracking-wider mt-1.5 mb-1 group-hover:text-brand-muted transition-colors duration-300">
+                    <h4 className="text-sm font-semibold text-[#111111] tracking-wider mt-1.5 mb-1 group-hover:text-brand-muted transition-colors duration-300">
                       {project.title || 'GANGIN Space'}
                     </h4>
                     <p className="text-[10px] text-brand-muted font-light tracking-wide">{project.titleEn || ''}</p>
@@ -395,7 +417,7 @@ export default function Home({ projects, reviews, setView, setSelectedProjectId,
             <span className="text-[10px] uppercase tracking-[0.3em] text-brand-muted/70 block">
               {hpCms.integrityNum} — {hpCms.integrityLabel}
             </span>
-            <h2 className="text-xl md:text-2xl font-light tracking-[0.1em] text-[#111111] mt-2 mb-6">
+            <h2 className="text-xl md:text-2xl font-semibold tracking-[0.1em] text-[#111111] mt-2 mb-6">
               {hpCms.integrityTitle}
             </h2>
             <p className="text-xs font-light text-brand-muted leading-relaxed tracking-wide">
@@ -406,7 +428,7 @@ export default function Home({ projects, reviews, setView, setSelectedProjectId,
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-8">
             <div className="space-y-4">
               <span className="text-[10px] uppercase tracking-[0.25em] text-brand-muted block">{hpCms.col1Num}</span>
-              <h3 className="text-sm font-light tracking-widest text-[#111111]">{hpCms.col1Title}</h3>
+              <h3 className="text-sm font-semibold tracking-widest text-[#111111]">{hpCms.col1Title}</h3>
               <p className="text-xs text-brand-muted font-light leading-relaxed">
                 {hpCms.col1Desc}
               </p>
@@ -414,7 +436,7 @@ export default function Home({ projects, reviews, setView, setSelectedProjectId,
             
             <div className="space-y-4">
               <span className="text-[10px] uppercase tracking-[0.25em] text-brand-muted block">{hpCms.col2Num}</span>
-              <h3 className="text-sm font-light tracking-widest text-[#111111]">{hpCms.col2Title}</h3>
+              <h3 className="text-sm font-semibold tracking-widest text-[#111111]">{hpCms.col2Title}</h3>
               <p className="text-xs text-brand-muted font-light leading-relaxed">
                 {hpCms.col2Desc}
               </p>
@@ -422,7 +444,7 @@ export default function Home({ projects, reviews, setView, setSelectedProjectId,
 
             <div className="space-y-4">
               <span className="text-[10px] uppercase tracking-[0.25em] text-brand-muted block">{hpCms.col3Num}</span>
-              <h3 className="text-sm font-light tracking-widest text-[#111111]">{hpCms.col3Title}</h3>
+              <h3 className="text-sm font-semibold tracking-widest text-[#111111]">{hpCms.col3Title}</h3>
               <p className="text-xs text-brand-muted font-light leading-relaxed">
                 {hpCms.col3Desc}
               </p>
@@ -594,7 +616,7 @@ function HomeConversionCTAs({ setView, homepageCms }: HomeConversionCTAsProps) {
         )}
 
         <div className="space-y-4">
-          <h3 className="text-sm font-normal tracking-widest text-brand-dark flex justify-between items-baseline border-b border-brand-border/40 pb-4">
+          <h3 className="text-sm font-semibold tracking-widest text-brand-dark flex justify-between items-baseline border-b border-brand-border/40 pb-4">
             <span>01 / {homepageCms.portal1Title}</span>
             <span className="text-[9px] text-brand-muted font-mono tracking-wider font-light">ESTIMATE PORTAL</span>
           </h3>
@@ -710,7 +732,7 @@ function HomeConversionCTAs({ setView, homepageCms }: HomeConversionCTAsProps) {
         )}
 
         <div className="space-y-4">
-          <h3 className="text-sm font-normal tracking-widest text-brand-dark flex justify-between items-baseline border-b border-brand-border/40 pb-4">
+          <h3 className="text-sm font-semibold tracking-widest text-brand-dark flex justify-between items-baseline border-b border-brand-border/40 pb-4">
             <span>02 / {homepageCms.portal2Title}</span>
             <span className="text-[9px] text-brand-muted font-mono tracking-wider font-light">QUICK CALL</span>
           </h3>

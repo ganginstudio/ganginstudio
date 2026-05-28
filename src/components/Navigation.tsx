@@ -29,7 +29,7 @@ export default function Navigation({ currentView, setView, resetProject, setting
   const defaultNavItems: NavItemConfig[] = [
     { id: 'nav_home', label: 'Home', view: 'home', labelKr: '홈', order: 1, show: true },
     { id: 'nav_portfolio', label: 'Portfolio', view: 'portfolio', labelKr: '포트폴리오', order: 2, show: true },
-    { id: 'nav_categories', label: 'Services', view: 'categories', labelKr: '분야별 서비스', order: 3, show: true },
+    { id: 'nav_categories', label: 'Services', view: 'categories', labelKr: '분야별 서비스', order: 3, show: false },
     { id: 'nav_pricing', label: 'Pricing', view: 'pricing', labelKr: '요금정찰제', order: 4, show: true },
     { id: 'nav_estimate', label: 'Estimate', view: 'estimate', labelKr: '견적문의', order: 5, show: true },
     { id: 'nav_reviews', label: 'Reviews', view: 'reviews', labelKr: '고객후기', order: 6, show: true },
@@ -39,7 +39,7 @@ export default function Navigation({ currentView, setView, resetProject, setting
   ];
 
   const activeNavItems = [...(navItems && navItems.length > 0 ? navItems : defaultNavItems)]
-    .filter(item => item.show)
+    .filter(item => item.show && item.view !== 'categories')
     .sort((a, b) => (a.order || 0) - (b.order || 0));
 
   const handleNavClick = (view: NavView) => {
@@ -108,12 +108,22 @@ export default function Navigation({ currentView, setView, resetProject, setting
         </button>
       </div>
 
+      {/* Mobile Menu Backdrop (subtle dim overlay) */}
+      {isMobileMenuOpen && (
+        <div
+          id="mobile-nav-backdrop"
+          className="fixed inset-0 bg-black/25 z-30 transition-opacity duration-500 md:hidden animate-fade-in"
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
+      )}
+
       {/* Mobile Slide Menu Overlay */}
       <div
         id="mobile-nav-overlay"
-        className={`fixed inset-0 top-0 left-0 bg-white z-40 flex flex-col justify-between p-12 transition-all duration-700 convenience-slide-menu md:hidden ${
+        className={`fixed inset-0 top-0 left-0 bg-[#ffffff] z-40 flex flex-col justify-between p-12 transition-all duration-700 convenience-slide-menu md:hidden ${
           isMobileMenuOpen ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible -translate-y-8 pointer-events-none'
         }`}
+        style={{ background: '#ffffff' }}
       >
         <div className="flex flex-col space-y-8 mt-24">
           {activeNavItems.map((item, idx) => (

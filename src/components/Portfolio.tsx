@@ -74,9 +74,6 @@ export default function Portfolio({ projects, setSelectedProjectId, selectedProj
         <h1 className="text-2xl md:text-4xl font-extrabold tracking-[0.1em] text-[#111111] uppercase">
           포트폴리오
         </h1>
-        <p className="text-xs font-semibold text-brand-muted max-w-xl leading-relaxed tracking-wider mt-2">
-          공간의 한 끗을 바꾸는 완벽한 조닝과 시공 정교성. 강인스튜디오가 세심히 빚어낸 거주 형태들과 상업공간 인테리어 선집들입니다. 필터를 이용해 분야별 미학을 감상하십시오.
-        </p>
       </div>
 
       {/* Category filter row with high-readability thicker gothic styling */}
@@ -122,15 +119,15 @@ export default function Portfolio({ projects, setSelectedProjectId, selectedProj
                   setSelectedProjectId(project.id);
                   window.scrollTo({ top: 0, behavior: 'smooth' });
                 }}
-                className="group cursor-pointer relative aspect-square bg-[#FFFFFF]/30 overflow-hidden border border-brand-border/40"
+                className="group cursor-pointer relative h-auto sm:aspect-square bg-[#FFFFFF]/30 overflow-hidden border border-brand-border/40"
               >
                 {/* Image Frame */}
-                <div className="w-full h-full overflow-hidden bg-[#fafaf9]">
+                <div className="w-full h-auto sm:h-full overflow-hidden bg-[#fafaf9]">
                   <img
                     src={project.imageMobile || project.image || 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=1200'}
                     alt={project.title || "Bathroom Interior Project"}
                     loading="lazy"
-                    className="w-full h-full object-contain sm:object-cover transition-all duration-700 ease-out scale-100 group-hover:scale-[1.03]"
+                    className="w-full h-auto block sm:h-full sm:object-cover transition-all duration-700 ease-out scale-100 group-hover:scale-[1.03]"
                     referrerPolicy="no-referrer"
                     onError={(e) => {
                       e.currentTarget.src = 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=1200';

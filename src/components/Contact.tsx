@@ -146,7 +146,7 @@ export default function Contact({ contactCms }: ContactProps) {
         <span className="text-[10px] uppercase tracking-[0.3em] text-brand-muted/70 block">
           {contactCms?.topLabel || "Establish Connection — 커뮤니케이션 오피스 연결"}
         </span>
-        <h1 className="text-2xl md:text-3xl font-extralight tracking-[0.16em] text-[#111111] uppercase">
+        <h1 className="text-2xl md:text-3xl font-semibold tracking-[0.16em] text-[#111111] uppercase">
           {contactCms?.topTitle || "오시는 길 & 기획 문의"}
         </h1>
         <p className="text-xs font-light text-brand-muted max-w-xl leading-relaxed tracking-wider mt-2">
@@ -314,7 +314,7 @@ export default function Contact({ contactCms }: ContactProps) {
       <div className="pt-24 max-w-4xl mx-auto">
         <div className="text-center space-y-4 mb-16">
           <span className="text-[9px] uppercase tracking-[0.3em] text-brand-muted block">02 — ADVANCED INQUIRY SYSTEM</span>
-          <h2 className="text-xl md:text-2xl font-light tracking-[0.15em] text-[#111111] uppercase">정밀 기획 상담 통합 양식</h2>
+          <h2 className="text-xl md:text-2xl font-semibold tracking-[0.15em] text-[#111111] uppercase">정밀 기획 상담 통합 양식</h2>
           <p className="text-xs font-light text-brand-muted max-w-xl mx-auto leading-relaxed">
             세부 평형 정보, 예산 기준 및 고객님이 소유하신 단가 참조 자료(지상도, 자재 가구 선호도)를 모두 첨부하여 공학자처럼 신속하게 일대일 디렉터 상담 예약 명세를 구성하는 고품격 접수처입니다.
           </p>

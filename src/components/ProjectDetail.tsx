@@ -51,12 +51,12 @@ export default function ProjectDetail({ project, onBack, setView, setEstimatePre
       <div className="max-w-[1400px] mx-auto px-6 md:px-12 mt-12">
         {/* 1. LARGE WIDESCREEN HERO */}
         <section className="mb-24">
-          <div className="w-full h-auto aspect-square md:h-[75vh] md:aspect-auto overflow-hidden bg-[#fafaf9] border border-brand-border/40">
+          <div className="w-full h-auto md:h-[75vh] md:aspect-auto overflow-hidden bg-[#fafaf9] border border-brand-border/40">
             <img
               src={project.imageMobile || project.image || 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=1200'}
               alt={project.title || "Bathroom Interior Project"}
               loading="lazy"
-              className="w-full h-auto md:h-full object-contain md:object-cover animate-fade-in"
+              className="w-full h-auto block md:h-full md:object-cover animate-fade-in"
               referrerPolicy="no-referrer"
               onError={(e) => {
                 e.currentTarget.src = 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=1200';
@@ -72,9 +72,9 @@ export default function ProjectDetail({ project, onBack, setView, setEstimatePre
         <section className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-24 mb-28 border-b border-brand-border/50 pb-16">
           <div className="lg:col-span-5 space-y-4">
             <span className="text-[9px] uppercase tracking-[0.3em] text-brand-muted block">Identity Specs</span>
-            <h2 className="text-xl md:text-2xl font-light tracking-widest text-[#111111] uppercase leading-relaxed">
+            <h2 className="text-xl md:text-2xl font-semibold tracking-widest text-[#111111] uppercase leading-relaxed">
               {project.title || 'GANGIN Space'} <br/>
-              <span className="text-xs tracking-[0.2em] text-brand-muted font-extralight block mt-1">
+              <span className="text-xs tracking-[0.2em] text-brand-muted font-normal block mt-1">
                 {project.titleEn || ''}
               </span>
             </h2>
@@ -230,12 +230,12 @@ export default function ProjectDetail({ project, onBack, setView, setEstimatePre
             <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
               {(project.gallery || []).map((img, index) => (
                 <div key={index} className="space-y-3">
-                   <div className="w-full h-auto aspect-square md:aspect-[4/3] overflow-hidden bg-[#fafaf9] border border-brand-border/40">
+                   <div className="w-full h-auto md:aspect-[4/3] overflow-hidden bg-[#fafaf9] border border-brand-border/40">
                     <img 
                       src={img.urlMobile || img.url || 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=1200'} 
                       alt={img.caption || "Bathroom Interior Project"} 
                       loading="lazy"
-                      className="w-full h-auto md:h-full object-contain md:object-cover"
+                      className="w-full h-auto block md:h-full md:object-cover"
                       referrerPolicy="no-referrer"
                       onError={(e) => {
                         e.currentTarget.src = 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=1200';
@@ -255,7 +255,7 @@ export default function ProjectDetail({ project, onBack, setView, setEstimatePre
         <section className="border-t border-brand-border pt-20 text-center">
           <div className="max-w-xl mx-auto space-y-6">
             <span className="text-[10px] uppercase tracking-[0.3em] text-brand-muted block">Inquiry Flow</span>
-            <h4 className="text-lg md:text-xl font-light tracking-widest text-brand-dark">
+            <h4 className="text-lg md:text-xl font-semibold tracking-widest text-brand-dark">
               {project.title} 스타일로 시공 설계 상담하기
             </h4>
             <p className="text-xs font-light text-brand-muted leading-relaxed tracking-wider">

@@ -677,11 +677,12 @@ export default function App() {
           </button>
 
           <button
+            id="panel-cta-contact"
             onClick={() => { setView('contact'); resetProject(); }}
             className="w-14 h-14 bg-white text-brand-dark border border-brand-border flex flex-col justify-center items-center hover:bg-brand-bg transition-all cursor-pointer shadow-sm group font-semibold"
             title="정밀기획 및 간편상담"
           >
-            <Clock size={14} className="text-indigo-600 group-hover:scale-105 transition-transform" />
+            <Clock size={14} className="text-brand-dark group-hover:scale-105 transition-transform" />
             <span className="text-[7.5px] mt-1 tracking-widest font-bold text-brand-dark">간편상담</span>
           </button>
           
@@ -692,7 +693,7 @@ export default function App() {
             className="w-14 h-14 bg-white text-brand-dark border border-brand-border flex flex-col justify-center items-center hover:bg-brand-bg transition-all cursor-pointer shadow-sm group"
             title="카카오톡 1:1 채팅"
           >
-            <MessageSquare size={14} className="text-yellow-600 group-hover:scale-105 transition-transform" />
+            <MessageSquare size={14} className="text-brand-dark group-hover:scale-105 transition-transform" />
             <span className="text-[7.5px] mt-1 tracking-widest font-bold text-brand-dark">카카오톡</span>
           </a>
 
@@ -703,7 +704,7 @@ export default function App() {
             className="w-14 h-14 bg-white text-brand-dark border border-brand-border flex flex-col justify-center items-center hover:bg-brand-bg transition-all cursor-pointer shadow-sm group"
             title="인스타그램 방문"
           >
-            <Instagram size={14} className="text-[#e1306c] group-hover:scale-105 transition-transform" />
+            <Instagram size={14} className="text-brand-dark group-hover:scale-105 transition-transform" />
             <span className="text-[7.5px] mt-1 tracking-widest font-bold text-brand-dark">인스타</span>
           </a>
 
@@ -714,7 +715,7 @@ export default function App() {
             className="w-14 h-14 bg-white text-brand-dark border border-brand-border flex flex-col justify-center items-center hover:bg-brand-bg transition-all cursor-pointer shadow-sm group"
             title="공식 블로그 칼럼"
           >
-            <BookOpen size={14} className="text-emerald-700 group-hover:scale-105 transition-transform" />
+            <BookOpen size={14} className="text-brand-dark group-hover:scale-105 transition-transform" />
             <span className="text-[7.5px] mt-1 tracking-widest font-bold text-brand-dark">블로그</span>
           </a>
 
@@ -734,7 +735,7 @@ export default function App() {
             onClick={() => { setView('portfolio'); resetProject(); }}
             className="flex flex-col justify-center items-center text-brand-dark cursor-pointer active:bg-brand-bg select-none"
           >
-            <FileText size={15} />
+            <FileText size={15} className="text-brand-dark" />
             <span className="text-[8.5px] mt-1 font-bold tracking-widest text-[#111111]">포폴검색</span>
           </button>
 
@@ -742,7 +743,7 @@ export default function App() {
             onClick={() => { setView('estimate'); resetProject(); }}
             className="flex flex-col justify-center items-center text-brand-dark cursor-pointer active:bg-brand-bg select-none"
           >
-            <Calculator size={15} className="text-indigo-600 animate-pulse" />
+            <Calculator size={15} className="text-brand-dark" />
             <span className="text-[8.5px] mt-1 font-bold tracking-widest text-[#111111]">예상견적</span>
           </button>
 
@@ -750,7 +751,7 @@ export default function App() {
             onClick={() => { setView('contact'); resetProject(); }}
             className="flex flex-col justify-center items-center text-brand-dark cursor-pointer active:bg-brand-bg select-none"
           >
-            <Clock size={15} className="text-pink-600" />
+            <Clock size={15} className="text-brand-dark" />
             <span className="text-[8.5px] mt-1 font-bold tracking-widest text-[#111111]">간편상담</span>
           </button>
 
@@ -760,7 +761,7 @@ export default function App() {
             rel="noopener noreferrer"
             className="flex flex-col justify-center items-center text-brand-dark cursor-pointer active:bg-brand-bg select-none"
           >
-            <MessageSquare size={15} className="text-yellow-600" />
+            <MessageSquare size={15} className="text-brand-dark" />
             <span className="text-[8.5px] mt-1 font-bold tracking-widest text-[#111111]">카톡문의</span>
           </a>
 
@@ -768,7 +769,7 @@ export default function App() {
             href={`tel:${settings.phone}`}
             className="flex flex-col justify-center items-center text-brand-dark cursor-pointer active:bg-brand-bg select-none"
           >
-            <Phone size={15} className="text-emerald-700" />
+            <Phone size={15} className="text-brand-dark" />
             <span className="text-[8.5px] mt-1 font-bold tracking-widest text-[#111111]">기술전화</span>
           </a>
         </div>

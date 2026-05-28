@@ -32,19 +32,20 @@
     font-family: var(--font-sans) !important;
   }
 
-  /* Keep the same font weight and letter spacing style as the current top category menu button:
-     - Force all bold, black, or extrabold headings to use a unified medium/semibold weight (not bold/black/harsh)
-     - Force all light, extra-light, or thin elements to use a unified clean normal weight (400)
-  */
-  .font-bold, .font-semibold, .font-extrabold, .font-black, strong {
+  /* Keep clean weight controls that support title emphasis */
+  .font-semibold {
+    font-weight: 600 !important;
+  }
+  .font-bold {
+    font-weight: 750 !important;
+  }
+  .font-medium {
     font-weight: 500 !important;
   }
-
   .font-light, .font-extralight, .font-thin {
-    font-weight: 400 !important;
+    font-weight: 300 !important;
   }
-
-  h1, h2, h3, h4, h5, h6 {
+  .font-normal {
     font-weight: 400 !important;
   }
 
