@@ -63,9 +63,6 @@ export default function ProjectDetail({ project, onBack, setView, setEstimatePre
               }}
             />
           </div>
-          <p className="text-[10px] tracking-widest text-brand-muted/70 mt-3 text-right">
-            01 / Cover Design Frame — {project.titleEn || ''}
-          </p>
         </section>
 
         {/* 2. SPECIFICATION ASYMMETRIC SUMMARY */}
@@ -131,9 +128,6 @@ export default function ProjectDetail({ project, onBack, setView, setEstimatePre
                       }}
                     />
                   </div>
-                  <p className="text-[10px] tracking-wider text-brand-muted font-light">
-                    공간 상세 0{index + 1} — {img.caption || ''}
-                  </p>
                 </div>
               ))}
             </div>

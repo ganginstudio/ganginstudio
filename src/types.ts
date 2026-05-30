@@ -39,6 +39,7 @@ export interface Project {
   beforeAfter: BeforeAfterPair;
   gallery: GalleryItem[];
   featured?: boolean;
+  featuredOrder?: number;
 }
 
 export interface EstimateSubmit {

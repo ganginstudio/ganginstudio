@@ -1163,7 +1163,14 @@ export default function Admin({
                         />
                         <div>
                           <h4 className="text-xs font-semibold text-brand-dark">{p.title}</h4>
-                          <span className="text-[9px] text-brand-muted uppercase tracking-widest">{p.category} | {p.year} | {p.area}</span>
+                          <div className="flex items-center gap-2 mt-1 flex-wrap">
+                            <span className="text-[9px] text-brand-muted uppercase tracking-widest">{p.category} | {p.year} | {p.area}</span>
+                            {p.featured && (
+                              <span className="text-[8px] bg-indigo-50 text-indigo-700 border border-indigo-200 px-1.5 py-0.5 font-bold uppercase tracking-wider">
+                                ★ 홈 추천선정작 (정렬순: {p.featuredOrder ?? '없음'})
+                              </span>
+                            )}
+                          </div>
                         </div>
                       </div>
                       <div className="flex gap-2">
@@ -1282,6 +1289,42 @@ export default function Admin({
                       onChange={(e) => setEditingProject({ ...editingProject, concept: e.target.value })}
                       className="w-full text-xs font-light p-3 border border-brand-border/60 focus:outline-none focus:border-brand-dark rounded-none text-[#111111]"
                     />
+                  </div>
+
+                  {/* Homepage Featured Settings */}
+                  <div className="col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6 p-4 bg-neutral-50/50 border border-brand-border/40 my-2">
+                    <div className="flex items-center gap-3">
+                      <input
+                        type="checkbox"
+                        id="proj-featured"
+                        checked={!!editingProject.featured}
+                        onChange={(e) => setEditingProject({ ...editingProject, featured: e.target.checked })}
+                        className="w-4 h-4 cursor-pointer text-brand-dark focus:ring-brand-dark focus:ring-0"
+                      />
+                      <label htmlFor="proj-featured" className="text-xs font-semibold text-brand-dark select-none cursor-pointer">
+                        홈페이지 메인 추천선정작으로 노출 (Featured on Home)
+                      </label>
+                    </div>
+
+                    <div className="space-y-1">
+                      <label htmlFor="proj-featured-order" className="text-[10px] text-brand-muted font-semibold block">
+                        추천선정작 표시 정렬 순서 (Featured Display Order)
+                      </label>
+                      <input
+                        type="number"
+                        id="proj-featured-order"
+                        value={editingProject.featuredOrder ?? ''}
+                        placeholder="예: 1, 2, 3... (낮을수록 먼저 배치됨)"
+                        onChange={(e) => setEditingProject({ 
+                          ...editingProject, 
+                          featuredOrder: e.target.value === '' ? undefined : Number(e.target.value) 
+                        })}
+                        className="w-full text-xs font-light p-2.5 bg-white border border-brand-border/60 focus:outline-none focus:border-brand-dark rounded-none text-brand-dark font-mono"
+                      />
+                      <p className="text-[9px] text-[#e11d48] font-light mt-1 leading-relaxed">
+                        * 홈페이지 홈 화면에는 선정작(대표작)으로 체크되고, 정렬 순서가 빠른 상위 3개 프로젝트가 디자인 그리드에 순서대로 표기됩니다.
+                      </p>
+                    </div>
                   </div>
 
                   {/* PC NATIVE IMAGE UPLOADER (Primary Image) */}
@@ -1520,6 +1563,60 @@ export default function Admin({
                         onChange={(e) => setEditingCategory({ ...editingCategory, nameEn: e.target.value })}
                         className="w-full text-xs font-semibold p-3 border border-brand-border/60 text-[#111111]"
                       />
+                    </div>
+                  </div>
+
+                  {/* Category Hero Image Uploader */}
+                  <div className="space-y-3 pt-2 bg-[#FAFAF9] p-4 border border-brand-border/40 my-2">
+                    <span className="text-[10px] text-brand-muted font-bold uppercase block text-[#111111]">대표 배경 이미지 (heroImage)</span>
+                    <div className="flex flex-col md:flex-row gap-4 items-start md:items-center">
+                      <div className="w-32 h-20 bg-neutral-100 border border-brand-border/40 overflow-hidden flex items-center justify-center shrink-0">
+                        {editingCategory.heroImage ? (
+                          <img src={editingCategory.heroImage} className="w-full h-full object-cover" alt="Category Hero" />
+                        ) : (
+                          <span className="text-[9px] text-brand-muted">이미지 없음</span>
+                        )}
+                      </div>
+                      <div className="flex-1 space-y-2 w-full">
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="text"
+                            value={editingCategory.heroImage || ''}
+                            onChange={(e) => setEditingCategory({ ...editingCategory, heroImage: e.target.value })}
+                            className="flex-1 text-xs font-light p-2 bg-white border border-brand-border/60 text-[#111111]"
+                            placeholder="이미지 주소 직접 입력 또는 업로드"
+                          />
+                          <label className="px-4 py-2.5 bg-brand-dark hover:bg-black text-white text-[9px] select-none cursor-pointer tracking-wider shrink-0 transition-colors">
+                            컴퓨터에서 선택 업로드
+                            <input
+                              type="file"
+                              accept="image/*"
+                              className="hidden"
+                              onChange={async (e) => {
+                                const files = e.target.files;
+                                if (files && files.length > 0) {
+                                  const file = files[0];
+                                  try {
+                                    const processedUrl = await processAndCompressImage(file);
+                                    const compressedFile = dataURLtoFile(processedUrl, `category_${editingCategory.id}_${Date.now()}.webp`);
+                                    const storageUrl = await uploadPortfolioImage(compressedFile);
+                                    setEditingCategory({
+                                      ...editingCategory,
+                                      heroImage: storageUrl
+                                    });
+                                    alert('카테고리 배경 이미지가 성공적으로 업로드 및 대체되었습니다.');
+                                  } catch (err: any) {
+                                    alert(err.message || '이미지 가공 및 업로드 중 오류가 발생했습니다.');
+                                  }
+                                }
+                              }}
+                            />
+                          </label>
+                        </div>
+                        <p className="text-[8px] text-brand-muted leading-relaxed">
+                          * 5MB 이내의 JPG, PNG, WEBP 격식을 지원하며, 업로드 시 고해상도 저용량의 차세대 WebP 데이터로 자동 최적화 처리됩니다.
+                        </p>
+                      </div>
                     </div>
                   </div>
 
@@ -1990,6 +2087,60 @@ export default function Admin({
                     onChange={(e) => setEditingBlog({ ...editingBlog, summary: e.target.value })}
                     className="w-full text-xs font-light p-3 border border-brand-border/60"
                   />
+                </div>
+
+                {/* Blog Image File Uploader */}
+                <div className="space-y-3 pt-2 bg-[#FAFAF9] p-4 border border-brand-border/40 my-2">
+                  <span className="text-[10px] text-brand-muted font-bold uppercase block text-[#111111]">칼럼 대표 이미지 (image)</span>
+                  <div className="flex flex-col md:flex-row gap-4 items-start md:items-center">
+                    <div className="w-32 h-20 bg-neutral-100 border border-brand-border/40 overflow-hidden flex items-center justify-center shrink-0">
+                      {editingBlog.image ? (
+                        <img src={editingBlog.image} className="w-full h-full object-cover" alt="Blog Image" />
+                      ) : (
+                        <span className="text-[9px] text-brand-muted">이미지 없음</span>
+                      )}
+                    </div>
+                    <div className="flex-1 space-y-2 w-full">
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="text"
+                          value={editingBlog.image || ''}
+                          onChange={(e) => setEditingBlog({ ...editingBlog, image: e.target.value })}
+                          className="flex-1 text-xs font-light p-2 bg-white border border-brand-border/60 text-[#111111]"
+                          placeholder="이미지 주소 직접 입력 또는 업로드"
+                        />
+                        <label className="px-4 py-2.5 bg-brand-dark hover:bg-black text-white text-[9px] select-none cursor-pointer tracking-wider shrink-0 transition-colors">
+                          컴퓨터에서 선택 업로드
+                          <input
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={async (e) => {
+                              const files = e.target.files;
+                              if (files && files.length > 0) {
+                                const file = files[0];
+                                try {
+                                  const processedUrl = await processAndCompressImage(file);
+                                  const compressedFile = dataURLtoFile(processedUrl, `blog_${editingBlog.id}_${Date.now()}.webp`);
+                                  const storageUrl = await uploadPortfolioImage(compressedFile);
+                                  setEditingBlog({
+                                    ...editingBlog,
+                                    image: storageUrl
+                                  });
+                                  alert('칼럼 대표 이미지가 성공적으로 업로드 및 대체되었습니다.');
+                                } catch (err: any) {
+                                  alert(err.message || '이미지 가공 및 업로드 중 오류가 발생했습니다.');
+                                }
+                              }
+                            }}
+                          />
+                        </label>
+                      </div>
+                      <p className="text-[8px] text-brand-muted leading-relaxed">
+                        * 5MB 이내의 JPG, PNG, WEBP 격식을 지원하며, 업로드 시 고해상도 저용량의 차세대 WebP 데이터로 자동 최적화 처리됩니다.
+                      </p>
+                    </div>
+                  </div>
                 </div>
 
                 <div className="space-y-1">

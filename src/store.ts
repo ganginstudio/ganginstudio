@@ -673,7 +673,8 @@ export function getInitialState() {
               imageAfter: ''
             },
         gallery: p && typeof p === 'object' && Array.isArray(p.gallery) ? p.gallery : [],
-        featured: p && typeof p === 'object' ? !!p.featured : false
+        featured: p && typeof p === 'object' ? !!p.featured : false,
+        featuredOrder: p && typeof p === 'object' && p.featuredOrder !== undefined ? Number(p.featuredOrder) : undefined
       };
     });
 

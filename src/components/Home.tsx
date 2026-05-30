@@ -22,8 +22,11 @@ export default function Home({ projects, reviews, setView, setSelectedProjectId,
     return isNaN(num) ? String(val) : num.toLocaleString('ko-KR');
   };
 
-  // Pull 3 featured projects for the homepage grid
-  const featuredProjects = projects.filter(p => p.featured).slice(0, 3);
+  // Pull 3 featured projects for the homepage grid sorted by featuredOrder
+  const featuredProjects = projects
+    .filter(p => p.featured)
+    .sort((a, b) => (a.featuredOrder ?? 0) - (b.featuredOrder ?? 0))
+    .slice(0, 3);
 
   // Pull maximum 3 sorted featured customer reviews
   const featuredReviews = (reviews || [])
@@ -170,7 +173,7 @@ export default function Home({ projects, reviews, setView, setSelectedProjectId,
   return (
     <div id="home-view-container" className="pt-0 min-h-screen">
       {/* 1. HERO SECTION WITH IMAGE SLIDER */}
-      <section id="hero-section" className="relative h-[85vh] md:h-[90vh] bg-white flex items-center px-6 md:px-12 mb-32 overflow-hidden">
+      <section id="hero-section" className="relative h-[85vh] md:h-[90vh] bg-white flex items-center px-6 md:px-12 mb-16 md:mb-20 overflow-hidden">
         {/* Slider Background wrapper - Pure fade transitions */}
         <div className="absolute inset-0 z-0 bg-white">
           <AnimatePresence mode="wait">
@@ -278,7 +281,7 @@ export default function Home({ projects, reviews, setView, setSelectedProjectId,
 
       {/* 1.5 PERFORMANCE STATISTICS SECTION */}
       {(!statsCms || statsCms.show !== false) && (
-        <section id="performance-statistics-section" className="max-w-[1400px] mx-auto px-6 md:px-12 mb-20 md:mb-28 animate-fade-in">
+        <section id="performance-statistics-section" className="max-w-[1400px] mx-auto px-6 md:px-12 mb-12 md:mb-16 animate-fade-in">
           <div className="border-b border-brand-border/40 pb-16">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-24 items-baseline">
               {/* Left Column: Title and Badge */}
@@ -332,8 +335,8 @@ export default function Home({ projects, reviews, setView, setSelectedProjectId,
       )}
 
       {/* 2. PHILOSOPHY HIGHLIGHT */}
-      <section id="introduction-philosophy" className="max-w-[1400px] mx-auto px-6 md:px-12 mb-16 md:mb-24">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-24 items-baseline mb-16">
+      <section id="introduction-philosophy" className="max-w-[1400px] mx-auto px-6 md:px-12 mb-12 md:mb-16">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-24 items-baseline mb-10">
           {/* Tag */}
           <div className="lg:col-span-3">
             <div className="flex items-center gap-2 mb-2">
@@ -409,8 +412,8 @@ export default function Home({ projects, reviews, setView, setSelectedProjectId,
       </section>
 
       {/* 3. FEATURED PROJECTS ARCHITECTURAL GRID */}
-      <section id="featured-projects" className="max-w-[1400px] mx-auto px-6 md:px-12 mb-16 md:mb-24">
-        <div className="flex justify-between items-baseline border-b border-brand-border/60 pb-6 mb-12">
+      <section id="featured-projects" className="max-w-[1400px] mx-auto px-6 md:px-12 mb-12 md:mb-16">
+        <div className="flex justify-between items-baseline border-b border-brand-border/60 pb-4 mb-8">
           <div className="space-y-1">
             <div className="flex items-center gap-2 mb-2">
               <span className="flex items-center justify-center min-w-[20px] h-5 px-1 rounded-full bg-[#111111] text-white text-[9px] font-bold shrink-0">02</span>
@@ -441,7 +444,7 @@ export default function Home({ projects, reviews, setView, setSelectedProjectId,
                 key={project.id}
                 id={`featured-${project.id}`}
                 onClick={() => handleProjectClick(project.id)}
-                className={`group cursor-pointer flex flex-col ${isEven ? 'md:mt-24' : ''}`}
+                className={`group cursor-pointer flex flex-col ${isEven ? 'md:mt-12' : ''}`}
                 initial={{ opacity: 0, y: 40 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: '-100px' }}
@@ -483,9 +486,9 @@ export default function Home({ projects, reviews, setView, setSelectedProjectId,
       </section>
 
       {/* 4. BUSINESS CORE VALUES */}
-      <section id="trust-core-business" className="bg-white/40 border-y border-brand-border py-12 md:py-16 mb-16 md:mb-24">
+      <section id="trust-core-business" className="bg-white/40 border-y border-brand-border py-10 md:py-12 mb-12 md:mb-16">
         <div className="max-w-[1400px] mx-auto px-6 md:px-12">
-          <div className="max-w-xl mb-16">
+          <div className="max-w-xl mb-10">
             <div className="flex items-center gap-2 mb-2">
               <span className="flex items-center justify-center min-w-[20px] h-5 px-1 rounded-full bg-[#111111] text-white text-[9px] font-bold shrink-0">03</span>
               <span className="text-[10px] uppercase tracking-[0.3em] text-[#111111] font-bold block">
@@ -538,8 +541,8 @@ export default function Home({ projects, reviews, setView, setSelectedProjectId,
       </section>
 
       {/* 5. PRIMARY CONVERSION CTA SYSTEM */}
-      <section id="conversion-cta-block" className="max-w-[1400px] mx-auto px-6 md:px-12 mb-16 md:mb-24 border-t border-brand-border/60 pt-12 md:pt-16">
-        <div className="max-w-xl mb-16">
+      <section id="conversion-cta-block" className="max-w-[1400px] mx-auto px-6 md:px-12 mb-12 md:mb-16 border-t border-brand-border/60 pt-10 md:pt-12">
+        <div className="max-w-xl mb-10">
           <div className="flex items-center gap-2 mb-2">
             <span className="flex items-center justify-center min-w-[20px] h-5 px-1 rounded-full bg-[#111111] text-white text-[9px] font-bold shrink-0">04</span>
             <span className="text-[10px] uppercase tracking-[0.3em] text-[#111111] font-bold block">

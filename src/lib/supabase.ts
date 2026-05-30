@@ -132,6 +132,7 @@ async function syncIndividualTables(key: string, value: any) {
           before_after: p.beforeAfter || {},
           gallery: Array.isArray(p.gallery) ? p.gallery.map(String) : [],
           featured: Boolean(p.featured),
+          featured_order: p.featuredOrder !== undefined ? Number(p.featuredOrder) : null,
           updated_at: new Date().toISOString()
         }, { onConflict: 'id' });
       }
