@@ -207,7 +207,7 @@ export default function Home({ projects, reviews, setView, setSelectedProjectId,
               }}
             />
           </AnimatePresence>
-          <div className="absolute inset-y-0 left-0 w-full h-full bg-[#111111]/10 bg-gradient-to-t from-[#ffffff] via-transparent to-transparent z-10" />
+          <div className="absolute inset-0 bg-black/20 bg-gradient-to-t from-black/60 via-black/20 to-transparent z-10" />
         </div>
 
         {/* Text Area */}
@@ -216,29 +216,29 @@ export default function Home({ projects, reviews, setView, setSelectedProjectId,
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1.2, ease: [0.25, 0.1, 0.25, 1] }}
-            className="max-w-2xl text-[#111111]"
+            className="max-w-2xl text-white"
           >
             {/* Super strong/premium architectural heading */}
-            <h1 className="text-2xl sm:text-3xl md:text-5xl font-semibold tracking-widest leading-[1.6] mb-8 font-sans">
+            <h1 className="text-2xl sm:text-3xl md:text-5xl font-semibold tracking-widest leading-[1.6] mb-8 font-sans text-white">
               {hCms.headlineLine1 || "공간을 디자인하고"} <br />
-              <span className="font-semibold">{hCms.headlineLine2 || "시공까지 책임집니다."}</span>
+              <span className="font-semibold text-white">{hCms.headlineLine2 || "시공까지 책임집니다."}</span>
             </h1>
 
             {/* Sub-capabilities */}
-            <div className="flex flex-wrap gap-x-8 gap-y-3 text-[11px] tracking-[0.25em] uppercase text-brand-muted/90 mb-12 font-light">
+            <div className="flex flex-wrap gap-x-8 gap-y-3 text-[11px] tracking-[0.25em] uppercase text-white/80 mb-12 font-light">
               {hCms.label1 && (
                 <span className="flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-brand-dark/40" /> {hCms.label1}
+                  <span className="w-1.5 h-1.5 rounded-full bg-white/40" /> {hCms.label1}
                 </span>
               )}
               {hCms.label2 && (
                 <span className="flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-brand-dark/40" /> {hCms.label2}
+                  <span className="w-1.5 h-1.5 rounded-full bg-white/40" /> {hCms.label2}
                 </span>
               )}
               {hCms.label3 && (
                 <span className="flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-brand-dark/40" /> {hCms.label3}
+                  <span className="w-1.5 h-1.5 rounded-full bg-white/40" /> {hCms.label3}
                 </span>
               )}
             </div>
@@ -249,10 +249,10 @@ export default function Home({ projects, reviews, setView, setSelectedProjectId,
                 <button
                   id="hero-cta-portfolio"
                   onClick={() => setView((hCms.button1Url || 'portfolio') as any)}
-                  className="group relative px-7 py-3 text-[11px] uppercase tracking-[0.2em] bg-brand-dark text-white hover:bg-brand-dark/90 transition-all duration-300 rounded-none cursor-pointer focus:outline-none flex items-center gap-2"
+                  className="group relative px-7 py-3 text-[11px] uppercase tracking-[0.2em] bg-white text-[#111111] hover:bg-white/90 transition-all duration-300 rounded-none cursor-pointer focus:outline-none flex items-center gap-2 font-medium"
                 >
                   <span>{hCms.button1Text}</span>
-                  <ArrowRight size={12} className="transform group-hover:translate-x-1 transition-transform" />
+                  <ArrowRight size={12} className="transform group-hover:translate-x-1 transition-transform text-[#111111]" />
                 </button>
               )}
               
@@ -260,7 +260,7 @@ export default function Home({ projects, reviews, setView, setSelectedProjectId,
                 <button
                   id="hero-cta-estimate"
                   onClick={() => setView((hCms.button2Url || 'estimate') as any)}
-                  className="group px-7 py-3 text-[11px] uppercase tracking-[0.2em] border border-brand-dark/30 text-brand-dark hover:border-brand-dark hover:bg-brand-dark hover:text-white transition-all duration-500 rounded-none cursor-pointer focus:outline-none"
+                  className="group px-7 py-3 text-[11px] uppercase tracking-[0.2em] border border-white/40 text-white hover:border-white hover:bg-white hover:text-[#111111] transition-all duration-500 rounded-none cursor-pointer focus:outline-none"
                 >
                   {hCms.button2Text}
                 </button>
@@ -277,7 +277,7 @@ export default function Home({ projects, reviews, setView, setSelectedProjectId,
                 key={i}
                 onClick={() => setSlideIdx(i)}
                 className={`w-1.5 h-1.5 rounded-full transition-all duration-300 focus:outline-none cursor-pointer ${
-                  slideIdx === i ? 'bg-brand-dark scale-125' : 'bg-brand-dark/30 hover:bg-brand-dark/60'
+                  slideIdx === i ? 'bg-white scale-125' : 'bg-white/30 hover:bg-white/60'
                 }`}
                 aria-label={`Go to slide ${i + 1}`}
               />
