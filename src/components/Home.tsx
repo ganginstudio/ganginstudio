@@ -347,82 +347,48 @@ export default function Home({ projects, reviews, setView, setSelectedProjectId,
         </section>
       )}
 
-      {/* 2. PHILOSOPHY HIGHLIGHT */}
-      <section id="introduction-philosophy" className="max-w-[1400px] mx-auto px-6 md:px-12 mb-12 md:mb-16">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-24 items-baseline mb-10">
-          {/* Tag */}
-          <div className="lg:col-span-3">
-            <div className="flex items-center gap-2 mb-2">
-              <span className="flex items-center justify-center min-w-[20px] h-5 px-1 rounded-full bg-[#111111] text-white text-[9px] font-bold shrink-0">01</span>
-              <span className="text-[10px] uppercase tracking-[0.3em] text-[#111111] font-bold block">
-                {hpCms.philosophyLabel}
-              </span>
-            </div>
-            <h2 className="text-sm uppercase tracking-[0.2em] text-[#111111] mt-2 font-bold">
-              {hpCms.philosophyTitle}
-            </h2>
-          </div>
-
-          {/* Narrative */}
-          <div className="lg:col-span-5 space-y-6">
-            <h3 className="text-xl md:text-2xl font-bold tracking-[0.1em] text-[#111111] font-sans leading-relaxed">
-              {hpCms.philosophyHeadline}
-            </h3>
-          </div>
-
-          <div className="lg:col-span-4 text-[13px] font-normal tracking-wide text-[#222222] leading-relaxed space-y-4">
-            <p className="leading-relaxed">
-              {hpCms.philosophyPara1}
-            </p>
-            <p className="leading-relaxed">
-              {hpCms.philosophyPara2}
-            </p>
-          </div>
-        </div>
-
-        {/* Dynamic Featured Reviews Integration inside Brand Philosophy/History */}
-        {featuredReviews.length > 0 && (
-          <div className="pt-16 border-t border-brand-border/40">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-start">
-              <div className="lg:col-span-3">
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full bg-[#111111] text-white text-[9px] font-bold shrink-0">01-B</span>
-                  <span className="text-[10px] uppercase tracking-[0.3em] text-[#111111] font-bold block">
-                    SELECTED VOICES
-                  </span>
-                </div>
-                <h4 className="text-sm uppercase tracking-[0.2em] text-[#111111] mt-2 font-bold">
-                  고객 후기
-                </h4>
+      {/* 2. CUSTOMER REVIEWS */}
+      {featuredReviews.length > 0 && (
+        <section id="customer-reviews" className="max-w-[1400px] mx-auto px-6 md:px-12 mb-12 md:mb-16">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-start">
+            <div className="lg:col-span-3">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full bg-[#111111] text-white text-[9px] font-bold shrink-0">01</span>
+                <span className="text-[10px] uppercase tracking-[0.3em] text-[#111111] font-bold block">
+                  SELECTED VOICES
+                </span>
               </div>
-              
-              <div className="lg:col-span-9 grid grid-cols-1 md:grid-cols-3 gap-x-8 gap-y-6 min-h-0 pl-1">
-                {featuredReviews.map((rev) => (
-                  <div key={rev.id} className="flex flex-col justify-between py-1.5 font-sans border-l border-neutral-200 pl-4 space-y-1.5 transition-all duration-300 hover:border-neutral-400">
-                    <div>
-                      <div className="flex items-center justify-between gap-1 mb-1 border-b border-neutral-100 pb-1">
-                        <span className="text-[11px] font-bold text-[#111111] tracking-tight">{rev.clientName}</span>
-                        <span className="text-[9px] text-neutral-400 font-medium tracking-wide">{rev.category}</span>
-                      </div>
-                      <p className="text-[11px] font-normal leading-relaxed text-neutral-500 tracking-wide text-justify whitespace-pre-line">
-                        "{rev.quote}"
-                      </p>
+              <h4 className="text-sm uppercase tracking-[0.2em] text-[#111111] mt-2 font-bold">
+                고객 후기
+              </h4>
+            </div>
+            
+            <div className="lg:col-span-9 grid grid-cols-1 md:grid-cols-3 gap-x-8 gap-y-6 min-h-0 pl-1">
+              {featuredReviews.map((rev) => (
+                <div key={rev.id} className="flex flex-col justify-between py-1.5 font-sans border-l border-neutral-200 pl-4 space-y-1.5 transition-all duration-300 hover:border-neutral-400">
+                  <div>
+                    <div className="flex items-center justify-between gap-1 mb-1 border-b border-neutral-100 pb-1">
+                      <span className="text-[11px] font-bold text-[#111111] tracking-tight">{rev.clientName}</span>
+                      <span className="text-[9px] text-neutral-400 font-medium tracking-wide">{rev.category}</span>
                     </div>
-                    <div className="flex justify-between items-center text-[9px] text-neutral-400 font-mono pt-1">
-                      <span>{rev.date || 'N/A'}</span>
-                      {rev.rating !== undefined && rev.rating > 0 && (
-                        <span className="flex items-center text-amber-500 text-[8px]">
-                          {'★'.repeat(rev.rating)}
-                        </span>
-                      )}
-                    </div>
+                    <p className="text-[11px] font-normal leading-relaxed text-neutral-500 tracking-wide text-justify whitespace-pre-line">
+                      "{rev.quote}"
+                    </p>
                   </div>
-                ))}
-              </div>
+                  <div className="flex justify-between items-center text-[9px] text-neutral-400 font-mono pt-1">
+                    <span>{rev.date || 'N/A'}</span>
+                    {rev.rating !== undefined && rev.rating > 0 && (
+                      <span className="flex items-center text-amber-500 text-[8px]">
+                        {'★'.repeat(rev.rating)}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
-        )}
-      </section>
+        </section>
+      )}
 
       {/* 3. FEATURED PROJECTS ARCHITECTURAL GRID */}
       <section id="featured-projects" className="max-w-[1400px] mx-auto px-6 md:px-12 mb-12 md:mb-16">
