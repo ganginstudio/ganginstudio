@@ -279,35 +279,36 @@ export default function Categories({
                 </h3>
               </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div className="grid grid-cols-2 lg:grid-cols-3 gap-x-4 sm:gap-x-8 gap-y-8 sm:gap-y-12">
                 {filteredProjects.map((p) => (
                   <div
                     key={p.id}
                     onClick={() => handleProjectClick(p.id)}
-                    className="group cursor-pointer space-y-3"
+                    className="group cursor-pointer flex flex-col"
                   >
-                    <div className="w-full h-auto aspect-square md:aspect-[4/3] overflow-hidden bg-[#fafaf9] relative border border-brand-border/40">
+                    {/* Image Frame with rounded corners tailored for mobile & desktop */}
+                    <div className="w-full aspect-[16/10] overflow-hidden bg-[#fafaf9] rounded-[10px] sm:rounded-[14px] relative mb-2 sm:mb-4 shadow-sm">
                       <img
                         src={p.imageMobile || p.image || 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=1200'}
-                        alt={p.title || "Bathroom Interior Project"}
+                        alt={p.title || "Interior Project"}
                         loading="lazy"
-                        className="w-full h-auto md:h-full object-contain md:object-cover transition-transform duration-700 ease-out group-hover:scale-102"
+                        className="w-full h-full object-cover bg-[#fafaf9] transition-all duration-700 ease-out scale-100 group-hover:scale-[1.03]"
                         referrerPolicy="no-referrer"
                         onError={(e) => {
                           e.currentTarget.src = 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=1200';
                         }}
                       />
+                      <div className="absolute inset-0 bg-neutral-900/5 opacity-100 group-hover:opacity-0 transition-opacity duration-500" />
                     </div>
-                    <div className="grid grid-cols-3 gap-4 border-b border-brand-border/40 pb-4">
-                      <div className="col-span-2">
-                        <h4 className="text-sm font-bold text-[#111111] tracking-wider mt-1.5 mb-1 group-hover:text-brand-muted transition-colors duration-300">
-                          {p.title || 'GANGIN Space'}
-                        </h4>
-                        <span className="text-xs text-[#222222] font-semibold tracking-wide">{p.location || 'Gwangju'}</span>
-                      </div>
-                      <div className="text-right flex flex-col justify-end">
-                        <span className="text-[10px] text-[#222222] font-semibold font-mono mt-1">{p.area || 'N/A'}</span>
-                      </div>
+
+                    {/* Minimalist modern metadata labels directly mimicking reference image */}
+                    <div className="text-left font-sans pl-1">
+                      <h4 className="text-[12px] sm:text-[16px] font-bold text-[#111111] tracking-tight leading-snug group-hover:text-brand-muted transition-colors duration-300">
+                        {p.title || 'GANGIN Space'}
+                      </h4>
+                      <p className="text-[10px] sm:text-[12px] text-neutral-400 font-normal mt-1 sm:mt-1.5 tracking-wide">
+                        {p.location || '광주'}
+                      </p>
                     </div>
                   </div>
                 ))}

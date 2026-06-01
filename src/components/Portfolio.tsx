@@ -100,74 +100,54 @@ export default function Portfolio({ projects, setSelectedProjectId, selectedProj
         ))}
       </div>
 
-      {/* Grid wrapper with pure white background */}
-      <div id="portfolio-frame-wrapper" className="bg-[#ffffff] p-4 sm:p-8 md:p-14 mb-16 shadow-xs">
+      {/* Grid wrapper */}
+      <div id="portfolio-frame-wrapper" className="mb-16">
         {/* Grid of Projects */}
         <motion.div 
           layout
           id="portfolio-grid-layout"
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5"
+          className="grid grid-cols-2 lg:grid-cols-3 gap-x-4 sm:gap-x-8 gap-y-8 sm:gap-y-12"
         >
           <AnimatePresence mode="popLayout">
             {displayedProjects.map((project) => (
               <motion.div
                 layout
-                initial={{ opacity: 0, scale: 0.98 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.98 }}
-                transition={{ duration: 0.7, ease: [0.25, 0.1, 0.25, 1] }}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
                 key={project.id}
                 id={`portfolio-card-${project.id}`}
                 onClick={() => {
                   setSelectedProjectId(project.id);
                   window.scrollTo({ top: 0, behavior: 'smooth' });
                 }}
-                className="group cursor-pointer relative h-auto sm:aspect-square bg-[#FFFFFF]/30 overflow-hidden border border-brand-border/40"
+                className="group cursor-pointer flex flex-col"
               >
-                {/* Image Frame */}
-                <div className="w-full h-auto sm:h-full overflow-hidden bg-[#fafaf9]">
+                {/* Image Frame with rounded corners tailored for mobile & desktop */}
+                <div className="w-full aspect-[16/10] overflow-hidden bg-[#fafaf9] rounded-[10px] sm:rounded-[14px] relative mb-2 sm:mb-4 shadow-sm">
                   <img
                     src={project.imageMobile || project.image || 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=1200'}
-                    alt={project.title || "Bathroom Interior Project"}
+                    alt={project.title || "Interior Project"}
                     loading="lazy"
-                    className="w-full h-auto block sm:h-full sm:object-cover transition-all duration-700 ease-out scale-100 group-hover:scale-[1.03]"
+                    className="w-full h-full object-cover bg-[#fafaf9] transition-all duration-700 ease-out scale-100 group-hover:scale-[1.03]"
                     referrerPolicy="no-referrer"
                     onError={(e) => {
                       e.currentTarget.src = 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=1200';
                     }}
                   />
+                  <div className="absolute inset-0 bg-neutral-900/5 opacity-100 group-hover:opacity-0 transition-opacity duration-500" />
                 </div>
 
-                {/* Minimal elegant overlay on hover */}
-                <div className="absolute inset-0 bg-[#ECE9E2]/95 opacity-0 group-hover:opacity-100 transition-all duration-400 ease-in-out flex flex-col justify-between p-7 select-none">
-                  <div className="space-y-1.5 text-left">
-                    <span className="text-[10px] uppercase tracking-[0.2em] text-brand-muted font-bold block">
-                      {project.category || 'Space'} — {project.year || '2026'}
-                    </span>
-                    <h3 className="text-sm font-extrabold text-[#111111] tracking-wide line-clamp-1">
-                      {project.title || 'GANGIN Space'}
-                    </h3>
-                    <p className="text-[11px] text-[#555] font-semibold italic">
-                      {project.titleEn || ''}
-                    </p>
-                  </div>
-                  
-                  <div className="border-t border-brand-dark/15 pt-5 flex justify-between items-end">
-                    <div className="text-left space-y-0.5">
-                      <span className="text-[10.5px] font-bold text-brand-dark block">
-                        {(project.location || '').split(' ')[2] || project.location || 'Gwangju'}
-                      </span>
-                      <span className="text-[9.5px] font-bold text-brand-muted/80 block">
-                        {project.area || 'N/A'}
-                      </span>
-                    </div>
-                    <span className="text-[9px] font-extrabold tracking-widest text-brand-dark uppercase border-b border-brand-dark pb-0.5">
-                      자세히 보기
-                    </span>
-                  </div>
+                {/* Minimalist modern metadata labels directly mimicking reference image */}
+                <div className="text-left font-sans pl-1">
+                  <h4 className="text-[12px] sm:text-[16px] font-bold text-[#111111] tracking-tight leading-snug group-hover:text-brand-muted transition-colors duration-300">
+                    {project.title || 'GANGIN Space'}
+                  </h4>
+                  <p className="text-[10px] sm:text-[12px] text-neutral-400 font-normal mt-1 sm:mt-1.5 tracking-wide">
+                    {project.location || '광주'}
+                  </p>
                 </div>
-
-
               </motion.div>
             ))}
           </AnimatePresence>

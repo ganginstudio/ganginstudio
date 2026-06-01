@@ -89,7 +89,10 @@ const dataURLtoFile = (dataurl: string, filename: string): File => {
   return new File([u8arr], filename, { type: mime });
 };
 
-const processAndCompressImage = (file: File): Promise<string> => {
+const processAndCompressImage = (
+  file: File,
+  options?: { maxDim?: number; quality?: number }
+): Promise<string> => {
   return new Promise((resolve, reject) => {
     // 1. Validation of accepted file extensions (jpg, jpeg, png, webp)
     const allowedExtensions = ['jpg', 'jpeg', 'png', 'webp'];
@@ -101,66 +104,75 @@ const processAndCompressImage = (file: File): Promise<string> => {
       return;
     }
 
-    // 2. Maximum upload size protection: 5MB
-    const MAX_SIZE = 5 * 1024 * 1024;
+    // 2. Maximum upload size protection: Increased from 5MB to 100MB as requested
+    const MAX_SIZE = 100 * 1024 * 1024;
     if (file.size > MAX_SIZE) {
-      reject(new Error(`업로드 크기 제한(5MB)을 초과했습니다. (현재 크기: ${(file.size / (1024 * 1024)).toFixed(2)}MB)`));
+      reject(new Error(`업로드 크기 제한(100MB)을 초과했습니다. (현재 크기: ${(file.size / (1024 * 1024)).toFixed(2)}MB)`));
       return;
     }
 
-    const reader = new FileReader();
-    reader.onerror = () => reject(new Error('파일의 스트림을 임포트하는 도중 오류가 발생했습니다.'));
-    reader.onload = (event) => {
-      const src = event.target?.result;
-      if (typeof src !== 'string') {
-        reject(new Error('인코딩 데이터 읽기에 실패했습니다.'));
-        return;
-      }
+    // Use URL.createObjectURL to solve mobile memory crash issues with multi-megabyte images
+    const objectUrl = URL.createObjectURL(file);
+    const img = new Image();
 
-      const img = new Image();
-      img.onerror = () => reject(new Error('이미지 원형 디코딩에 실패했습니다.'));
-      img.onload = () => {
-        try {
-          const canvas = document.createElement('canvas');
-          const ctx = canvas.getContext('2d');
-          if (!ctx) {
-            reject(new Error('Canvas API 가용성 확보에 실각했습니다.'));
-            return;
-          }
-
-          let width = img.width;
-          let height = img.height;
-          // Auto compress images above 2MB
-          const needsCompression = file.size > 2 * 1024 * 1024;
-
-          if (needsCompression) {
-            const MAX_DIM = 2048; // Preserving excellent quality, high fidelity
-            if (width > MAX_DIM || height > MAX_DIM) {
-              if (width > height) {
-                height = Math.round((height * MAX_DIM) / width);
-                width = MAX_DIM;
-              } else {
-                width = Math.round((width * MAX_DIM) / height);
-                height = MAX_DIM;
-              }
-            }
-          }
-
-          canvas.width = width;
-          canvas.height = height;
-          ctx.drawImage(img, 0, 0, width, height);
-
-          // Auto convert uploads to WebP
-          const quality = needsCompression ? 0.75 : 0.88;
-          const webpDataUrl = canvas.toDataURL('image/webp', quality);
-          resolve(webpDataUrl);
-        } catch (err) {
-          reject(err);
-        }
-      };
-      img.src = src;
+    img.onerror = () => {
+      URL.revokeObjectURL(objectUrl);
+      reject(new Error('이미지 원형 디코딩에 실패했습니다.'));
     };
-    reader.readAsDataURL(file);
+
+    img.onload = () => {
+      // Immediately revoke object URL to free browser memory
+      URL.revokeObjectURL(objectUrl);
+      try {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          reject(new Error('Canvas API 가용성 확보에 실각했습니다.'));
+          return;
+        }
+
+        let width = img.width;
+        let height = img.height;
+        
+        // Use user-specified max dimension or default to a generous size (e.g., 3840 for backgrounds, 2560 for others)
+        const MAX_DIM = options?.maxDim ?? 3840;
+        
+        // Downscale only if original image exceeds max target dimension
+        if (width > MAX_DIM || height > MAX_DIM) {
+          if (width > height) {
+            height = Math.round((height * MAX_DIM) / width);
+            width = MAX_DIM;
+          } else {
+            width = Math.round((width * MAX_DIM) / height);
+            height = MAX_DIM;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        
+        // Enable bicubic high-quality canvas smoothing to keep details intact and prevent pixelation
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
+        ctx.drawImage(img, 0, 0, width, height);
+
+        // Convert to next-gen WebP format with high quality (default 0.92 preserving fine-grained architectural textures)
+        const targetQuality = options?.quality ?? 0.92;
+        const webpDataUrl = canvas.toDataURL('image/webp', targetQuality);
+
+        // Memory cleanup
+        img.onload = null;
+        img.onerror = null;
+        canvas.width = 0;
+        canvas.height = 0;
+
+        resolve(webpDataUrl);
+      } catch (err) {
+        reject(err);
+      }
+    };
+
+    img.src = objectUrl;
   });
 };
 
@@ -203,15 +215,42 @@ export default function Admin({
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [password, setPassword] = useState<string>('');
   const [errorMsg, setErrorMsg] = useState<string>('');
+  const [uploadProgress, setUploadProgress] = useState<string | null>(null);
+
+  const performUpload = async (
+    file: File, 
+    prefix: string, 
+    options?: { maxDim?: number; quality?: number }
+  ): Promise<string> => {
+    try {
+      setUploadProgress(`이미지 최적화 분석 및 차세대 WebP 변환 인코딩 중...\n(선택 파일 크기: ${(file.size / (1024 * 1024)).toFixed(2)}MB, 최대 100MB 지원)`);
+      // Short yield to allow React rendering of progress indicator before heavy downscaling
+      await new Promise(resolve => setTimeout(resolve, 50));
+      const processedUrl = await processAndCompressImage(file, options);
+      
+      setUploadProgress('고해상도로 최적화된 WebP 이미지 데이터를 클라우드 스토리지로 로딩 없이 무중단 전송 중...');
+      const compressedFile = dataURLtoFile(processedUrl, `${prefix}_${Date.now()}.webp`);
+      const storageUrl = await uploadPortfolioImage(compressedFile);
+      
+      if (!storageUrl) {
+        throw new Error('클라우드 스토리지 업로드 후 저장 경로 URL을 받지 못했습니다.');
+      }
+      return storageUrl;
+    } finally {
+      setUploadProgress(null);
+    }
+  };
 
   const handleHeroImageUpload = async (e: ChangeEvent<HTMLInputElement>, fieldName: 'image1' | 'image1Mobile' | 'image2' | 'image2Mobile' | 'image3' | 'image3Mobile') => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
     const file = files[0];
     try {
-      const processedUrl = await processAndCompressImage(file);
-      const compressedFile = dataURLtoFile(processedUrl, `hero_${fieldName}_${Date.now()}.webp`);
-      const storageUrl = await uploadPortfolioImage(compressedFile);
+      const isMobileHero = fieldName.toLowerCase().includes('mobile');
+      const storageUrl = await performUpload(file, `hero_${fieldName}`, {
+        maxDim: isMobileHero ? 1440 : 3840,
+        quality: isMobileHero ? 0.92 : 0.96 // Ultra high-quality for main backgrounds
+      });
       if (storageUrl) {
         onUpdateHeroCms({ ...heroCms, [fieldName]: storageUrl });
         alert(`${fieldName} 이미지가 성공적으로 업로드 및 대체되었습니다.`);
@@ -226,9 +265,7 @@ export default function Admin({
     if (!files || files.length === 0) return;
     try {
       const file = files[0];
-      const processedUrl = await processAndCompressImage(file);
-      const compressedFile = dataURLtoFile(processedUrl, `map_${Date.now()}.webp`);
-      const storageUrl = await uploadPortfolioImage(compressedFile);
+      const storageUrl = await performUpload(file, 'map', { maxDim: 2560, quality: 0.92 });
       if (storageUrl) {
         onUpdateContactCms({ ...contactCms, mapImage: storageUrl });
         alert(`지도가 성공적으로 업로드 되었습니다.`);
@@ -421,10 +458,11 @@ export default function Admin({
     if (target === 'primary' || target === 'primaryMobile') {
       const file = files[0];
       try {
-        const processedUrl = await processAndCompressImage(file);
-        // Convert back to File and upload to real Supabase Storage CMS
-        const compressedFile = dataURLtoFile(processedUrl, `${target}_${Date.now()}.webp`);
-        const storageUrl = await uploadPortfolioImage(compressedFile);
+        const isMobileCover = target === 'primaryMobile';
+        const storageUrl = await performUpload(file, target, {
+          maxDim: isMobileCover ? 1440 : 3840,
+          quality: isMobileCover ? 0.92 : 0.95
+        });
 
         if (editingProject) {
           setEditingProject((prev) => {
@@ -442,10 +480,10 @@ export default function Admin({
       const fileList = Array.from(files) as File[];
       for (const file of fileList) {
         try {
-          const processedUrl = await processAndCompressImage(file);
-          // Convert back to File and upload to real Supabase Storage CMS
-          const compressedFile = dataURLtoFile(processedUrl, `gallery_${Date.now()}.webp`);
-          const storageUrl = await uploadPortfolioImage(compressedFile);
+          const storageUrl = await performUpload(file, 'gallery', {
+            maxDim: 2560,
+            quality: 0.92
+          });
 
           const newItem = {
             url: storageUrl,
@@ -1019,9 +1057,7 @@ export default function Admin({
                             if (files && files.length > 0) {
                               const file = files[0];
                               try {
-                                const processedUrl = await processAndCompressImage(file);
-                                const compressedFile = dataURLtoFile(processedUrl, `hero_${Date.now()}.webp`);
-                                const storageUrl = await uploadPortfolioImage(compressedFile);
+                                const storageUrl = await performUpload(file, 'hero', { maxDim: 3840, quality: 0.95 });
                                 setLocalSettings({
                                   ...localSettings,
                                   visualHeroImage: storageUrl
@@ -1597,9 +1633,7 @@ export default function Admin({
                                 if (files && files.length > 0) {
                                   const file = files[0];
                                   try {
-                                    const processedUrl = await processAndCompressImage(file);
-                                    const compressedFile = dataURLtoFile(processedUrl, `category_${editingCategory.id}_${Date.now()}.webp`);
-                                    const storageUrl = await uploadPortfolioImage(compressedFile);
+                                    const storageUrl = await performUpload(file, `category_${editingCategory.id}`, { maxDim: 3840, quality: 0.95 });
                                     setEditingCategory({
                                       ...editingCategory,
                                       heroImage: storageUrl
@@ -1614,7 +1648,7 @@ export default function Admin({
                           </label>
                         </div>
                         <p className="text-[8px] text-brand-muted leading-relaxed">
-                          * 5MB 이내의 JPG, PNG, WEBP 격식을 지원하며, 업로드 시 고해상도 저용량의 차세대 WebP 데이터로 자동 최적화 처리됩니다.
+                          * 100MB 이내의 JPG, PNG, WEBP 격식을 지원하며, 업로드 시 고해상도 저용량의 차세대 WebP 데이터로 자동 최적화 처리됩니다.
                         </p>
                       </div>
                     </div>
@@ -2120,9 +2154,7 @@ export default function Admin({
                               if (files && files.length > 0) {
                                 const file = files[0];
                                 try {
-                                  const processedUrl = await processAndCompressImage(file);
-                                  const compressedFile = dataURLtoFile(processedUrl, `blog_${editingBlog.id}_${Date.now()}.webp`);
-                                  const storageUrl = await uploadPortfolioImage(compressedFile);
+                                  const storageUrl = await performUpload(file, `blog_${editingBlog.id}`, { maxDim: 2560, quality: 0.92 });
                                   setEditingBlog({
                                     ...editingBlog,
                                     image: storageUrl
@@ -2137,7 +2169,7 @@ export default function Admin({
                         </label>
                       </div>
                       <p className="text-[8px] text-brand-muted leading-relaxed">
-                        * 5MB 이내의 JPG, PNG, WEBP 격식을 지원하며, 업로드 시 고해상도 저용량의 차세대 WebP 데이터로 자동 최적화 처리됩니다.
+                        * 100MB 이내의 JPG, PNG, WEBP 격식을 지원하며, 업로드 시 고해상도 저용량의 차세대 WebP 데이터로 자동 최적화 처리됩니다.
                       </p>
                     </div>
                   </div>
@@ -4279,6 +4311,26 @@ export default function Admin({
           </div>
         )}
       </main>
+
+      {uploadProgress && (
+        <div className="fixed inset-0 bg-neutral-950/85 backdrop-blur-md flex flex-col items-center justify-center z-[9999] text-center p-6 select-none leading-relaxed">
+          <div className="relative mb-6">
+            {/* Spinning element */}
+            <div className="w-16 h-16 border-2 border-neutral-800 border-t-white rounded-full animate-spin"></div>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <span className="text-[9px] font-mono text-white/40">WEBP</span>
+            </div>
+          </div>
+          <h3 className="text-white text-xs font-semibold tracking-widest uppercase mb-2">GANG IN OPTIMIZER ACTIVE</h3>
+          <p className="text-white/80 text-[11px] font-light font-sans max-w-sm whitespace-pre-line tracking-wide">
+            {uploadProgress}
+          </p>
+          <div className="mt-8 flex items-center gap-1.5 px-3 py-1 bg-white/5 border border-white/10 rounded-full font-mono text-[8px] text-white/40">
+            <span className="w-1 h-1 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span>MOBILE MEMORY LEAK IMMUNIZATION APPLIED</span>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

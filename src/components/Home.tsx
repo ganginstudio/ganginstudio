@@ -22,11 +22,18 @@ export default function Home({ projects, reviews, setView, setSelectedProjectId,
     return isNaN(num) ? String(val) : num.toLocaleString('ko-KR');
   };
 
-  // Pull 3 featured projects for the homepage grid sorted by featuredOrder
-  const featuredProjects = projects
+  // Pull up to 6 featured projects for the homepage grid sorted by featuredOrder to match the 2x3 reference layout
+  // Fallback: If there are fewer than 6 featured projects in the database, supplement with non-featured to always show a perfect 6-item grid
+  const initialFeatured = projects
     .filter(p => p.featured)
-    .sort((a, b) => (a.featuredOrder ?? 0) - (b.featuredOrder ?? 0))
-    .slice(0, 3);
+    .sort((a, b) => (a.featuredOrder ?? 0) - (b.featuredOrder ?? 0));
+  
+  const featuredProjects = [...initialFeatured];
+  if (featuredProjects.length < 6) {
+    const remainingCount = 6 - featuredProjects.length;
+    const extraProjects = projects.filter(p => !p.featured).slice(0, remainingCount);
+    featuredProjects.push(...extraProjects);
+  }
 
   // Pull maximum 3 sorted featured customer reviews
   const featuredReviews = (reviews || [])
@@ -185,7 +192,13 @@ export default function Home({ projects, reviews, setView, setSelectedProjectId,
               animate={{ opacity: isCurrentlyLoaded ? 1 : 0 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.8, ease: 'easeInOut' }}
-              className="absolute inset-0 w-full h-full object-cover grayscale-10 brightness-[0.93] contrast-[1.02]"
+              className="absolute inset-0 w-full h-full object-cover object-center grayscale-10 brightness-[0.93] contrast-[1.02]"
+              style={{
+                imageRendering: 'auto',
+                backfaceVisibility: 'hidden',
+                WebkitBackfaceVisibility: 'hidden',
+                transform: 'translate3d(0, 0, 0)'
+              }}
               referrerPolicy="no-referrer"
               onLoad={() => {
                 if (activeSlide) {
@@ -383,22 +396,22 @@ export default function Home({ projects, reviews, setView, setSelectedProjectId,
                 </h4>
               </div>
               
-              <div className="lg:col-span-9 grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div className="lg:col-span-9 grid grid-cols-1 md:grid-cols-3 gap-x-8 gap-y-6 min-h-0 pl-1">
                 {featuredReviews.map((rev) => (
-                  <div key={rev.id} className="border border-brand-border/60 p-6 bg-white space-y-4 font-sans text-justify flex flex-col justify-between h-full hover:bg-neutral-50 transition-colors duration-300">
-                    <div className="space-y-3">
-                      <div className="flex justify-between items-baseline border-b border-[#111111]/20 pb-2">
-                        <span className="text-xs font-bold tracking-wider text-[#111111]">{rev.clientName}</span>
-                        <span className="text-[10px] uppercase tracking-[0.15em] text-[#111111] font-bold">{rev.category}</span>
+                  <div key={rev.id} className="flex flex-col justify-between py-1.5 font-sans border-l border-neutral-200 pl-4 space-y-1.5 transition-all duration-300 hover:border-neutral-400">
+                    <div>
+                      <div className="flex items-center justify-between gap-1 mb-1 border-b border-neutral-100 pb-1">
+                        <span className="text-[11px] font-bold text-[#111111] tracking-tight">{rev.clientName}</span>
+                        <span className="text-[9px] text-neutral-400 font-medium tracking-wide">{rev.category}</span>
                       </div>
-                      <p className="text-[13px] font-normal leading-relaxed text-[#222222] tracking-wide italic whitespace-pre-line">
+                      <p className="text-[11px] font-normal leading-relaxed text-neutral-500 tracking-wide text-justify whitespace-pre-line">
                         "{rev.quote}"
                       </p>
                     </div>
-                    <div className="flex justify-between items-center text-[10px] text-[#222222] font-semibold pt-4 font-mono mt-auto border-t border-brand-border/10">
-                      <span className="tracking-widest">{rev.date || 'N/A'}</span>
+                    <div className="flex justify-between items-center text-[9px] text-neutral-400 font-mono pt-1">
+                      <span>{rev.date || 'N/A'}</span>
                       {rev.rating !== undefined && rev.rating > 0 && (
-                        <span className="tracking-widest flex items-center gap-0.5 text-[#111111] text-[9px] font-bold">
+                        <span className="flex items-center text-amber-500 text-[8px]">
                           {'★'.repeat(rev.rating)}
                         </span>
                       )}
@@ -435,53 +448,45 @@ export default function Home({ projects, reviews, setView, setSelectedProjectId,
           </button>
         </div>
 
-        {/* Asymmetrical composition for high-end look / gap tighter to fix spacing on mobile */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-24">
-          {featuredProjects.map((project, idx) => {
-            const isEven = idx % 2 === 1;
-            return (
-              <motion.div
-                key={project.id}
-                id={`featured-${project.id}`}
-                onClick={() => handleProjectClick(project.id)}
-                className={`group cursor-pointer flex flex-col ${isEven ? 'md:mt-12' : ''}`}
-                initial={{ opacity: 0, y: 40 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: '-100px' }}
-                transition={{ duration: 1, ease: 'easeOut' }}
-              >
-                {/* Image Wrap - h-auto on mobile prevents cropping and keeps high-contrast bg */}
-                <div className="w-full h-auto md:aspect-[3/2] overflow-hidden bg-brand-bg relative mb-3 md:mb-6 border border-brand-border/40">
-                  <img
-                    src={project.imageMobile || project.image || 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=1200'}
-                    alt={project.title || "Bathroom Interior Project"}
-                    loading="lazy"
-                    className="w-full h-auto block md:h-full md:object-cover bg-[#fafaf9] transition-all duration-700 ease-out scale-100 group-hover:scale-[1.02]"
-                    referrerPolicy="no-referrer"
-                    onError={(e) => {
-                      e.currentTarget.src = 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=1200';
-                    }}
-                  />
-                  <div className="absolute inset-0 bg-[#111111]/5 opacity-100 group-hover:opacity-0 transition-opacity duration-500" />
-                </div>
+        {/* Symmetrical 2-column grid on mobile & 3-column grid on desktop to match the reference images */}
+        <div className="grid grid-cols-2 lg:grid-cols-3 gap-x-4 sm:gap-x-8 gap-y-8 sm:gap-y-12">
+          {featuredProjects.map((project) => (
+            <motion.div
+              key={project.id}
+              id={`featured-${project.id}`}
+              onClick={() => handleProjectClick(project.id)}
+              className="group cursor-pointer flex flex-col"
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: '-100px' }}
+              transition={{ duration: 0.8, ease: 'easeOut' }}
+            >
+              {/* Image Frame with rounded corners tailored for mobile & desktop */}
+              <div className="w-full aspect-[16/10] overflow-hidden bg-[#fafaf9] rounded-[10px] sm:rounded-[14px] relative mb-2 sm:mb-4 shadow-sm">
+                <img
+                  src={project.imageMobile || project.image || 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=1200'}
+                  alt={project.title || "Interior Project"}
+                  loading="lazy"
+                  className="w-full h-full object-cover bg-[#fafaf9] transition-all duration-700 ease-out scale-100 group-hover:scale-[1.03]"
+                  referrerPolicy="no-referrer"
+                  onError={(e) => {
+                    e.currentTarget.src = 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=1200';
+                  }}
+                />
+                <div className="absolute inset-0 bg-neutral-900/5 opacity-100 group-hover:opacity-0 transition-opacity duration-500" />
+              </div>
 
-                {/* Metadata Column */}
-                <div className="grid grid-cols-3 gap-4 border-b border-brand-border/40 pb-4">
-                  <div className="col-span-2">
-                    <p className="text-[10px] uppercase tracking-[0.25em] text-[#222222] font-semibold">{(project.category || 'Space')} — {project.year || '2026'}</p>
-                    <h4 className="text-base font-bold text-[#111111] tracking-wider mt-1.5 mb-1 group-hover:text-brand-muted transition-colors duration-300">
-                      {project.title || 'GANGIN Space'}
-                    </h4>
-                    <p className="text-xs text-[#222222] font-semibold tracking-wide">{project.titleEn || ''}</p>
-                  </div>
-                  <div className="text-right flex flex-col justify-end">
-                    <span className="text-xs text-[#111111] font-semibold tracking-widest">{project.location || 'Gwangju'}</span>
-                    <span className="text-[10px] text-[#222222] font-semibold font-mono mt-1">{project.area || 'N/A'}</span>
-                  </div>
-                </div>
-              </motion.div>
-            );
-          })}
+              {/* Minimalist modern metadata labels directly mimicking reference image */}
+              <div className="text-left font-sans pl-1">
+                <h4 className="text-[12px] sm:text-[16px] font-bold text-[#111111] tracking-tight leading-snug group-hover:text-brand-muted transition-colors duration-300">
+                  {project.title || 'GANGIN Space'}
+                </h4>
+                <p className="text-[10px] sm:text-[12px] text-neutral-400 font-normal mt-1 sm:mt-1.5 tracking-wide">
+                  {project.location || '광주'}
+                </p>
+              </div>
+            </motion.div>
+          ))}
         </div>
       </section>
 
