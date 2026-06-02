@@ -14,6 +14,34 @@ interface HomeProps {
   statsCms?: StatsCmsConfig;
 }
 
+function CountUp({ end, duration = 1500 }: { end: any; duration?: number }) {
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    const rawNum = parseInt(String(end).replace(/[^0-9]/g, ''), 10);
+    const target = isNaN(rawNum) ? 0 : rawNum;
+    
+    let startTimestamp: number | null = null;
+    let animationFrameId: number;
+
+    const step = (timestamp: number) => {
+      if (!startTimestamp) startTimestamp = timestamp;
+      const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+      setCount(Math.floor(progress * target));
+      if (progress < 1) {
+        animationFrameId = window.requestAnimationFrame(step);
+      }
+    };
+    animationFrameId = window.requestAnimationFrame(step);
+
+    return () => {
+      window.cancelAnimationFrame(animationFrameId);
+    };
+  }, [end, duration]);
+
+  return <span>{count.toLocaleString('ko-KR')}</span>;
+}
+
 export default function Home({ projects, reviews, setView, setSelectedProjectId, settings, heroCms, homepageCms, statsCms }: HomeProps) {
   // Helper for formatting statistics numbers
   const formatNumber = (val: any) => {
@@ -22,17 +50,42 @@ export default function Home({ projects, reviews, setView, setSelectedProjectId,
     return isNaN(num) ? String(val) : num.toLocaleString('ko-KR');
   };
 
-  // Pull up to 6 featured projects for the homepage grid sorted by featuredOrder to match the 2x3 reference layout
-  // Fallback: If there are fewer than 6 featured projects in the database, supplement with non-featured to always show a perfect 6-item grid
-  const initialFeatured = projects
-    .filter(p => p.featured)
-    .sort((a, b) => (a.featuredOrder ?? 0) - (b.featuredOrder ?? 0));
-  
-  const featuredProjects = [...initialFeatured];
-  if (featuredProjects.length < 6) {
-    const remainingCount = 6 - featuredProjects.length;
-    const extraProjects = projects.filter(p => !p.featured).slice(0, remainingCount);
-    featuredProjects.push(...extraProjects);
+  // 1. Commercial spaces (상가 인테리어) - exactly 6 items
+  const commercialList = projects
+    .filter(p => ['commercial', 'office', 'cafe', 'architecture', 'retail', 'custom project'].includes(p.category?.toLowerCase() || ''))
+    .sort((a, b) => {
+      if (a.featured !== b.featured) {
+        return a.featured ? -1 : 1;
+      }
+      return (a.featuredOrder ?? 100) - (b.featuredOrder ?? 100);
+    });
+
+  const commercialProjects = [...commercialList].slice(0, 6);
+  if (commercialProjects.length < 6) {
+    const remainingCount = 6 - commercialProjects.length;
+    const extraProjects = projects
+      .filter(p => !['kids pool', 'residential', 'bathroom'].includes(p.category?.toLowerCase() || '') && !commercialProjects.some(cp => cp.id === p.id))
+      .slice(0, remainingCount);
+    commercialProjects.push(...extraProjects);
+  }
+
+  // 2. Kids Pool spaces (키즈풀 인테리어) - exactly 4 items
+  const kidsPoolList = projects
+    .filter(p => p.category?.toLowerCase() === 'kids pool' || p.category?.toLowerCase().includes('pool') || p.category?.toLowerCase().includes('키즈'))
+    .sort((a, b) => {
+      if (a.featured !== b.featured) {
+        return a.featured ? -1 : 1;
+      }
+      return (a.featuredOrder ?? 100) - (b.featuredOrder ?? 100);
+    });
+
+  const kidsPoolProjects = [...kidsPoolList].slice(0, 4);
+  if (kidsPoolProjects.length < 4) {
+    const remainingCount = 4 - kidsPoolProjects.length;
+    const extraProjects = projects
+      .filter(p => !kidsPoolProjects.some(kp => kp.id === p.id))
+      .slice(0, remainingCount);
+    kidsPoolProjects.push(...extraProjects);
   }
 
   // Pull maximum 3 sorted featured customer reviews
@@ -180,7 +233,7 @@ export default function Home({ projects, reviews, setView, setSelectedProjectId,
   return (
     <div id="home-view-container" className="pt-0 min-h-screen">
       {/* 1. HERO SECTION WITH IMAGE SLIDER */}
-      <section id="hero-section" className="relative h-[85vh] md:h-[90vh] bg-white flex items-center px-6 md:px-12 mb-16 md:mb-20 overflow-hidden">
+      <section id="hero-section" className="relative h-[85vh] md:h-[90vh] bg-white flex items-center px-6 md:px-12 mb-6 md:mb-8 overflow-hidden">
         {/* Slider Background wrapper - Pure fade transitions */}
         <div className="absolute inset-0 z-0 bg-white">
           <AnimatePresence mode="wait">
@@ -292,55 +345,48 @@ export default function Home({ projects, reviews, setView, setSelectedProjectId,
         </div>
       </section>
 
-      {/* 1.5 PERFORMANCE STATISTICS SECTION */}
+      {/* 1.5 PERFORMANCE STATISTICS SECTION - COMPACT SINGLE ROW Badges */}
       {(!statsCms || statsCms.show !== false) && (
-        <section id="performance-statistics-section" className="max-w-[1400px] mx-auto px-6 md:px-12 mb-12 md:mb-16 animate-fade-in">
-          <div className="border-b border-brand-border/40 pb-16">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-24 items-baseline">
-              {/* Left Column: Title and Badge */}
-              <div className="lg:col-span-4 space-y-4">
-                <div className="flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 bg-brand-dark" />
-                  <span className="text-[10px] uppercase tracking-[0.3em] text-[#111111] font-bold block">
-                    {statsCms?.smallLabel || "PROJECT STATUS"}
-                  </span>
-                </div>
-                <h2 className="text-xl md:text-2.5xl font-bold tracking-[0.1em] text-[#111111] font-sans leading-relaxed">
-                  {statsCms?.mainTitle || "공간을 맡기는 기준, 숫자로 증명합니다."}
-                </h2>
+        <section id="performance-statistics-section" className="max-w-[1400px] mx-auto px-6 md:px-12 mb-8 md:mb-10 animate-fade-in">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-5 py-4 border-y border-neutral-100 sm:border-y-0 sm:py-2">
+            <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-[0.2em] font-mono select-none">
+              {statsCms?.smallLabel || "PROJECT STATUS"}
+            </span>
+            <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-2.5">
+              {/* Stat 1 */}
+              <div className="bg-white border border-neutral-200/80 rounded-full py-1 sm:py-1.5 px-3.5 sm:px-4 flex items-center gap-1.5 sm:gap-2 shadow-[0_1px_2px_rgba(0,0,0,0.02)] hover:border-neutral-300 transition-colors duration-200">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+                <span className="text-neutral-500 text-[11px] sm:text-xs font-semibold tracking-tight">
+                  {statsCms?.stat1Label || "견적중"}
+                </span>
+                <span className="font-bold text-[#111111] font-mono text-[11px] sm:text-xs flex items-baseline">
+                  <CountUp end={statsCms?.stat1Number ?? 339} />
+                  <span className="text-neutral-400 font-light ml-0.5 text-[10px]">건</span>
+                </span>
               </div>
 
-              {/* Right Column: Numbers */}
-              <div className="lg:col-span-8 grid grid-cols-3 gap-3 md:gap-12 border-t lg:border-t-0 border-brand-border/40 pt-8 lg:pt-0">
-                {/* Stat 1 */}
-                <div className="space-y-1.5 text-left">
-                  <p className="text-[10px] uppercase tracking-[0.25em] text-brand-muted/90 font-medium">
-                    {statsCms?.stat1Label || "견적중"}
-                  </p>
-                  <p className="text-2xl sm:text-3xl md:text-4.5xl font-bold font-mono tracking-tight text-[#111111]">
-                    {formatNumber(statsCms?.stat1Number ?? 339)}<span className="text-xs md:text-sm font-light font-sans ml-1 text-brand-muted/80">건</span>
-                  </p>
-                </div>
+              {/* Stat 2 */}
+              <div className="bg-white border border-neutral-200/80 rounded-full py-1 sm:py-1.5 px-3.5 sm:px-4 flex items-center gap-1.5 sm:gap-2 shadow-[0_1px_2px_rgba(0,0,0,0.02)] hover:border-neutral-300 transition-colors duration-200">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+                <span className="text-neutral-500 text-[11px] sm:text-xs font-semibold tracking-tight">
+                  {statsCms?.stat2Label || "공사중"}
+                </span>
+                <span className="font-bold text-[#111111] font-mono text-[11px] sm:text-xs flex items-baseline">
+                  <CountUp end={statsCms?.stat2Number ?? 106} />
+                  <span className="text-neutral-400 font-light ml-0.5 text-[10px]">건</span>
+                </span>
+              </div>
 
-                {/* Stat 2 */}
-                <div className="space-y-1.5 text-left border-l border-brand-border/40 pl-4 md:pl-12">
-                  <p className="text-[10px] uppercase tracking-[0.25em] text-brand-muted/90 font-medium">
-                    {statsCms?.stat2Label || "공사중"}
-                  </p>
-                  <p className="text-2xl sm:text-3xl md:text-4.5xl font-bold font-mono tracking-tight text-[#111111]">
-                    {formatNumber(statsCms?.stat2Number ?? 106)}<span className="text-xs md:text-sm font-light font-sans ml-1 text-brand-muted/80">건</span>
-                  </p>
-                </div>
-
-                {/* Stat 3 */}
-                <div className="space-y-1.5 text-left border-l border-brand-border/40 pl-4 md:pl-12">
-                  <p className="text-[10px] uppercase tracking-[0.25em] text-brand-muted/90 font-medium">
-                    {statsCms?.stat3Label || "공사완료"}
-                  </p>
-                  <p className="text-2xl sm:text-3xl md:text-4.5xl font-bold font-mono tracking-tight text-[#111111]">
-                    {formatNumber(statsCms?.stat3Number ?? 8434)}<span className="text-xs md:text-sm font-light font-sans ml-1 text-brand-muted/80">건</span>
-                  </p>
-                </div>
+              {/* Stat 3 */}
+              <div className="bg-white border border-neutral-200/80 rounded-full py-1 sm:py-1.5 px-3.5 sm:px-4 flex items-center gap-1.5 sm:gap-2 shadow-[0_1px_2px_rgba(0,0,0,0.02)] hover:border-neutral-300 transition-colors duration-200">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+                <span className="text-neutral-500 text-[11px] sm:text-xs font-semibold tracking-tight">
+                  {statsCms?.stat3Label || "공사완료"}
+                </span>
+                <span className="font-bold text-[#111111] font-mono text-[11px] sm:text-xs flex items-baseline">
+                  <CountUp end={statsCms?.stat3Number ?? 8434} />
+                  <span className="text-neutral-400 font-light ml-0.5 text-[10px]">건</span>
+                </span>
               </div>
             </div>
           </div>
@@ -392,7 +438,7 @@ export default function Home({ projects, reviews, setView, setSelectedProjectId,
 
       {/* 3. FEATURED PROJECTS ARCHITECTURAL GRID */}
       <section id="featured-projects" className="max-w-[1400px] mx-auto px-6 md:px-12 mb-12 md:mb-16">
-        <div className="flex justify-between items-baseline border-b border-brand-border/60 pb-4 mb-8">
+        <div className="flex justify-between items-baseline border-b border-brand-border/60 pb-4 mb-10">
           <div className="space-y-1">
             <div className="flex items-center gap-2 mb-2">
               <span className="flex items-center justify-center min-w-[20px] h-5 px-1 rounded-full bg-[#111111] text-white text-[9px] font-bold shrink-0">02</span>
@@ -414,45 +460,114 @@ export default function Home({ projects, reviews, setView, setSelectedProjectId,
           </button>
         </div>
 
-        {/* Symmetrical 2-column grid on mobile & 3-column grid on desktop to match the reference images */}
-        <div className="grid grid-cols-2 lg:grid-cols-3 gap-x-4 sm:gap-x-8 gap-y-8 sm:gap-y-12">
-          {featuredProjects.map((project) => (
-            <motion.div
-              key={project.id}
-              id={`featured-${project.id}`}
-              onClick={() => handleProjectClick(project.id)}
-              className="group cursor-pointer flex flex-col"
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: '-100px' }}
-              transition={{ duration: 0.8, ease: 'easeOut' }}
-            >
-              {/* Image Frame with rounded corners tailored for mobile & desktop */}
-              <div className="w-full aspect-[16/10] overflow-hidden bg-[#fafaf9] rounded-[10px] sm:rounded-[14px] relative mb-2 sm:mb-4 shadow-sm">
-                <img
-                  src={project.imageMobile || project.image || 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=1200'}
-                  alt={project.title || "Interior Project"}
-                  loading="lazy"
-                  className="w-full h-full object-cover bg-[#fafaf9] transition-all duration-700 ease-out scale-100 group-hover:scale-[1.03]"
-                  referrerPolicy="no-referrer"
-                  onError={(e) => {
-                    e.currentTarget.src = 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=1200';
-                  }}
-                />
-                <div className="absolute inset-0 bg-neutral-900/5 opacity-100 group-hover:opacity-0 transition-opacity duration-500" />
-              </div>
+        {/* 3A. COMMERCIAL INTERIORS SUBSECTION (상가 인테리어 6개) */}
+        <div id="home-commercial-section" className="mb-14 sm:mb-20">
+          <div className="flex items-center gap-2 mb-6 sm:mb-8 bg-neutral-50 py-2.5 px-4 rounded-lg w-fit border border-neutral-200/50">
+            <span className="w-1.5 h-1.5 rounded-full bg-neutral-900 animate-pulse" />
+            <span className="text-[11px] sm:text-[12px] tracking-[0.15em] text-[#111111] font-bold uppercase font-mono">
+              상가 인테리어 (COMMERCIAL PORTFOLIO)
+            </span>
+          </div>
 
-              {/* Minimalist modern metadata labels directly mimicking reference image */}
-              <div className="text-left font-sans pl-1">
-                <h4 className="text-[12px] sm:text-[16px] font-bold text-[#111111] tracking-tight leading-snug group-hover:text-brand-muted transition-colors duration-300">
-                  {project.title || 'GANGIN Space'}
-                </h4>
-                <p className="text-[10px] sm:text-[12px] text-neutral-400 font-normal mt-1 sm:mt-1.5 tracking-wide">
-                  {project.location || '광주'}
-                </p>
-              </div>
-            </motion.div>
-          ))}
+          <div className="grid grid-cols-2 lg:grid-cols-3 gap-x-4 sm:gap-x-8 gap-y-8 sm:gap-y-12">
+            {commercialProjects.map((project) => (
+              <motion.div
+                key={project.id}
+                id={`featured-${project.id}`}
+                onClick={() => handleProjectClick(project.id)}
+                className="group cursor-pointer flex flex-col"
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: '-100px' }}
+                transition={{ duration: 0.8, ease: 'easeOut' }}
+              >
+                {/* Image Frame with rounded corners tailored for mobile & desktop */}
+                <div className="w-full aspect-[16/10] overflow-hidden bg-[#fafaf9] rounded-[10px] sm:rounded-[14px] relative mb-2 sm:mb-4 shadow-sm">
+                  <img
+                    src={project.imageMobile || project.image || 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=1200'}
+                    alt={project.title || "Interior Project"}
+                    loading="lazy"
+                    className="w-full h-full object-cover bg-[#fafaf9] transition-all duration-700 ease-out scale-100 group-hover:scale-[1.03]"
+                    referrerPolicy="no-referrer"
+                    onError={(e) => {
+                      e.currentTarget.src = 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=1200';
+                    }}
+                  />
+                  <div className="absolute top-3 right-3 bg-[#111111]/80 backdrop-blur-md text-[8px] sm:text-[9px] text-white px-2 py-0.5 rounded font-mono z-10 uppercase tracking-widest">
+                    {project.category}
+                  </div>
+                  <div className="absolute inset-0 bg-neutral-900/5 opacity-100 group-hover:opacity-0 transition-opacity duration-500" />
+                </div>
+
+                {/* Minimalist modern metadata labels directly mimicking reference image */}
+                <div className="text-left font-sans pl-1">
+                  <h4 className="text-[12px] sm:text-[16px] font-bold text-[#111111] tracking-tight leading-snug group-hover:text-brand-muted transition-colors duration-300">
+                    {project.title || 'GANGIN Space'}
+                  </h4>
+                  <p className="text-[10px] sm:text-[12px] text-neutral-400 font-normal mt-1 sm:mt-1.5 tracking-wide flex items-center gap-1.5">
+                    <span>{project.location || '광주'}</span>
+                    <span className="text-neutral-200">|</span>
+                    <span>{project.area || 'N/A'}</span>
+                  </p>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+
+        {/* 3B. KIDS POOL INTERIORS SUBSECTION (키즈풀 인테리어 4개) */}
+        <div id="home-kidspool-section" className="pt-10 sm:pt-14 border-t border-brand-border/60">
+          <div className="flex items-center gap-2 mb-6 sm:mb-8 bg-neutral-50 py-2.5 px-4 rounded-lg w-fit border border-neutral-200/50">
+            <span className="w-1.5 h-1.5 rounded-full bg-neutral-900 animate-pulse" />
+            <span className="text-[11px] sm:text-[12px] tracking-[0.15em] text-[#111111] font-bold uppercase font-mono">
+              키즈풀 인테리어 (KIDS POOL PORTFOLIO)
+            </span>
+          </div>
+
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-x-4 sm:gap-x-8 gap-y-8 sm:gap-y-12">
+            {kidsPoolProjects.map((project) => (
+              <motion.div
+                key={project.id}
+                id={`featured-${project.id}`}
+                onClick={() => handleProjectClick(project.id)}
+                className="group cursor-pointer flex flex-col"
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: '-100px' }}
+                transition={{ duration: 0.8, ease: 'easeOut' }}
+              >
+                {/* Image Frame with rounded corners tailored for mobile & desktop */}
+                <div className="w-full aspect-[16/10] overflow-hidden bg-[#fafaf9] rounded-[10px] sm:rounded-[14px] relative mb-2 sm:mb-4 shadow-sm">
+                  <img
+                    src={project.imageMobile || project.image || 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=1200'}
+                    alt={project.title || "Interior Project"}
+                    loading="lazy"
+                    className="w-full h-full object-cover bg-[#fafaf9] transition-all duration-700 ease-out scale-100 group-hover:scale-[1.03]"
+                    referrerPolicy="no-referrer"
+                    onError={(e) => {
+                      e.currentTarget.src = 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=1200';
+                    }}
+                  />
+                  <div className="absolute top-3 right-3 bg-[#111111]/80 backdrop-blur-md text-[8px] sm:text-[9px] text-white px-2 py-0.5 rounded font-mono z-10 uppercase tracking-widest">
+                    {project.category}
+                  </div>
+                  <div className="absolute inset-0 bg-neutral-900/5 opacity-100 group-hover:opacity-0 transition-opacity duration-500" />
+                </div>
+
+                {/* Minimalist modern metadata labels directly mimicking reference image */}
+                <div className="text-left font-sans pl-1">
+                  <h4 className="text-[12px] sm:text-[16px] font-bold text-[#111111] tracking-tight leading-snug group-hover:text-brand-muted transition-colors duration-300">
+                    {project.title || 'GANGIN Space'}
+                  </h4>
+                  <p className="text-[10px] sm:text-[12px] text-neutral-400 font-normal mt-1 sm:mt-1.5 tracking-wide flex items-center gap-1.5">
+                    <span>{project.location || '광주'}</span>
+                    <span className="text-neutral-200">|</span>
+                    <span>{project.area || 'N/A'}</span>
+                  </p>
+                </div>
+              </motion.div>
+            ))}
+          </div>
         </div>
       </section>
 

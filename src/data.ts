@@ -235,6 +235,118 @@ export const PORTFOLIO_PROJECTS: Project[] = [
     gallery: [
       { url: '/src/assets/images/gangin_lounge_1779412227496.png', caption: '창가의 흐린 그림자와 목재 가구가 조우하는 명상적인 오후 3시.', aspect: 'portrait' }
     ]
+  },
+  {
+    id: 'space_09',
+    title: '빛의 기하학 (Geometric Light Salon)',
+    titleEn: 'Minimalist Premium Hair Salon',
+    location: '광주 서구 치평동 (Chipyeong-dong)',
+    locationDetails: 'Chipyeong Premium Beauty Lounge 1F',
+    category: 'Commercial',
+    year: '2025',
+    area: '132㎡ / 40평',
+    client: 'Lumiere Salon Group',
+    image: 'https://images.unsplash.com/photo-1560066984-138dadb4c035?q=80&w=1200',
+    featured: true,
+    concept: '반사와 비반사, 빛과 드넓은 거울이 주는 공간적 깊이를 탐구한 뷰티 플라자입니다. 거울 뒤에 매립된 간접 광원은 시각적인 눈부심을 차단하며 자연스럽고 고아한 음영감을 안깁니다.',
+    materials: ['특수 은경 무코팅 밀러', '이탈리아 화이트 비앙코 대리석', '샌드 그레이 무광 에폭시'],
+    timeline: '6주 (2025.03 - 2025.04)',
+    constructionProcess: [
+      { title: '은경 정밀 접합 공법', description: '거울 간 이음선이 보이지 않도록 0.5mm 이하의 초정밀 가공을 통한 일체형 무프레임 은경 안착' }
+    ],
+    beforeAfter: {
+      beforeDescription: '기존의 복잡한 배선과 어두운 할로겐 직사 조명으로 인해 눈 피로도가 높고 배수가 취약했던 오래된 헤어숍',
+      afterDescription: '은은한 광천장 조명과 대형 화이트 트래버틴 카운터를 전면 배치하여 신비로운 힐링 라운지로 재구축',
+      desc: '빛이 산란하는 각도를 인간 공학적으로 계산하여 피사체 본연의 가장 평온한 안색을 비추도록 완성했습니다.',
+      imageAfter: 'https://images.unsplash.com/photo-1560066984-138dadb4c035?q=80&w=1200'
+    },
+    gallery: [
+      { url: 'https://images.unsplash.com/photo-1560066984-138dadb4c035?q=80&w=1200', caption: '은은한 간접 조명과 미니멀한 실버 디테일의 하모니.', aspect: 'landscape' }
+    ]
+  },
+  {
+    id: 'space_10',
+    title: '점진적 침묵 (Progressive Silent Lounge)',
+    titleEn: 'Minimalist Fashion Showroom',
+    location: '광주 남구 봉선동 (Bongseon-dong)',
+    locationDetails: 'Bongseon Fashion Gallery Site',
+    category: 'Commercial',
+    year: '2025',
+    area: '148㎡ / 45평',
+    client: 'Moiré Boutique',
+    image: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=1200',
+    featured: true,
+    concept: '패브릭의 질감과 금속의 차가움이 대조되도록 디자인한 패션 편집숍입니다. 넓은 시멘트 슬래브와 가변 디스플레이 패널을 배치해 공간 자체가 수수하면서 감각적인 배경 역할을 수행합니다.',
+    materials: ['노출 콘크리트 패널', '샌드 블라스트 알루미늄 행거', '아이보리 코튼 인조 벽지'],
+    timeline: '5주 (2025.01 - 2025.02)',
+    constructionProcess: [
+      { title: '알루미늄 모듈러 행거 가설', description: '용접흔 없이 조립 분해가 자유롭도록 고정식 마그네틱 슬라이딩 프로파일 시스템 설치' }
+    ],
+    beforeAfter: {
+      beforeDescription: '다양한 벽지와 가벽으로 내부 동선이 협소하고 진열 마감이 어색했던 빈 상업 지구 공간',
+      afterDescription: '모든 수직 기둥을 샌딩 처리하고 미색 콘크리트로 일관되게 코팅하여 제품의 가치를 돋보이게 전환',
+      desc: '의류가 전시되는 물리적 깊이를 극대화하기 위해 여백의 미를 끝까지 끌어올린 쇼룸을 구축했습니다.',
+      imageAfter: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=1200'
+    },
+    gallery: [
+      { url: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=1200', caption: '미색 배경에 스틸 행거가 선형으로 이어져 연출되는 정갈한 쇼룸 동선.', aspect: 'landscape' }
+    ]
+  },
+  {
+    id: 'space_11',
+    title: '아쿠아 셀레네 (Aqua Selene Family Pool)',
+    titleEn: 'Premium Kids & Family Pool',
+    location: '광주 북구 첨단지구 (Cheomdan-dist)',
+    locationDetails: 'Cheomdan Wellness Center 2F',
+    category: 'Kids Pool',
+    year: '2024',
+    area: '135㎡ / 41평',
+    client: 'Selene Pool & Spa',
+    image: 'https://images.unsplash.com/photo-1576013551627-0cc20b96c2a7?q=80&w=1200',
+    featured: true,
+    concept: '밤하늘의 달빛과 물결의 유연한 포용성에서 영감을 얻은 프리미엄 웰니스 풀장입니다. 매끈한 마이크로시멘트 샌드 마감과 부드러운 LED 오버헤드 간접 돔을 매치하여 아이들에게 안전하면서 편안한 정서적 안도감을 부여합니다.',
+    materials: ['친환경 논슬립 세라믹 도막', '이탈리아 수입 모자이크 타일', '광확산 바리솔 천장 시스템'],
+    timeline: '8주 (2024.11 - 2025.01)',
+    constructionProcess: [
+      { title: '바리솔 돔 천장 구조 설계', description: '습기에 강하고 조명을 자연스럽게 분산 유도하는 특수 아크릴 텐션 바리솔 조명 전면 시공' }
+    ],
+    beforeAfter: {
+      beforeDescription: '습식 시설물이 전무하여 환기 및 대류 순환이 막히고 소음 제어가 불가능했던 빈 상업 지구 홀',
+      afterDescription: '바리솔 조명과 친환경 방수 오버랩으로 기포 및 결로 현상 자체를 완전 예방한 따스한 라군 풀로 탈바꿈',
+      desc: '아이들의 전인적인 감각 정서 충족을 도모하기 위해 쉼과 놀이의 균형을 이끄는 완벽한 위생 수련처를 축조했습니다.',
+      imageAfter: 'https://images.unsplash.com/photo-1576013551627-0cc20b96c2a7?q=80&w=1200'
+    },
+    gallery: [
+      { url: 'https://images.unsplash.com/photo-1576013551627-0cc20b96c2a7?q=80&w=1200', caption: '바리솔 천장에서 기원한 은은한 낙엽색 햇살이 수면에 스며드는 풍경.', aspect: 'landscape' }
+    ]
+  },
+  {
+    id: 'space_12',
+    title: '빛나는 산호초 (Coral Reef Sensory Lagoon)',
+    titleEn: 'Sensory Children Play Pool',
+    location: '광주 서구 마륵동 (Mareuk-dong)',
+    locationDetails: 'Mareuk Kids Academy Park',
+    category: 'Kids Pool',
+    year: '2025',
+    area: '112㎡ / 34평',
+    client: 'Kids Ocean Lab',
+    image: 'https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?q=80&w=1200',
+    featured: true,
+    concept: '맑고 고요한 바닷속을 노닐듯 오감을 자극하는 키즈 에듀케이션 전용 해수풀장입니다. 아이들의 신체 동선을 섬세하게 고려한 조적 계단 설계와 둥글게 가공된 월 디테일로 안전한 다이내믹 물놀이를 구현합니다.',
+    materials: ['곡면 성형 아크릴 방풍막', '미세기공 특수 방수 모르타르', '바다색 오가닉 세라믹 도트 타일'],
+    timeline: '7주 (2025.01 - 2025.03)',
+    constructionProcess: [
+      { title: '정밀 해수 필터 순환 시스템', description: '아이들 피부 손상 영점을 수호하는 고성능 염소 프리 나노 자외선 오존 정화 다중 배관 기획' }
+    ],
+    beforeAfter: {
+      beforeDescription: '일반 사무실 용도로 기획되어 배수가 막히고 소방 스프링클러 배관이 노출되어 오염이 서려있던 오피스 상가',
+      afterDescription: '벽면 전체에 부드러운 라운드 오가닉 조형 벽을 입히고 오션 무드의 물빛을 연계해 안전한 유원지 구축',
+      desc: '화려한 장식 없이 편안한 곡선의 흐름과 상냥한 세라믹 질감으로 오직 소아 발달을 위한 완벽한 해안선을 재현했습니다.',
+      imageAfter: 'https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?q=80&w=1200'
+    },
+    gallery: [
+      { url: 'https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?q=80&w=1200', caption: '산호초색 간접 발광과 맑은 푸른 풀의 평온한 기하학적 정렬.', aspect: 'landscape' }
+    ]
   }
 ];
 
