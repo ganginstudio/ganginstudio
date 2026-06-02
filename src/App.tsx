@@ -32,6 +32,33 @@ import Admin from './components/Admin';
 
 import { Phone, MessageSquare, Calculator, FileText, Instagram, BookOpen, Clock, Sparkles, X } from 'lucide-react';
 
+// Custom high-fidelity brand icons for KakaoTalk, Naver Blog, and Instagram
+export function KakaoTalkIcon({ size = 14, className = "" }: { size?: number; className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" width={size} height={size} fill="currentColor" className={className}>
+      <path d="M12 3c-4.97 0-9 3.185-9 7.115 0 2.557 1.707 4.8 4.27 6.054-.277.95-.997 3.422-1.144 3.963-.16.603.2.595.424.444.177-.12 2.81-1.912 3.934-2.678.474.085.962.132 1.516.132 4.97 0 9-3.186 9-7.115S16.97 3 12 3z" />
+    </svg>
+  );
+}
+
+export function NaverBlogIcon({ size = 14, className = "" }: { size?: number; className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" width={size} height={size} fill="currentColor" className={className}>
+      <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5.4 11.5c-.7.4-1.6.5-2.6.5H8.4V7.3h2.6v3.1c.5-.5 1.2-.8 1.9-.8 2.1 0 3.1 1.4 3.1 3.3 0 1.9-1 3.1-2.4 3.6zm-1.1-5.6c-.9 0-1.5.6-1.5 1.6v1.3c0 .9.6 1.5 1.5 1.5.9 0 1.4-.6 1.4-1.5v-1.3c0-.9-.5-1.6-1.4-1.6z"/>
+    </svg>
+  );
+}
+
+export function InstagramIcon({ size = 14, className = "" }: { size?: number; className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" width={size} height={size} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+      <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+      <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
+    </svg>
+  );
+}
+
 export default function App() {
   const [currentView, setView] = useState<NavView>('home');
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
@@ -819,7 +846,7 @@ export default function App() {
             className="w-14 h-14 bg-white text-brand-dark border border-brand-border flex flex-col justify-center items-center hover:bg-brand-bg transition-all cursor-pointer shadow-sm group"
             title="카카오톡 1:1 채팅"
           >
-            <MessageSquare size={14} className="text-brand-dark group-hover:scale-105 transition-transform" />
+            <KakaoTalkIcon size={14} className="text-brand-dark group-hover:scale-105 transition-transform" />
             <span className="text-[7.5px] mt-1 tracking-widest font-bold text-brand-dark">카카오톡</span>
           </a>
 
@@ -830,7 +857,7 @@ export default function App() {
             className="w-14 h-14 bg-white text-brand-dark border border-brand-border flex flex-col justify-center items-center hover:bg-brand-bg transition-all cursor-pointer shadow-sm group"
             title="인스타그램 방문"
           >
-            <Instagram size={14} className="text-brand-dark group-hover:scale-105 transition-transform" />
+            <InstagramIcon size={14} className="text-brand-dark group-hover:scale-105 transition-transform" />
             <span className="text-[7.5px] mt-1 tracking-widest font-bold text-brand-dark">인스타</span>
           </a>
 
@@ -841,7 +868,7 @@ export default function App() {
             className="w-14 h-14 bg-white text-brand-dark border border-brand-border flex flex-col justify-center items-center hover:bg-brand-bg transition-all cursor-pointer shadow-sm group"
             title="공식 블로그 칼럼"
           >
-            <BookOpen size={14} className="text-brand-dark group-hover:scale-105 transition-transform" />
+            <NaverBlogIcon size={14} className="text-brand-dark group-hover:scale-105 transition-transform" />
             <span className="text-[7.5px] mt-1 tracking-widest font-bold text-brand-dark">블로그</span>
           </a>
 
@@ -895,7 +922,7 @@ export default function App() {
             rel="noopener noreferrer"
             className="flex flex-col justify-center items-center text-brand-dark cursor-pointer active:bg-brand-bg select-none"
           >
-            <Instagram size={15} className="text-brand-dark" />
+            <InstagramIcon size={15} className="text-brand-dark" />
             <span className="text-[8.5px] mt-1 font-bold tracking-widest text-[#111111]">인스타그램</span>
           </a>
         </div>

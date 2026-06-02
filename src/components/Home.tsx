@@ -347,45 +347,45 @@ export default function Home({ projects, reviews, setView, setSelectedProjectId,
 
       {/* 1.5 PERFORMANCE STATISTICS SECTION - COMPACT SINGLE ROW Badges */}
       {(!statsCms || statsCms.show !== false) && (
-        <section id="performance-statistics-section" className="max-w-[1400px] mx-auto px-6 md:px-12 mb-8 md:mb-10 animate-fade-in">
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-5 py-4 border-y border-neutral-100 sm:border-y-0 sm:py-2">
-            <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-[0.2em] font-mono select-none">
+        <section id="performance-statistics-section" className="max-w-[1400px] mx-auto px-4 md:px-12 mb-8 md:mb-10 animate-fade-in">
+          <div className="flex flex-row flex-wrap items-center justify-center gap-2.5 sm:gap-5 py-3 border-y border-neutral-100 sm:border-y-0 sm:py-2">
+            <span className="text-[9px] sm:text-[10px] font-bold text-neutral-400 uppercase tracking-[0.2em] font-mono select-none mr-1 sm:mr-0">
               {statsCms?.smallLabel || "PROJECT STATUS"}
             </span>
-            <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-2.5">
+            <div className="flex flex-row items-center justify-center gap-2 sm:gap-2.5">
               {/* Stat 1 */}
-              <div className="bg-white border border-neutral-200/80 rounded-full py-1 sm:py-1.5 px-3.5 sm:px-4 flex items-center gap-1.5 sm:gap-2 shadow-[0_1px_2px_rgba(0,0,0,0.02)] hover:border-neutral-300 transition-colors duration-200">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
-                <span className="text-neutral-500 text-[11px] sm:text-xs font-semibold tracking-tight">
+              <div className="bg-white border border-neutral-200/80 rounded-full py-1 sm:py-1.5 px-3 sm:px-4 flex items-center gap-1.5 sm:gap-2 shadow-[0_1px_2px_rgba(0,0,0,0.02)] hover:border-neutral-300 transition-colors duration-200">
+                <span className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse shrink-0" />
+                <span className="text-neutral-500 text-[10px] sm:text-xs font-semibold tracking-tight">
                   {statsCms?.stat1Label || "견적중"}
                 </span>
-                <span className="font-bold text-[#111111] font-mono text-[11px] sm:text-xs flex items-baseline">
+                <span className="font-bold text-[#111111] font-mono text-[10px] sm:text-xs flex items-baseline">
                   <CountUp end={statsCms?.stat1Number ?? 339} />
-                  <span className="text-neutral-400 font-light ml-0.5 text-[10px]">건</span>
+                  <span className="text-neutral-400 font-light ml-0.5 text-[9px]">건</span>
                 </span>
               </div>
 
               {/* Stat 2 */}
-              <div className="bg-white border border-neutral-200/80 rounded-full py-1 sm:py-1.5 px-3.5 sm:px-4 flex items-center gap-1.5 sm:gap-2 shadow-[0_1px_2px_rgba(0,0,0,0.02)] hover:border-neutral-300 transition-colors duration-200">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
-                <span className="text-neutral-500 text-[11px] sm:text-xs font-semibold tracking-tight">
+              <div className="bg-white border border-neutral-200/80 rounded-full py-1 sm:py-1.5 px-3 sm:px-4 flex items-center gap-1.5 sm:gap-2 shadow-[0_1px_2px_rgba(0,0,0,0.02)] hover:border-neutral-300 transition-colors duration-200">
+                <span className="w-1.5 h-1.5 rounded-full bg-purple-500 animate-pulse shrink-0" />
+                <span className="text-neutral-500 text-[10px] sm:text-xs font-semibold tracking-tight">
                   {statsCms?.stat2Label || "공사중"}
                 </span>
-                <span className="font-bold text-[#111111] font-mono text-[11px] sm:text-xs flex items-baseline">
+                <span className="font-bold text-[#111111] font-mono text-[10px] sm:text-xs flex items-baseline">
                   <CountUp end={statsCms?.stat2Number ?? 106} />
-                  <span className="text-neutral-400 font-light ml-0.5 text-[10px]">건</span>
+                  <span className="text-neutral-400 font-light ml-0.5 text-[9px]">건</span>
                 </span>
               </div>
 
               {/* Stat 3 */}
-              <div className="bg-white border border-neutral-200/80 rounded-full py-1 sm:py-1.5 px-3.5 sm:px-4 flex items-center gap-1.5 sm:gap-2 shadow-[0_1px_2px_rgba(0,0,0,0.02)] hover:border-neutral-300 transition-colors duration-200">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
-                <span className="text-neutral-500 text-[11px] sm:text-xs font-semibold tracking-tight">
+              <div className="bg-white border border-neutral-200/80 rounded-full py-1 sm:py-1.5 px-3 sm:px-4 flex items-center gap-1.5 sm:gap-2 shadow-[0_1px_2px_rgba(0,0,0,0.02)] hover:border-neutral-300 transition-colors duration-200">
+                <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse shrink-0" />
+                <span className="text-neutral-500 text-[10px] sm:text-xs font-semibold tracking-tight">
                   {statsCms?.stat3Label || "공사완료"}
                 </span>
-                <span className="font-bold text-[#111111] font-mono text-[11px] sm:text-xs flex items-baseline">
+                <span className="font-bold text-[#111111] font-mono text-[10px] sm:text-xs flex items-baseline">
                   <CountUp end={statsCms?.stat3Number ?? 8434} />
-                  <span className="text-neutral-400 font-light ml-0.5 text-[10px]">건</span>
+                  <span className="text-neutral-400 font-light ml-0.5 text-[9px]">건</span>
                 </span>
               </div>
             </div>

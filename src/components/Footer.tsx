@@ -110,18 +110,29 @@ export default function Footer({ setView, resetProject, settings }: FooterProps)
             <h4 className="text-[11px] uppercase tracking-[0.2em] text-[#F7F6F2]/50 font-normal">Channels</h4>
             <div className="space-y-3.5 text-[11px] font-light tracking-wide text-brand-muted">
               <p>
-                <a href={blogUrl} target="_blank" rel="noreferrer" className="hover:text-white transition-colors block animate-pulse-subtle">
-                  Naver Blog — 네이버 블로그 포트폴리오
+                <a href={blogUrl} target="_blank" rel="noreferrer" className="hover:text-white transition-colors flex items-center gap-2.5 animate-pulse-subtle">
+                  <svg viewBox="0 0 24 24" width={13} height={13} fill="currentColor" className="shrink-0 text-emerald-500/80 group-hover:text-emerald-400 transition-colors">
+                    <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5.4 11.5c-.7.4-1.6.5-2.6.5H8.4V7.3h2.6v3.1c.5-.5 1.2-.8 1.9-.8 2.1 0 3.1 1.4 3.1 3.3 0 1.9-1 3.1-2.4 3.6zm-1.1-5.6c-.9 0-1.5.6-1.5 1.6v1.3c0 .9.6 1.5 1.5 1.5.9 0 1.4-.6 1.4-1.5v-1.3c0-.9-.5-1.6-1.4-1.6z"/>
+                  </svg>
+                  <span>Naver Blog — 네이버 블로그 포트폴리오</span>
                 </a>
               </p>
               <p>
-                <a href={instagramUrl} target="_blank" rel="noreferrer" className="hover:text-white transition-colors block">
-                  Instagram — 인스타그램 스토리
+                <a href={instagramUrl} target="_blank" rel="noreferrer" className="hover:text-white transition-colors flex items-center gap-2.5">
+                  <svg viewBox="0 0 24 24" width={13} height={13} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 text-pink-500/80 group-hover:text-pink-400 transition-colors">
+                    <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+                    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+                    <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
+                  </svg>
+                  <span>Instagram — 인스타그램 스토리</span>
                 </a>
               </p>
               <p>
-                <a href={kakaotalkUrl} target="_blank" rel="noreferrer" className="hover:text-white transition-colors block">
-                  KakaoTalk — 강인스튜디오 카카오톡 채널
+                <a href={kakaotalkUrl} target="_blank" rel="noreferrer" className="hover:text-white transition-colors flex items-center gap-2.5">
+                  <svg viewBox="0 0 24 24" width={13} height={13} fill="currentColor" className="shrink-0 text-yellow-500/85 group-hover:text-yellow-400 transition-colors">
+                    <path d="M12 3c-4.97 0-9 3.185-9 7.115 0 2.557 1.707 4.8 4.27 6.054-.277.95-.997 3.422-1.144 3.963-.16.603.2.595.424.444.177-.12 2.81-1.912 3.934-2.678.474.085.962.132 1.516.132 4.97 0 9-3.186 9-7.115S16.97 3 12 3z" />
+                  </svg>
+                  <span>KakaoTalk — 강인스튜디오 카카오톡 채널</span>
                 </a>
               </p>
               <p className="text-[9px] text-[#6B6B6B] leading-relaxed pt-2">
