@@ -877,6 +877,14 @@ export default function App() {
           </button>
 
           <a
+            href={`tel:${settings.phone}`}
+            className="flex flex-col justify-center items-center text-brand-dark cursor-pointer active:bg-brand-bg select-none"
+          >
+            <Phone size={16} className="text-brand-dark" />
+            <span className="text-[8.5px] mt-1 font-bold tracking-widest text-[#111111]">전화문의</span>
+          </a>
+
+          <a
             href={settings.kakaotalk}
             target="_blank"
             rel="noopener noreferrer"
@@ -884,14 +892,6 @@ export default function App() {
           >
             <KakaoTalkIcon size={20} />
             <span className="text-[8.5px] mt-1 font-bold tracking-widest text-[#111111]">카카오톡</span>
-          </a>
-
-          <a
-            href={`tel:${settings.phone}`}
-            className="flex flex-col justify-center items-center text-brand-dark cursor-pointer active:bg-brand-bg select-none"
-          >
-            <Phone size={16} className="text-brand-dark" />
-            <span className="text-[8.5px] mt-1 font-bold tracking-widest text-[#111111]">전화문의</span>
           </a>
 
           <a
