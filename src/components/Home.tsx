@@ -356,7 +356,7 @@ export default function Home({ projects, reviews, setView, setSelectedProjectId,
               {/* Stat 1 */}
               <div className="bg-white border border-neutral-200/80 rounded-full py-1 sm:py-1.5 px-3 sm:px-4 flex items-center gap-1.5 sm:gap-2 shadow-[0_1px_2px_rgba(0,0,0,0.02)] hover:border-neutral-300 transition-colors duration-200">
                 <span className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse shrink-0" />
-                <span className="text-neutral-500 text-[10px] sm:text-xs font-semibold tracking-tight">
+                <span className="font-sans font-bold text-[#111111] text-[10px] sm:text-xs tracking-tight">
                   {statsCms?.stat1Label || "견적중"}
                 </span>
                 <span className="font-bold text-[#111111] font-mono text-[10px] sm:text-xs flex items-baseline">
@@ -368,7 +368,7 @@ export default function Home({ projects, reviews, setView, setSelectedProjectId,
               {/* Stat 2 */}
               <div className="bg-white border border-neutral-200/80 rounded-full py-1 sm:py-1.5 px-3 sm:px-4 flex items-center gap-1.5 sm:gap-2 shadow-[0_1px_2px_rgba(0,0,0,0.02)] hover:border-neutral-300 transition-colors duration-200">
                 <span className="w-1.5 h-1.5 rounded-full bg-purple-500 animate-pulse shrink-0" />
-                <span className="text-neutral-500 text-[10px] sm:text-xs font-semibold tracking-tight">
+                <span className="font-sans font-bold text-[#111111] text-[10px] sm:text-xs tracking-tight">
                   {statsCms?.stat2Label || "공사중"}
                 </span>
                 <span className="font-bold text-[#111111] font-mono text-[10px] sm:text-xs flex items-baseline">
@@ -380,7 +380,7 @@ export default function Home({ projects, reviews, setView, setSelectedProjectId,
               {/* Stat 3 */}
               <div className="bg-white border border-neutral-200/80 rounded-full py-1 sm:py-1.5 px-3 sm:px-4 flex items-center gap-1.5 sm:gap-2 shadow-[0_1px_2px_rgba(0,0,0,0.02)] hover:border-neutral-300 transition-colors duration-200">
                 <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse shrink-0" />
-                <span className="text-neutral-500 text-[10px] sm:text-xs font-semibold tracking-tight">
+                <span className="font-sans font-bold text-[#111111] text-[10px] sm:text-xs tracking-tight">
                   {statsCms?.stat3Label || "공사완료"}
                 </span>
                 <span className="font-bold text-[#111111] font-mono text-[10px] sm:text-xs flex items-baseline">
